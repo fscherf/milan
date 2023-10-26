@@ -1,0 +1,26 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    font-family: Arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background-image: linear-gradient(to right top, #051937, #004d7a, #008793, #00bf72, #a8eb12);
+    display: flex;
+    align-items: end;
+}
+
+#version {
+    font-size: 12px;
+    width: 100%;
+    padding: 0.25em;
+    text-align: right;
+    color: white;
+}

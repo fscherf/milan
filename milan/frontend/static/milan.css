@@ -1,0 +1,285 @@
+/* variables --------------------------------------------------------------- */
+:root {
+    --grid-gutter: 24px;
+    --grid-gutter-half: 12px;
+    --grid-gutter-quarter: 6px;
+    --grid-gutter-eighth: 3px;
+
+    --color-black:  #000000;
+    --color-white:  #FFFFFF;
+    --color-grey-1: #F1F1F1;
+    --color-grey-2: #E3E3E3;
+    --color-grey-3: #DDDDDD;
+    --color-grey-4: #545454;
+    --color-blue:   #88BBFF;
+
+    --color-marker: #00FF00;
+
+    --default-border-radius: 5px;
+}
+
+/* fonts ------------------------------------------------------------------- */
+/* Google Material Icons */
+/* source: https://developers.google.com/fonts/docs/material_icons */
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src:
+        url(assets/fonts/google-material-design-icons/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf) format('truetype'),
+        url(assets/fonts/google-material-design-icons/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].woff2) format('woff2'),
+}
+
+.material-icon {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
+/* page -------------------------------------------------------------------- */
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+main {
+    font-family: Arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+main {
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: auto;
+    height: 100%;
+    width: 100%;
+}
+
+main > #background {
+    grid-row: 1;
+    grid-column: 1;
+
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+main > .grid {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+/* marker ------------------------------------------------------------------ */
+#marker {
+    display: none;
+    position: absolute;
+    z-index: 1000001;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: var(--color-marker);
+}
+
+/* cursor ------------------------------------------------------------------ */
+#cursor {
+    position: fixed;
+    z-index: 1000000;
+    width: 28px;
+    height: 28px;
+}
+
+/* grid -------------------------------------------------------------------- */
+.grid,
+.row,
+.column {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    gap: var(--grid-gutter);
+}
+
+.grid {
+    padding: var(--grid-gutter);
+}
+
+.column {
+    flex-direction: column;
+}
+
+/* browser window ---------------------------------------------------------- */
+.browser-window {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    box-shadow: 3px 3px 12px 0px rgb(0 0 0 / 50%);
+    border: 1px solid var(--color-grey-3);
+    border-radius: var(--default-border-radius) var(--default-border-radius) 0 0;
+}
+
+.browser-window .top-bar {
+    display: flex;
+}
+
+.browser-window .tab-panes {
+    flex-grow: 1;
+}
+
+.browser-window .tab-panes .tab-pane {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-white);
+}
+
+.browser-window .tab-panes .tab-pane iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* browser-window / top-bar ------------------------------------------------ */
+.top-bar {
+    background-color: var(--color-grey-2);
+    padding-top: var(--grid-gutter-quarter);
+}
+
+
+/* browser-window / top-bar / tabs ----------------------------------------- */
+.dots {
+    display: flex;
+    align-items: center;
+    gap: var(--grid-gutter-quarter);
+    padding: 0 var(--grid-gutter-half);
+    margin-top: calc(var(--grid-gutter-quarter) * -1);
+}
+
+.dot {
+    height: var(--grid-gutter-half);
+    width: var(--grid-gutter-half);
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.dot.red {
+    background: #ED594A;
+}
+
+.dot.yellow {
+    background: #F4BD00;
+}
+
+.dot.green {
+    background: #00D500;
+}
+
+.tab,
+.tab * {
+    display: flex;
+    align-items: center;
+}
+
+.tab {
+    gap: var(--grid-gutter-quarter);
+    width: 200px;
+    line-height: 16px;
+    font-size: 12px;
+    padding: var(--grid-gutter-quarter);
+    background-color: var(--color-white);
+    border-radius: var(--default-border-radius) var(--default-border-radius) 0 0;
+}
+
+.tab .material-icon {
+    font-size: 16px;
+}
+
+.tab-title {
+    display: block;
+    flex-grow: 1;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* browser-window / toolbar ------------------------------------------------ */
+.toolbars {
+    background-color: var(--color-white);
+    padding: var(--grid-gutter-quarter);
+    border-bottom: 1px solid var(--color-grey-2);
+}
+
+.toolbar,
+.toolbar * {
+    display: flex;
+    align-items: center;
+    gap: var(--grid-gutter-quarter);
+}
+
+.toolbar .controls .material-icon,
+.toolbar .menu .material-icon {
+    font-size: 22px;
+    color: var(--color-grey-4);
+    cursor: pointer;
+}
+
+.toolbar .search-bar {
+    flex-grow: 1;
+}
+
+/* browser-window / toolbar / search-bar ----------------------------------- */
+.toolbar .search-bar * {
+    color: var(--color-black);
+}
+
+.toolbar .search-bar .material-icon {
+    position: absolute;
+    font-size: 16px;
+    padding-left: 6px;
+}
+
+.toolbar .search-bar input[type=text] {
+    color: var(--color-black);
+    width: 100%;
+    border-radius: 100px;
+    font-size: 14px;
+    background-color: var(--color-grey-1);
+    border: 0;
+    outline: 2px solid var(--color-grey-1);
+    height: 20px;
+    padding:
+        var(--grid-gutter-quarter)
+        var(--grid-gutter-quarter)
+        var(--grid-gutter-quarter)
+        var(--grid-gutter);
+}
+
+.toolbar .search-bar input[type=text]:focus {
+    outline: 2px solid var(--color-blue);
+}

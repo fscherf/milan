@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+version = "0.0.0"
+name = "milan"
+
+requires-python = ">=3.8"
+
+dependencies = [
+  "websockets==12.0",
+  "requests==2.31.0",
+]
+
+
+[project.optional-dependencies]
+dev = [
+  "build",
+  "twine",
+  "simple-logging-setup",
+  "lona==1.16",
+  "lona-picocss==0.4.3",
+  "rlpython",
+]
+
+
+[tool.setuptools]
+include-package-data = true

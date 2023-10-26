@@ -1,0 +1,363 @@
+import threading
+import logging
+import time
+import os
+
+from milan.utils import decode_base64, http_json_request, retry, unique_id
+from milan.executables import find_ffmpeg_executable
+from milan.event_router import EventRouter
+from milan.json_rpc import JsonRpcClient
+from milan.process import Process
+
+
+class CdpClient:
+    """
+    https://chromedevtools.github.io/devtools-protocol/
+    """
+
+    FFMPEG_JPEG_ARGS = '{EXECUTABLE} -loglevel error -f image2pipe -avioflags direct -fpsprobesize 0 -probesize 32 -analyzeduration 0 -c:v mjpeg -i - -y -an -r {FPS} -c:v vp8 -qmin 0 -qmax 50 -crf 8 -deadline realtime -speed 8 -b:v 1M -threads 1 -vf pad={WIDTH}:{HEIGHT}:0:0:gray,crop={WIDTH}:{HEIGHT}:0:0 {OUTPUT_FILE}'  # NOQA
+
+    def __init__(self, host, port, event_router=None, logger=None):
+        self.host = host
+        self.port = port
+        self.event_router = event_router
+        self.logger = logger
+
+        self.json_rpc_client = None
+
+        self._browser_info = {}
+        self._video_capturing_running = False
+        self._video_fps = 0
+        self._frame_buffer = None
+        self._ffmpeg_process = None
+
+        if not self.logger:
+            self.logger = logging.getLogger(f'milan.cdp-client.{unique_id()}')
+
+        if not self.event_router:
+            self.event_router = EventRouter()
+
+        try:
+            self._start()
+
+        except Exception:
+            self.logger.exception(
+                f'exception raised while connecting to {self.browser_id} debug port. stopping',  # NOQA
+            )
+
+            self.stop()
+
+    def _start(self):
+
+        @retry
+        def wait_for_browser_info():
+            self.logger.debug(
+                'trying to connecting to %s:%s',
+                self.host,
+                self.port,
+            )
+
+            self.get_browser_info(refresh=True)
+
+        wait_for_browser_info()
+
+        self.logger.debug(
+            'connected to browsers debug port\n'
+            '  debugger frontend url: %s\n'
+            '  debugger websocket url: %s',
+            self.get_frontend_url(),
+            self.get_websocket_url(),
+        )
+
+        # setup JsonRpcClient
+        self.json_rpc_client = JsonRpcClient(
+            url=self.get_websocket_url(),
+            worker_thread_count=2,
+            logger=logging.getLogger(f'{self.logger.name}.json-rpc'),
+        )
+
+        self.json_rpc_client.subscribe(
+            methods=[
+                'Page.loadEventFired',
+                'Page.frameNavigated',
+                'Page.navigatedWithinDocument',
+            ],
+            handler=self._handle_navigation_events,
+        )
+
+        self.json_rpc_client.subscribe(
+            methods=[
+                'Page.screencastFrame',
+            ],
+            handler=self._handle_screen_cast_frame,
+        )
+
+        # enable events
+        self.page_enable()
+
+    def stop(self):
+        self.logger.debug('stopping')
+
+        if self.json_rpc_client:
+            self.json_rpc_client.stop()
+
+        if self._video_capturing_running:
+            self.stop_video_capturing()
+
+    # REST API ################################################################
+    def get_browser_info(self, refresh=False):
+        if (not self._browser_info) or refresh:
+            self._browser_info = http_json_request(
+                url=f'http://{self.host}:{self.port}/json/list',
+            )[0]
+
+        return self._browser_info
+
+    def get_frontend_url(self):
+        url = self.get_browser_info()['devtoolsFrontendUrl']
+
+        if not url:
+            return '[NONE]'
+
+        if url.startswith('/'):
+            url = url[1:]
+
+        return f'http://{self.host}:{self.port}/{url}'
+
+    def get_websocket_url(self):
+        return self.get_browser_info()['webSocketDebuggerUrl']
+
+    # RPC requests ############################################################
+    # network
+    def network_enable(self):
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-enable
+        """
+
+        return self.json_rpc_client.send_request(method='Network.enable')
+
+    # runtime
+    def runtime_enable(self):
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-enable
+        """
+
+        return self.json_rpc_client.send_request(method='Runtime.enable')
+
+    def runtime_evaluate(
+            self,
+            expression,
+            await_promise=True,
+            repl_mode=False,
+    ):
+
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-evaluate
+        """
+
+        return self.json_rpc_client.send_request(
+            method='Runtime.evaluate',
+            params={
+                'expression': expression,
+                'awaitPromise': await_promise,
+                'replMode': repl_mode,
+            },
+        )
+
+    # emulation
+    def emulation_set_device_metrics_override(
+            self,
+            width,
+            height,
+            scale_factor=0,
+            mobile=False,
+    ):
+
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setDeviceMetricsOverride
+        """
+
+        return self.json_rpc_client.send_request(
+            method='Emulation.setDeviceMetricsOverride',
+            params={
+                'width': width,
+                'height': height,
+                'deviceScaleFactor': scale_factor,
+                'mobile': mobile,
+            },
+        )
+
+    # page
+    def page_enable(self):
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-enable
+        """
+
+        return self.json_rpc_client.send_request(method='Page.enable')
+
+    def page_get_frame_tree(self):
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-getFrameTree
+        """
+
+        return self.json_rpc_client.send_request(method='Page.getFrameTree')
+
+    def page_navigate(self, url):
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-navigate
+        """
+
+        frame_id = self.page_get_frame_tree()['frameTree']['frame']['id']
+
+        return self.json_rpc_client.send_request(
+            method='Page.navigate',
+            params={
+                'url': url,
+                'frameId': frame_id,
+                'transitionType': 'link',
+            },
+        )
+
+    def page_screenshot(self, path, quality=100):
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-captureScreenshot
+        """
+
+        image_format = os.path.splitext(path)[1][1:]
+
+        data = self.json_rpc_client.send_request(
+            method='Page.captureScreenshot',
+            params={
+                'format': image_format,
+                'quality': quality,
+            },
+        )
+
+        with open(path, 'wb+') as f:
+            f.write(decode_base64(data['data']))
+
+    def page_start_screen_cast(
+            self,
+            format='png',
+            quality=100,
+            max_width=None,
+            max_height=None,
+            every_nth_frame=None,
+    ):
+
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-startScreencast
+        """
+
+        params = {
+            'format': format,
+            'quality': quality,
+        }
+
+        # maxWidth, maxHeight and everyNthFrame are optional, but may not be
+        # `None` or `undefined`. Chromium will respond with an error, stating
+        # "Failed to deserialize params.maxWidth - BINDINGS: int32 ".
+        if max_width is not None:
+            params['maxWidth'] = max_width
+
+        if max_height is not None:
+            params['maxHeight'] = max_height
+
+        if every_nth_frame is not None:
+            params['everyNthFrame'] = every_nth_frame
+
+        return self.json_rpc_client.send_request(
+            method='Page.startScreencast',
+            params=params,
+        )
+
+    def page_stop_screen_cast(self):
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-stopScreencast
+        """
+
+        return self.json_rpc_client.send_request(
+            method='Page.stopScreencast',
+        )
+
+    def page_screen_cast_frame_ack(self, session_id):
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-screencastFrameAck
+        """
+
+        return self.json_rpc_client.send_request(
+            method='Page.screencastFrameAck',
+            params={
+                'sessionId': session_id,
+            },
+        )
+
+    # events ##################################################################
+    def _handle_navigation_events(self, json_rpc_message):
+        method = json_rpc_message.method
+
+        if method == 'Page.loadEventFired':
+            self.event_router.fire_event('browser_load')
+
+        elif method in ('Page.frameNavigated', 'Page.navigatedWithinDocument'):
+            self.event_router.fire_event('browser_navigated')
+
+    # video capturing #########################################################
+    def _handle_screen_cast_frame(self, json_rpc_message):
+        self._frame_buffer = decode_base64(json_rpc_message.params['data'])
+
+        self.page_screen_cast_frame_ack(
+            session_id=json_rpc_message.params['sessionId'],
+        )
+
+    def _write_frame_buffer_to_ffmpeg(self):
+        while self._video_capturing_running:
+            if self._frame_buffer:  # FIXME
+                self._ffmpeg_process.stdin_write(self._frame_buffer)
+
+            time.sleep(0.6 / self._video_fps)
+
+    def start_video_capturing(self, path, format='jpeg', quality=100, fps=30):
+        # FIXME: currently the resolution is hard coded to be 720p
+
+        if self._video_capturing_running:
+            raise RuntimeError('video capture already running')
+
+        self.logger.debug('starting video capturing to %s', path)
+
+        self.emulation_set_device_metrics_override(  # FIXME
+            width=1280,
+            height=720,
+        )
+
+        # setup internal state
+        self._video_capturing_running = True
+        self._frame_buffer = None
+        self._video_fps = fps
+
+        # setup ffmpeg
+        self._ffmpeg_process = Process(
+            command=self.FFMPEG_JPEG_ARGS.format(
+                EXECUTABLE=find_ffmpeg_executable(),
+                FPS=self._video_fps,
+                WIDTH=1280,  # FIXME
+                HEIGHT=720,  # FIXME
+                OUTPUT_FILE=path,
+            ),
+            logger=logging.getLogger(f'{self.logger.name}.ffmpeg')
+        )
+
+        threading.Thread(
+            target=self._write_frame_buffer_to_ffmpeg,
+            name=f'{self.logger.name}.ffmpeg',
+        ).start()
+
+        # start screen cast
+        self.page_start_screen_cast(format=format, quality=quality)
+
+    def stop_video_capturing(self):
+        self.page_stop_screen_cast()
+
+        self._video_capturing_running = False
+        self._ffmpeg_process.stdin_close()
+        self._ffmpeg_process.wait()
