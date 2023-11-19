@@ -154,17 +154,24 @@ class CdpBrowser(Browser):
             quality=quality,
         )
 
-    def start_video_capturing(self, path, format='jpeg', quality=100, fps=30):
+    def start_video_capturing(
+            self,
+            output_path,
+            fps=60,
+            image_format='png',
+            image_quality=100,
+    ):
+
         if self.is_firefox():
             raise NotImplementedError(
                 'CDP based video recording is not supported in firefox',
             )
 
         return self.cdp_client.start_video_capturing(
-            path=path,
-            format=format,
-            quality=quality,
+            output_path=output_path,
             fps=fps,
+            image_format=image_format,
+            image_quality=image_quality,
         )
 
     def stop_video_capturing(self):

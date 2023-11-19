@@ -1,13 +1,11 @@
-import threading
 import logging
 import time
 import os
 
 from milan.utils import decode_base64, http_json_request, retry, unique_id
-from milan.executables import find_ffmpeg_executable
+from milan.ffmpeg_video_recorder import FfmpegVideoRecorder
 from milan.event_router import EventRouter
 from milan.json_rpc import JsonRpcClient
-from milan.process import Process
 
 
 class CdpClient:
@@ -15,21 +13,19 @@ class CdpClient:
     https://chromedevtools.github.io/devtools-protocol/
     """
 
-    FFMPEG_JPEG_ARGS = '{EXECUTABLE} -loglevel error -f image2pipe -avioflags direct -fpsprobesize 0 -probesize 32 -analyzeduration 0 -c:v mjpeg -i - -y -an -r {FPS} -c:v vp8 -qmin 0 -qmax 50 -crf 8 -deadline realtime -speed 8 -b:v 1M -threads 1 -vf pad={WIDTH}:{HEIGHT}:0:0:gray,crop={WIDTH}:{HEIGHT}:0:0 {OUTPUT_FILE}'  # NOQA
-
     def __init__(self, host, port, event_router=None, logger=None):
         self.host = host
         self.port = port
         self.event_router = event_router
         self.logger = logger
 
+        self.ffmpeg_video_recorder = FfmpegVideoRecorder(
+            logger=logging.getLogger(f'{self.logger.name}.ffmpeg-video-recorder'),  # NOQA
+        )
+
         self.json_rpc_client = None
 
         self._browser_info = {}
-        self._video_capturing_running = False
-        self._video_fps = 0
-        self._frame_buffer = None
-        self._ffmpeg_process = None
 
         if not self.logger:
             self.logger = logging.getLogger(f'milan.cdp-client.{unique_id()}')
@@ -98,11 +94,10 @@ class CdpClient:
     def stop(self):
         self.logger.debug('stopping')
 
+        self.ffmpeg_video_recorder.stop()
+
         if self.json_rpc_client:
             self.json_rpc_client.stop()
-
-        if self._video_capturing_running:
-            self.stop_video_capturing()
 
     # REST API ################################################################
     def get_browser_info(self, refresh=False):
@@ -177,7 +172,7 @@ class CdpClient:
         https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setDeviceMetricsOverride
         """
 
-        return self.json_rpc_client.send_request(
+        response = self.json_rpc_client.send_request(
             method='Emulation.setDeviceMetricsOverride',
             params={
                 'width': width,
@@ -186,6 +181,10 @@ class CdpClient:
                 'mobile': mobile,
             },
         )
+
+        time.sleep(1)  # FIXME: wait for resize
+
+        return response
 
     # page
     def page_enable(self):
@@ -238,8 +237,8 @@ class CdpClient:
 
     def page_start_screen_cast(
             self,
-            format='png',
-            quality=100,
+            image_format='png',
+            image_quality=100,
             max_width=None,
             max_height=None,
             every_nth_frame=None,
@@ -250,8 +249,8 @@ class CdpClient:
         """
 
         params = {
-            'format': format,
-            'quality': quality,
+            'format': image_format,
+            'quality': image_quality,
         }
 
         # maxWidth, maxHeight and everyNthFrame are optional, but may not be
@@ -304,60 +303,36 @@ class CdpClient:
 
     # video capturing #########################################################
     def _handle_screen_cast_frame(self, json_rpc_message):
-        self._frame_buffer = decode_base64(json_rpc_message.params['data'])
+        image_data = decode_base64(json_rpc_message.params['data'])
 
         self.page_screen_cast_frame_ack(
             session_id=json_rpc_message.params['sessionId'],
         )
 
-    def _write_frame_buffer_to_ffmpeg(self):
-        while self._video_capturing_running:
-            if self._frame_buffer:  # FIXME
-                self._ffmpeg_process.stdin_write(self._frame_buffer)
+        self.ffmpeg_video_recorder.write_frame(image_data=image_data)
 
-            time.sleep(0.6 / self._video_fps)
+    def start_video_capturing(
+            self,
+            output_path,
+            fps=60,
+            image_format='png',
+            image_quality=100,
+    ):
 
-    def start_video_capturing(self, path, format='jpeg', quality=100, fps=30):
-        # FIXME: currently the resolution is hard coded to be 720p
+        self.logger.debug('start video capturing to %s', output_path)
 
-        if self._video_capturing_running:
-            raise RuntimeError('video capture already running')
-
-        self.logger.debug('starting video capturing to %s', path)
-
-        self.emulation_set_device_metrics_override(  # FIXME
-            width=1280,
-            height=720,
+        self.ffmpeg_video_recorder.start(
+            output_path=output_path,
+            fps=fps,
         )
 
-        # setup internal state
-        self._video_capturing_running = True
-        self._frame_buffer = None
-        self._video_fps = fps
-
-        # setup ffmpeg
-        self._ffmpeg_process = Process(
-            command=self.FFMPEG_JPEG_ARGS.format(
-                EXECUTABLE=find_ffmpeg_executable(),
-                FPS=self._video_fps,
-                WIDTH=1280,  # FIXME
-                HEIGHT=720,  # FIXME
-                OUTPUT_FILE=path,
-            ),
-            logger=logging.getLogger(f'{self.logger.name}.ffmpeg')
+        self.page_start_screen_cast(
+            image_format=image_format,
+            image_quality=image_quality,
         )
-
-        threading.Thread(
-            target=self._write_frame_buffer_to_ffmpeg,
-            name=f'{self.logger.name}.ffmpeg',
-        ).start()
-
-        # start screen cast
-        self.page_start_screen_cast(format=format, quality=quality)
 
     def stop_video_capturing(self):
-        self.page_stop_screen_cast()
+        self.logger.debug('stoping video capture')
 
-        self._video_capturing_running = False
-        self._ffmpeg_process.stdin_close()
-        self._ffmpeg_process.wait()
+        self.ffmpeg_video_recorder.stop()
+        self.page_stop_screen_cast()
