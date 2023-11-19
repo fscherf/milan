@@ -19,24 +19,10 @@ def _get_playwright_distribution_dir(prefix):
 
 
 def find_ffmpeg_executable():
-    def _not_found():
+    if not os.path.exists(FFMPEG_EXECUTABLE_PATH):
         raise FileNotFoundError('no ffmpeg executable found')
 
-    # OS
-    if not _running_in_playwright_docker_image():
-        if not os.path.exists(FFMPEG_EXECUTABLE_PATH):
-            _not_found()
-
-        return FFMPEG_EXECUTABLE_PATH
-
-    # playwright
-    distribution_dir = _get_playwright_distribution_dir('ffmpeg-')
-    executable = os.path.join(distribution_dir, 'ffmpeg-linux')
-
-    if not os.path.exists(executable):
-        _not_found()
-
-    return executable
+    return FFMPEG_EXECUTABLE_PATH
 
 
 def find_chromium_executable():
