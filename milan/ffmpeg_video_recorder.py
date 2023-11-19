@@ -169,6 +169,8 @@ class FfmpegVideoRecorder:
         )
 
     def stop(self):
+        # TODO: remove mp4 video after gif rendering
+
         self.logger.debug('stopping recording to %s', self._output_path)
 
         if self.state != 'recording':
