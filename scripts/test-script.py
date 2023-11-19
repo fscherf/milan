@@ -13,10 +13,10 @@ def run_form_test(browser):
     browser.resize(1280, 720)
 
     # start video capturing
-    browser.start_video_capturing('video.webm')
+    browser.start_video_capturing('video.gif')
 
     # navigate to view
-    browser.navigate('/')
+    browser.navigate('localhost:8080')
     browser.await_element('h1')
     browser.await_text('h1', 'Milan Test Application')
 
@@ -87,8 +87,6 @@ if __name__ == '__main__':
     }
 
     with browser_class.start(**browser_args) as browser:
-        browser.navigate('localhost:8080')
-
         run_form_test(browser)
 
 #        import rlpython

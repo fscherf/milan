@@ -110,6 +110,9 @@ class CdpBrowser(Browser):
             logger=logging.getLogger(f'{self.logger.name}.cdp-client'),
         )
 
+        # navigate to frontend
+        self._navigate_browser(url=self._frontend_server.get_url())
+
         # finish
         self.logger.debug('browser started')
 
