@@ -1,11 +1,11 @@
 # milan
 
 milan is a Python based browser testing and capturing tool, designed for
-end-to-end testing and for creating beautiful screenshots and clips of web
-applications. To do so, milan visually emultates one or more browser windows
-and a cursor, in HTML and JavaScript.
+end-to-end testing and for creating beautiful screenshots and video clips of
+web applications. To do so, milan visually emultates one or more browser
+windows and a cursor, in HTML and JavaScript.
 
-![screenshot](doc/screenshot.png)
+![demo.gif](doc/demo.gif)
 
 # Usage
 ```python
@@ -14,10 +14,15 @@ from milan import Chromium, Firefox
 
 with Chromium.start(headless=True) as browser:
 
-    browser.navigate('localhost:8080')
-
     # resize browser
     browser.resize(width=1280, height=720)
+
+    # navigate to URL
+    browser.navigate('localhost:8080')
+
+    # start video capturing (requires ffmpeg)
+    # supported formats: mp4, webm, gif
+    browser.start_video_capturing('video.gif')
 
     # await HTML selectors
     browser.await_element('h1')
@@ -33,7 +38,6 @@ with Chromium.start(headless=True) as browser:
     # screenshot
     browser.screenshot('screenshot.png')
 
-    # video capturing
-    browser.start_video_capturing('video.webm')
+    # stop video capturing
     browser.stop_video_capturing()
 ```
