@@ -32,6 +32,10 @@ shell: | $(PYTHON_ENV)
 	rlpython $(args)
 
 # tests #######################################################################
+test: | $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && \
+	tox $(args)
+
 frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	python -m milan.frontend.server --port=8080

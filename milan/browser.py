@@ -266,6 +266,13 @@ class Browser:
             ),
         )
 
+    def navigate_to_test_application(self, *args, **kwargs):
+        return self.navigate(
+            url=self._frontend_server.get_test_application_url(),
+            *args,
+            **kwargs,
+        )
+
     # hooks ###################################################################
     def _navigate_browser(self, url):
         raise NotImplementedError()

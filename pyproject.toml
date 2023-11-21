@@ -19,10 +19,18 @@ dependencies = [
 dev = [
   "build",
   "twine",
+  "tox",
   "simple-logging-setup",
   "lona==1.16",
   "lona-picocss==0.4.3",
   "rlpython",
+]
+
+test = [
+  "coverage==7.3.2",
+  "pytest==7.4.3",
+  "pytest-timeout==2.2.0",
+  "playwright==1.38.0",
 ]
 
 

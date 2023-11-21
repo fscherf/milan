@@ -1,0 +1,68 @@
+html {
+    margin: 0;
+    padding: 0;
+
+    background: repeating-linear-gradient(
+        -45deg,
+        #FFFFFF,
+        #FFFFFF 10px,
+        #EEEEEE 10px,
+        #EEEEEE 20px
+    );
+}
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 1em;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+.spacer {
+    height: 100vh;
+}
+
+/* animations -------------------------------------------------------------- */
+#animation-controls {
+    margin-bottom: 1em;
+}
+
+#rotating-container {
+    background-color: cyan;
+    width: 100px;
+    height: 100px;
+}
+
+/* form inputs ------------------------------------------------------------- */
+table#form-inputs {
+    border: 0;
+}
+
+table#form-inputs th {
+    text-align: right;
+    vertical-align: top;
+}
+
+/* info -------------------------------------------------------------------- */
+table#info {
+    position: fixed;
+    top: 1em;
+    right: 1em;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    min-width: 300px;
+}
+
+table#info th {
+    padding-right: 1em;
+    font-weight: normal;
+}
+
+table#info th,
+table#info td {
+    text-align: left;
+    vertical-align: top;
+}

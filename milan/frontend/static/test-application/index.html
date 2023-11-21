@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Milan Test Application</title>
+    <link rel="stylesheet" href="./test-application.css">
+  </head>
+  <body>
+    <h1>Milan Test Appliction</h1>
+
+    <main>
+
+      <!-- document -->
+      <h2>Document</h2>
+
+      <table id="form-inputs">
+        <tr>
+          <th>Title:</th>
+          <td>
+            <input type="text" id="document-title">
+            <button id="document-title-set">Set</button>
+          </td>
+        </tr>
+      </table>
+
+      <!-- form inputs -->
+      <h2>Form Inputs</h2>
+      <table id="form-inputs">
+
+        <!-- text input -->
+        <tr>
+          <th>Text Input:</th>
+          <td>
+            <input type="text" id="text-input" class="changeable">
+          </td>
+        </tr>
+
+        <!-- select -->
+        <tr>
+          <th>Select:</th>
+          <td>
+            <select id="select" class="changeable">
+              <option value="option-1">Option 1</option>
+              <option value="option-2">Option 2</option>
+              <option value="option-3">Option 3</option>
+              <option value="option-4">Option 4</option>
+              <option value="option-5">Option 5</option>
+            </select>
+          </td>
+        </tr>
+
+        <!-- checkbox -->
+        <tr>
+          <th>Checkbox:</th>
+          <td>
+            <input type="checkbox" id="checkbox" class="changeable">
+          </td>
+        </tr>
+
+        <!-- button -->
+        <tr>
+          <th>Button:</th>
+          <td>
+            <button id="button" class="clickable">Button</button>
+          </td>
+        </tr>
+      </table>
+
+      <!-- animations -->
+      <h2>Animations</h2>
+      <div id="animation-controls">
+        <button id="animation-start">Start</button>
+        <button id="animation-stop" disabled>Stop</button>
+        <label>
+          Speed:
+          <input type="number" value="1" id="animation-speed">
+        </label>
+      </div>
+      <div id="rotating-container"></div>
+
+      <!-- spacer -->
+      <div class="spacer"></div>
+
+      <!-- out of viewport button -->
+      <button id="out-of-viewport-button" class="clickable">
+        Out Of Viewport Button
+      </button>
+
+      <!-- page end -->
+      <div class="spacer"></div>
+      <div>Page End</div>
+
+      <!-- info -->
+      <table id="info">
+        <tr>
+          <th>Appliction Start:</th>
+          <td id="startup-time">-</td>
+        </tr>
+        <tr>
+          <th>Window Width:</th>
+          <td id="window-width">-</td>
+        </tr>
+        <tr>
+          <th>Window Height:</th>
+          <td id="window-height">-</td>
+        </tr>
+        <tr>
+          <th>Event Count:</th>
+          <td id="event-count">-</td>
+        </tr>
+        <tr>
+          <th>Event Type:</th>
+          <td id="event-type">-</td>
+        </tr>
+        <tr>
+          <th>Element ID:</th>
+          <td id="element-id">-</td>
+        </tr>
+        <tr>
+          <th>Element Value:</th>
+          <td id="element-value">-</td>
+        </tr>
+        <tr>
+          <th>Animation Frames:</th>
+          <td id="animation-frames">-</td>
+        </tr>
+      </table>
+    </main>
+
+    <script src="./test-application.js"></script>
+  </body>
+</html>

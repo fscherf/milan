@@ -50,6 +50,9 @@ class FrontendServer:
 
         return f'http://{host}:{port}'
 
+    def get_test_application_url(self):
+        return f'{self.get_url()}/test-application/'
+
     def stop(self):
         logger.debug('stopping')
 
