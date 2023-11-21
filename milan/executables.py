@@ -2,6 +2,7 @@ import os
 
 PLAYWRIGHT_ROOT = '/ms-playwright'
 FFMPEG_EXECUTABLE_PATH = '/usr/bin/ffmpeg'
+FFPROBE_EXECUTABLE_PATH = '/usr/bin/ffprobe'
 CHROMIUM_EXECUTABLE_PATH = '/usr/bin/chromium'
 FIREFOX_EXECUTABLE_PATH = '/usr/bin/firefox'
 
@@ -23,6 +24,13 @@ def find_ffmpeg_executable():
         raise FileNotFoundError('no ffmpeg executable found')
 
     return FFMPEG_EXECUTABLE_PATH
+
+
+def find_ffprobe_executable():
+    if not os.path.exists(FFPROBE_EXECUTABLE_PATH):
+        raise FileNotFoundError('no ffprobe executable found')
+
+    return FFPROBE_EXECUTABLE_PATH
 
 
 def find_chromium_executable():
