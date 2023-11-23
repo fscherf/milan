@@ -20,6 +20,7 @@ class VideoRecorder:
         self._ffmpeg_process = None
         self._output_path = ''
         self._output_format = ''
+        self._output_gif_path = ''
         self._state = 'idle'
 
     def __repr__(self):
@@ -40,11 +41,6 @@ class VideoRecorder:
     def _touch(self, path):
         with open(path, 'w+') as file_handle:
             file_handle.close()
-
-    def _replace_file_extension(self, path, extension):
-        base_name, _ = os.path.splitext(path)
-
-        return f'{base_name}.{extension}'
 
     # ffmpeg: recording #######################################################
     def _get_ffmpeg_global_args(self):
@@ -135,15 +131,13 @@ class VideoRecorder:
         self._output_format = output_format
 
         # start ffmpeg for recording
-        if output_format == 'gif':
+        if self._output_format == 'gif':
             # Creating gifs is a post processing step.
             # We capture to .mp4 first and convert after the recording was
             # stopped.
 
-            self._output_path = self._replace_file_extension(
-                path=self._output_path,
-                extension='mp4',
-            )
+            self._output_gif_path = self._output_path
+            self._output_path = f'{self._output_path}.mp4'
 
             self._touch(path=self._output_path)
 
@@ -193,8 +187,5 @@ class VideoRecorder:
             # convert previously generated mp4 video to gif
             self._convert_video_to_gif(
                 input_path=self._output_path,
-                output_path=self._replace_file_extension(
-                    path=self._output_path,
-                    extension='gif',
-                ),
+                output_path=self._output_gif_path,
             )
