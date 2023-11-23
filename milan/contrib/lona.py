@@ -4,7 +4,10 @@ from lona import View, Response, FileResponse
 
 
 class FrontendView(View):
-    FRONTEND_ROOT = os.path.join(os.path.dirname(__file__), 'frontend/static')
+    FRONTEND_ROOT = os.path.join(
+        os.path.dirname(__file__),
+        '../frontend/static',
+    )
 
     def get_not_found_error(self):
         return Response('404: Not Found', status=404)

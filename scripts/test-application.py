@@ -16,7 +16,7 @@ from lona_picocss.html import (
     H3,
 )
 
-from milan.lona import FrontendView
+from milan.contrib.lona import FrontendView
 
 
 class FormTestView(View):
