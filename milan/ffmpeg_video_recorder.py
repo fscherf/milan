@@ -2,8 +2,8 @@ import logging
 import os
 
 from milan.executables import find_ffmpeg_executable
+from milan.utils.process import Process
 from milan.utils.misc import unique_id
-from milan.process import Process
 
 
 class FfmpegVideoRecorder:

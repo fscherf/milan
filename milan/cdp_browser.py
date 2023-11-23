@@ -4,9 +4,9 @@ import time
 
 from milan.utils.misc import retry, unique_id
 from milan.reverse_proxy import ReverseProxy
+from milan.utils.process import Process
 from milan.cdp_client import CdpClient
 from milan.browser import Browser
-from milan.process import Process
 from milan.utils.url import URL
 
 

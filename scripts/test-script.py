@@ -3,9 +3,9 @@ from argparse import ArgumentParser
 from simple_logging_setup import setup
 
 from milan.utils.http import http_get_request
+from milan.utils.process import Process
 from milan import Chromium, Firefox
 from milan.utils.misc import retry
-from milan.process import Process
 
 
 def run_form_test(browser):

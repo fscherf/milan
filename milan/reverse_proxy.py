@@ -1,6 +1,6 @@
 import os
 
-from milan.process import Process
+from milan.utils.process import Process
 
 
 class ReverseProxy:
