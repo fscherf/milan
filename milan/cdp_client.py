@@ -3,8 +3,8 @@ import time
 import os
 
 from milan.utils.misc import decode_base64, retry, unique_id
-from milan.ffmpeg_video_recorder import FfmpegVideoRecorder
 from milan.utils.event_router import EventRouter
+from milan.video_recorder import VideoRecorder
 from milan.utils.json_rpc import JsonRpcClient
 from milan.utils.http import http_json_request
 
@@ -20,8 +20,8 @@ class CdpClient:
         self.event_router = event_router
         self.logger = logger
 
-        self.ffmpeg_video_recorder = FfmpegVideoRecorder(
-            logger=logging.getLogger(f'{self.logger.name}.ffmpeg-video-recorder'),  # NOQA
+        self.video_recorder = VideoRecorder(
+            logger=logging.getLogger(f'{self.logger.name}.video-recorder'),  # NOQA
         )
 
         self.json_rpc_client = None
@@ -95,7 +95,7 @@ class CdpClient:
     def stop(self):
         self.logger.debug('stopping')
 
-        self.ffmpeg_video_recorder.stop()
+        self.video_recorder.stop()
 
         if self.json_rpc_client:
             self.json_rpc_client.stop()
@@ -310,7 +310,7 @@ class CdpClient:
             session_id=json_rpc_message.params['sessionId'],
         )
 
-        self.ffmpeg_video_recorder.write_frame(image_data=image_data)
+        self.video_recorder.write_frame(image_data=image_data)
 
     def start_video_capturing(
             self,
@@ -322,7 +322,7 @@ class CdpClient:
 
         self.logger.debug('start video capturing to %s', output_path)
 
-        self.ffmpeg_video_recorder.start(
+        self.video_recorder.start(
             output_path=output_path,
             fps=fps,
         )
@@ -335,5 +335,5 @@ class CdpClient:
     def stop_video_capturing(self):
         self.logger.debug('stoping video capture')
 
-        self.ffmpeg_video_recorder.stop()
+        self.video_recorder.stop()
         self.page_stop_screen_cast()

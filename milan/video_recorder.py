@@ -6,13 +6,13 @@ from milan.utils.process import Process
 from milan.utils.misc import unique_id
 
 
-class FfmpegVideoRecorder:
+class VideoRecorder:
     def __init__(self, logger=None):
         self.logger = logger
 
         if not logger:
             self.logger = logging.getLogger(
-                f'milan.ffmpeg-video-recorder.{unique_id()}',
+                f'milan.video-recorder.{unique_id()}',
             )
 
         # internal state
@@ -23,7 +23,7 @@ class FfmpegVideoRecorder:
         self._state = 'idle'
 
     def __repr__(self):
-        return f'<FfmpegVideoRecorder({self.ffmpeg_path=}, {self.state=})>'
+        return f'<VideoRecorder({self.ffmpeg_path=}, {self.state=})>'
 
     @property
     def ffmpeg_path(self):
