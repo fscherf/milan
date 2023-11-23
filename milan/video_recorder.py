@@ -163,8 +163,6 @@ class VideoRecorder:
         )
 
     def stop(self):
-        # TODO: remove mp4 video after gif rendering
-
         self.logger.debug('stopping recording to %s', self._output_path)
 
         if self.state != 'recording':
@@ -189,3 +187,6 @@ class VideoRecorder:
                 input_path=self._output_path,
                 output_path=self._output_gif_path,
             )
+
+            # remove artifacts
+            os.unlink(self._output_path)
