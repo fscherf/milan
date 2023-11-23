@@ -19,7 +19,7 @@ from lona_picocss.html import (
 from milan.contrib.lona import FrontendView
 
 
-class FormTestView(View):
+class FormDemoView(View):
     def open_modal(self, input_event=None):
         with self.html.lock:
             self.modal.get_body().nodes = [
@@ -48,7 +48,7 @@ class FormTestView(View):
         self.modal = Modal()
 
         self.html = HTML(
-            H1('Milan Test Application'),
+            H1('Milan Demo Application'),
 
             Label(
                 'Text Input',
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     install_picocss(app, debug=True)
 
-    app.route('/')(FormTestView)
+    app.route('/')(FormDemoView)
 
     if args.serve_milan_frontend:
         app.route(

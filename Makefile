@@ -42,7 +42,7 @@ frontend: | $(PYTHON_ENV)
 
 application: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/test-application.py $(args)
+	$(PYTHON) scripts/demo-application.py $(args)
 
 chromium: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \

@@ -19,7 +19,7 @@ def run_form_test(browser):
     # navigate to view
     browser.navigate('localhost:8080')
     browser.await_element('h1')
-    browser.await_text('h1', 'Milan Test Application')
+    browser.await_text('h1', 'Milan Demo Application')
 
     # fill out form
     browser.fill('#text-input', 'foo')
@@ -60,21 +60,21 @@ if __name__ == '__main__':
         ],
     )
 
-    # start app under test
-    app_under_test = Process([
+    # start demo application
+    demo_application = Process([
         '/usr/bin/env',
         'python3',
-        'scripts/test-application.py',
+        'scripts/demo-application.py',
         '--host=0.0.0.0',
         '--port=8080',
         # '--serve-milan-frontend',
     ])
 
     @retry
-    def _await_app_unter_test_started():
+    def _await_demo_application_started():
         http_get_request(url='http://127.0.0.1:8080')
 
-    _await_app_unter_test_started()
+    _await_demo_application_started()
 
     # start browser
     browser_class = {
@@ -93,5 +93,5 @@ if __name__ == '__main__':
 #        import rlpython
 #        rlpython.embed()
 
-    # stop app under test
-    app_under_test.stop()
+    # stop demo application
+    demo_application.stop()
