@@ -43,7 +43,7 @@
         let errorStack = '';
 
         try {
-            let returnValue = func(args);
+            returnValue = func(args);
 
             if (returnValue instanceof Promise) {
                 returnValue = await returnValue;
@@ -57,6 +57,12 @@
             if (error.stack) {
                 errorStack = error.stack.toString();
             }
+        }
+
+        // keep JSON.stringify from removing returnValue when func
+        // returned undefined
+        if (returnValue === undefined) {
+            returnValue = null;
         }
 
         return {
