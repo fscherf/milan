@@ -92,6 +92,7 @@ class VideoRecorder:
                 # 30 correctly. Between 15 and 24 is recommended.
                 '-r', '24',
 
+                '-f', 'gif',  # output format
                 output_path,
             ],
             logger=self._get_sub_logger('ffmpeg.video2gif'),
