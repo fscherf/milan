@@ -3,7 +3,7 @@ import threading
 import logging
 import shlex
 
-from milan.utils import unique_id
+from milan.utils.misc import unique_id
 
 
 class Process:

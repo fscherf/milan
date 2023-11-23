@@ -1,7 +1,7 @@
 import json
 import os
 
-from milan.utils import URL
+from milan.utils.url import URL
 
 FRONTEND_ROOT = os.path.join(os.path.dirname(__file__), 'frontend')
 CURSOR_SOURCE_PATH = os.path.join(FRONTEND_ROOT, 'cursor.js')

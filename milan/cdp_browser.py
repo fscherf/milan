@@ -2,11 +2,12 @@ from tempfile import TemporaryDirectory
 import logging
 import time
 
-from milan.utils import URL, retry, unique_id
+from milan.utils.misc import retry, unique_id
 from milan.reverse_proxy import ReverseProxy
 from milan.cdp_client import CdpClient
 from milan.browser import Browser
 from milan.process import Process
+from milan.utils.url import URL
 
 
 class CdpBrowser(Browser):

@@ -3,8 +3,9 @@ import logging
 from milan.frontend.commands import frontend_function
 from milan.frontend.server import FrontendServer
 from milan.event_router import EventRouter
-from milan.utils import URL, unique_id
+from milan.utils.misc import unique_id
 from milan.frontend import commands
+from milan.utils.url import URL
 
 
 class BrowserContext:

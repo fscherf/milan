@@ -9,7 +9,7 @@ import json
 from websockets.exceptions import ConnectionClosedError
 from websockets.sync.client import connect
 
-from milan.utils import AtomicCounter, LazyString, pformat_dict
+from milan.utils.misc import AtomicCounter, LazyString, pformat_dict
 
 default_logger = logging.getLogger('milan.json-rpc')
 

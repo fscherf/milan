@@ -2,8 +2,9 @@ from argparse import ArgumentParser
 
 from simple_logging_setup import setup
 
-from milan.utils import retry, http_get_request
+from milan.utils.http import http_get_request
 from milan import Chromium, Firefox
+from milan.utils.misc import retry
 from milan.process import Process
 
 
