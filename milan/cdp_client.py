@@ -4,8 +4,8 @@ import os
 
 from milan.utils.misc import decode_base64, retry, unique_id
 from milan.ffmpeg_video_recorder import FfmpegVideoRecorder
+from milan.utils.event_router import EventRouter
 from milan.utils.http import http_json_request
-from milan.event_router import EventRouter
 from milan.json_rpc import JsonRpcClient
 
 
