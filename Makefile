@@ -1,9 +1,10 @@
 SHELL=/bin/bash
 PYTHON=python3.11
 PYTHON_ENV=env/$(shell hostname)/$(PYTHON)
+DOC_ROOT=doc
 
 .PHONY: milan build clean fullclean \
-	application chromium headless-chromium firefox headless-firefox
+	application chromium headless-chromium firefox headless-firefox demos
 
 
 # docker ######################################################################
@@ -40,10 +41,6 @@ frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	python -m milan.frontend.server --port=8080
 
-application: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/demo-application.py $(args)
-
 chromium: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	$(PYTHON) scripts/run-browser.py --browser=chromium $(args)
@@ -59,3 +56,18 @@ firefox: | $(PYTHON_ENV)
 headless-firefox: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	$(PYTHON) scripts/run-browser.py --browser=firefox --headless $(args)
+
+# demos #######################################################################
+demos: | $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && \
+	rm $(DOC_ROOT)/*.gif && \
+	$(PYTHON) scripts/run-browser.py \
+		--browser=chromium \
+		--headless \
+		--run-form-demo \
+		--capture=$(DOC_ROOT)/form-demo.gif && \
+	$(PYTHON) scripts/run-browser.py \
+		--browser=chromium \
+		--headless \
+		--run-multi-window-demo \
+		--capture=$(DOC_ROOT)/multi-window-demo.gif

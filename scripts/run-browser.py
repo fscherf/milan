@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import time
 
 from simple_logging_setup import setup
 
@@ -8,13 +9,12 @@ from milan import Chromium, Firefox
 from milan.utils.misc import retry
 
 
-def run_form_test(browser):
-
-    # resize browser
+def run_form_demo(browser, capture=''):
     browser.resize(1280, 720)
 
-    # start video capturing
-    browser.start_video_capturing('video.gif')
+    # start video capturing:
+    if capture:
+        browser.start_video_capturing(capture)
 
     # navigate to view
     browser.navigate('localhost:8080')
@@ -32,7 +32,35 @@ def run_form_test(browser):
     browser.click('#close')
 
     # stop video capturing
-    browser.stop_video_capturing()
+    if capture:
+        browser.stop_video_capturing()
+
+
+def run_multi_window_demo(browser, capture=''):
+    browser.resize(1280, 720)
+
+    # start video capturing:
+    if capture:
+        browser.start_video_capturing(capture)
+
+    # open second window
+    if browser.get_window_count() < 2:
+        browser.split()
+
+    # open first popup
+    browser.navigate('localhost:8080', window=0)
+    browser.click('#open', window=0)
+    browser.fill('#text-input-2', 'foo', window=0)
+
+    # open second popup
+    browser.navigate('localhost:8080', window=1)
+    browser.click('#open', window=1)
+    browser.fill('#text-input-2', 'bar', window=1)
+
+    # stop video capturing
+    if capture:
+        time.sleep(2)
+        browser.stop_video_capturing()
 
 
 if __name__ == '__main__':
@@ -47,6 +75,10 @@ if __name__ == '__main__':
     )
 
     parser.add_argument('--headless', action='store_true')
+
+    parser.add_argument('--run-form-demo', action='store_true')
+    parser.add_argument('--run-multi-window-demo', action='store_true')
+    parser.add_argument('--capture')
 
     args = parser.parse_args()
 
@@ -88,10 +120,21 @@ if __name__ == '__main__':
     }
 
     with browser_class.start(**browser_args) as browser:
-        run_form_test(browser)
+        if args.run_form_demo:
+            run_form_demo(
+                browser=browser,
+                capture=args.capture,
+            )
 
-#        import rlpython
-#        rlpython.embed()
+        elif args.run_multi_window_demo:
+            run_multi_window_demo(
+                browser=browser,
+                capture=args.capture,
+            )
+
+        else:
+            import rlpython
+            rlpython.embed()
 
     # stop demo application
     demo_application.stop()
