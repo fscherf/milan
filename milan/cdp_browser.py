@@ -2,8 +2,8 @@ from tempfile import TemporaryDirectory
 import logging
 import time
 
+from milan.utils.reverse_proxy import ReverseProxy
 from milan.utils.misc import retry, unique_id
-from milan.reverse_proxy import ReverseProxy
 from milan.utils.process import Process
 from milan.cdp_client import CdpClient
 from milan.browser import Browser
