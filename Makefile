@@ -46,16 +46,16 @@ application: | $(PYTHON_ENV)
 
 chromium: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/test-script.py --browser=chromium $(args)
+	$(PYTHON) scripts/run-browser.py --browser=chromium $(args)
 
 headless-chromium: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/test-script.py --browser=chromium --headless $(args)
+	$(PYTHON) scripts/run-browser.py --browser=chromium --headless $(args)
 
 firefox: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/test-script.py --browser=firefox $(args)
+	$(PYTHON) scripts/run-browser.py --browser=firefox $(args)
 
 headless-firefox: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/test-script.py --browser=firefox --headless $(args)
+	$(PYTHON) scripts/run-browser.py --browser=firefox --headless $(args)
