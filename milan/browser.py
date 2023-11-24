@@ -281,8 +281,8 @@ class Browser:
     def screenshot(self, path):
         raise NotImplementedError()
 
-    def start_video_capture(self, path):
+    def start_video_capturing(self, path):
         raise NotImplementedError()
 
-    def stop_video_capture(self):
+    def stop_video_capturing(self):
         raise NotImplementedError()
