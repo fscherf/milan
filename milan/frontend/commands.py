@@ -92,6 +92,46 @@ def gen_cursor_hide_command():
     )
 
 
+def gen_cursor_is_visible_command():
+    return _gen_frontend_run_command(
+        func=_gen_cursor_function_name(
+            name='isVisible',
+        ),
+    )
+
+
+def gen_cursor_move_to_command(x, y, animation):
+    return _gen_frontend_run_command(
+        func=_gen_cursor_function_name(
+            name='moveTo',
+        ),
+        args={
+            'x': x,
+            'y': y,
+            'animation': animation,
+        },
+    )
+
+
+def gen_cursor_move_to_home_command(animation):
+    return _gen_frontend_run_command(
+        func=_gen_cursor_function_name(
+            name='moveToHome',
+        ),
+        args={
+            'animation': animation,
+        },
+    )
+
+
+def gen_cursor_get_position_command():
+    return _gen_frontend_run_command(
+        func=_gen_cursor_function_name(
+            name='getPosition',
+        ),
+    )
+
+
 # window manager
 def gen_window_manager_split_command():
     return _gen_frontend_run_command(

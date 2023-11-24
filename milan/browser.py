@@ -112,25 +112,39 @@ class Browser:
 
     @frontend_function
     def cursor_is_visible(self):
-        raise NotImplementedError()
+        return self.evaluate(
+            expression=commands.gen_cursor_is_visible_command(),
+        )
 
     @frontend_function
     def move_cursor(
             self,
             x=0,
             y=0,
-            relative=False,
-            home=False,
             animation=None,
     ):
 
-        animation = self._get_animation(animation)
+        return self.evaluate(
+            expression=commands.gen_cursor_move_to_command(
+                x=float(x),
+                y=float(y),
+                animation=self._get_animation(animation),
+            ),
+        )
 
-        raise NotImplementedError()
+    @frontend_function
+    def move_cursor_to_home(self, animation=None):
+        return self.evaluate(
+            expression=commands.gen_cursor_move_to_home_command(
+                animation=self._get_animation(animation),
+            ),
+        )
 
     @frontend_function
     def get_cursor_position(self):
-        raise NotImplementedError()
+        return self.evaluate(
+            expression=commands.gen_cursor_get_position_command(),
+        )
 
     # window
     @frontend_function

@@ -118,6 +118,26 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
+        // cursor element helper ----------------------------------------------
+        hide = () => {
+            this.cursorElement.style.display = 'none';
+        }
+
+        show = () => {
+            this.cursorElement.style.display = 'block';
+        }
+
+        isVisible = () => {
+            return this.cursorElement.style.display == 'block';
+        }
+
+        getPosition = () => {
+            return {
+                x: this.cursorX,
+                y: this.cursorY,
+            };
+        }
+
         // element helper -----------------------------------------------------
         getElement = ({
             elementOrSelector=required('elementOrSelector'),
@@ -304,22 +324,25 @@
             animation=true,
         }={}) => {
 
-            x = x + CURSOR_OFFSET_LEFT;
-            y = y + CURSOR_OFFSET_TOP;
+            // FIXME: when animations are switched off position queries come
+            // back incorrect after movement
+
+            const absoluteX = x + CURSOR_OFFSET_LEFT;
+            const absoluteY = y + CURSOR_OFFSET_TOP;
 
             if(!animation) {
                 this.cursorX = x;
                 this.cursorY = y;
-                this.cursorElement.style.left = `${x}px`;
-                this.cursorElement.style.top = `${y}px`;
+                this.cursorElement.style.left = `${absoluteX}px`;
+                this.cursorElement.style.top = `${absoluteY}px`;
 
                 return;
             }
 
             await this.cursorElement.animate(
                 {
-                    left: [`${this.cursorX}px`, `${x}px`],
-                    top: [`${this.cursorY}px`, `${y}px`],
+                    left: [`${this.cursorX}px`, `${absoluteX}px`],
+                    top: [`${this.cursorY}px`, `${absoluteY}px`],
                 },
                 {
                     easing: 'ease',
@@ -503,14 +526,6 @@
                 y: window.innerHeight / 2,
                 animation: animation,
             });
-        }
-
-        hide = () => {
-            this.cursorElement.style.display = 'none';
-        }
-
-        show = () => {
-            this.cursorElement.style.display = 'block';
         }
     }
 
