@@ -33,11 +33,19 @@ class Browser:
 
         self.animations = animations
 
-        self._frontend_server = FrontendServer(host='127.0.0.1', port=0)
+        self._frontend_server = FrontendServer(
+            host='127.0.0.1',
+            port=0,
+            logger=self._get_sub_logger('frontend.server'),
+        )
+
         self._event_router = EventRouter()
 
     def __repr__(self):
         return f'<{self.__class__.__name__}(id={self.id})>'
+
+    def _get_sub_logger(self, name):
+        return logging.getLogger(f'{self.logger.name}.{name}')
 
     def _get_animation(self, local_override):
         if local_override:

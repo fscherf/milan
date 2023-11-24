@@ -5,37 +5,45 @@ import os
 
 FRONTEND_STATIC_ROOT = os.path.join(os.path.dirname(__file__), 'static')
 
-logger = logging.getLogger('milan.frontend.server')
+default_logger = logging.getLogger('milan.frontend.server')
 
 
-class NoCachingRequestHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=FRONTEND_STATIC_ROOT, **kwargs)
+def gen_request_handler_class(logger=default_logger):
+    class NoCachingRequestHandler(SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=FRONTEND_STATIC_ROOT, **kwargs)
 
-    def end_headers(self):
+        def log_message(self, *args, **kwargs):
+            logger.debug(*args, **kwargs)
 
-        # caching header
-        self.send_header(
-            'Cache-Control',
-            'no-cache, no-store, must-revalidate',
-        )
+        def end_headers(self):
 
-        self.send_header('Pragma', 'no-cache')
-        self.send_header('Expires', '0')
+            # caching header
+            self.send_header(
+                'Cache-Control',
+                'no-cache, no-store, must-revalidate',
+            )
 
-        # CORS header
-        self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
 
-        super().end_headers()
+            # CORS header
+            self.send_header('Access-Control-Allow-Origin', '*')
+
+            super().end_headers()
+
+    return NoCachingRequestHandler
 
 
 class FrontendServer:
-    def __init__(self, host='localhost', port=0):
-        logger.debug('starting on %s:%s', host, port)
+    def __init__(self, host='localhost', port=0, logger=default_logger):
+        self.logger = logger
+
+        self.logger.debug('starting on %s:%s', host, port)
 
         self.http_server = ThreadingHTTPServer(
             (host, port),
-            NoCachingRequestHandler,
+            gen_request_handler_class(logger=self.logger),
         )
 
         Thread(
@@ -43,7 +51,7 @@ class FrontendServer:
             daemon=True,
         ).start()
 
-        logger.debug('running on %s', self.get_url())
+        self.logger.debug('running on %s', self.get_url())
 
     def get_url(self):
         host, port = self.http_server.server_address
@@ -54,7 +62,7 @@ class FrontendServer:
         return f'{self.get_url()}/test-application/'
 
     def stop(self):
-        logger.debug('stopping')
+        self.logger.debug('stopping')
 
         self.http_server.server_close()
 
