@@ -119,30 +119,39 @@ def gen_window_navigate_command(window_index, url, animation):
     )
 
 
-def gen_window_navigate_back_command(window_index):
+def gen_window_navigate_back_command(window_index, animation):
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
             name='navigateBack',
         ),
+        args={
+            'animation': animation,
+        },
     )
 
 
-def gen_window_navigate_forward_command(window_index):
+def gen_window_navigate_forward_command(window_index, animation):
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
             name='navigateForward',
         ),
+        args={
+            'animation': animation,
+        },
     )
 
 
-def gen_window_reload_command(window_index):
+def gen_window_reload_command(window_index, animation):
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
             name='reload',
         ),
+        args={
+            'animation': animation,
+        },
     )
 
 

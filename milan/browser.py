@@ -24,14 +24,14 @@ class Browser:
     def start(cls, *args, **kwargs):
         return BrowserContext(cls, *args, **kwargs)
 
-    def __init__(self):
+    def __init__(self, animations=True):
         self.id = unique_id()
 
         self.logger = logging.getLogger(
             f'milan.{self.__class__.__name__.lower()}.{self.id}',
         )
 
-        self.animation = True
+        self.animations = animations
 
         self._frontend_server = FrontendServer(host='127.0.0.1', port=0)
         self._event_router = EventRouter()
@@ -43,7 +43,7 @@ class Browser:
         if local_override:
             return local_override
 
-        return self.animation
+        return self.animations
 
     def stop(self):
         self._frontend_server.stop()
@@ -134,26 +134,29 @@ class Browser:
 
     # window
     @frontend_function
-    def reload(self, window=0):
+    def reload(self, window=0, animation=None):
         return self.evaluate(
             expression=commands.gen_window_reload_command(
                 window_index=window,
+                animation=self._get_animation(animation),
             ),
         )
 
     @frontend_function
-    def navigate_back(self, window=0):
+    def navigate_back(self, window=0, animation=None):
         return self.evaluate(
             expression=commands.gen_window_navigate_back_command(
                 window_index=window,
+                animation=self._get_animation(animation),
             ),
         )
 
     @frontend_function
-    def navigate_forward(self, window=0):
+    def navigate_forward(self, window=0, animation=None):
         return self.evaluate(
             expression=commands.gen_window_navigate_forward_command(
                 window_index=window,
+                animation=self._get_animation(animation),
             ),
         )
 
@@ -184,39 +187,33 @@ class Browser:
     # window: user input
     @frontend_function
     def click(self, selector, window=0, animation=None):
-        animation = self._get_animation(animation)
-
         return self.evaluate(
             expression=commands.gen_window_click_command(
                 window_index=window,
                 selector=selector,
-                animation=animation,
+                animation=self._get_animation(animation),
             ),
         )
 
     @frontend_function
     def fill(self, selector, value, window=0, animation=None):
-        animation = self._get_animation(animation)
-
         return self.evaluate(
             expression=commands.gen_window_fill_command(
                 window_index=window,
                 selector=selector,
                 value=value,
-                animation=animation,
+                animation=self._get_animation(animation),
             ),
         )
 
     @frontend_function
     def check(self, selector, value=True, window=0, animation=None):
-        animation = self._get_animation(animation)
-
         return self.evaluate(
             expression=commands.gen_window_check_command(
                 window_index=window,
                 selector=selector,
                 value=value,
-                animation=animation,
+                animation=self._get_animation(animation),
             ),
         )
 
@@ -231,8 +228,6 @@ class Browser:
             animation=None,
     ):
 
-        animation = self._get_animation(animation)
-
         return self.evaluate(
             expression=commands.gen_window_select_command(
                 window_index=window,
@@ -240,7 +235,7 @@ class Browser:
                 value=value,
                 index=index,
                 label=label,
-                animation=animation,
+                animation=self._get_animation(animation),
             ),
         )
 

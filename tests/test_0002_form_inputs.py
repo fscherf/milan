@@ -17,7 +17,7 @@ def test_form_inputs(browser_name):
 
     with browser_class.start() as browser:
         browser.navigate_to_test_application()
-        browser.animations = False  # TODO: this does not work
+        browser.animations = False
 
         # text input
         browser.fill('#text-input', 'foo')

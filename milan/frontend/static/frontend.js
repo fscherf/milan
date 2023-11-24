@@ -171,37 +171,55 @@ class BrowserWindow {
         }
     }
 
-    reload = async () => {
+    reload = async ({
+        animation=true,
+    }) => {
         const loadPromise = this.awaitLoad();
 
         await this.cursor.click({
             elementOrSelector: this.reloadElement,
+            animation: animation,
         });
 
         await loadPromise;
-        await sleep(200);
+
+        if (animation) {
+            await sleep(200);
+        }
     }
 
-    navigateBack = async () => {
+    navigateBack = async ({
+        animation=true,
+    }) => {
         const loadPromise = this.awaitLoad();
 
         await this.cursor.click({
             elementOrSelector: this.backElement,
+            animation: animation,
         });
 
         await loadPromise;
-        await sleep(200);
+
+        if (animation) {
+            await sleep(200);
+        }
     }
 
-    navigateForward = async () => {
+    navigateForward = async ({
+        animation=true,
+    }) => {
         const loadPromise = this.awaitLoad();
 
         await this.cursor.click({
             elementOrSelector: this.forwardElement,
+            animation: animation,
         });
 
         await loadPromise;
-        await sleep(200);
+
+        if (animation) {
+            await sleep(200);
+        }
     }
 
     // cursor shortcuts -------------------------------------------------------
@@ -237,23 +255,27 @@ class BrowserWindow {
 
     click = ({
         elementOrSelector=required('elementOrSelector'),
+        animation=true,
     }={}) => {
 
         return this.cursor.click({
             elementOrSelector: elementOrSelector,
             iframe: this.iframeElement,
+            animation: animation,
         });
     }
 
     fill = ({
         elementOrSelector=required('value'),
         value=required('value'),
+        animation=true,
     }={}) => {
 
         return this.cursor.fill({
             elementOrSelector: elementOrSelector,
             value: value,
             iframe: this.iframeElement,
+            animation: animation,
         });
     }
 
@@ -262,6 +284,7 @@ class BrowserWindow {
         value=undefined,
         index=undefined,
         label=undefined,
+        animation=true,
     }={}) => {
 
         return this.cursor.select({
@@ -270,6 +293,7 @@ class BrowserWindow {
             value: value,
             index: index,
             label: label,
+            animation: animation,
         });
     }
 
@@ -277,6 +301,7 @@ class BrowserWindow {
         elementOrSelector=required('elementOrSelector'),
         value=undefined,
         label=undefined,
+        animation=true,
     }={}) => {
 
         return this.cursor.check({
@@ -284,6 +309,7 @@ class BrowserWindow {
             iframe: this.iframeElement,
             value: value,
             label: label,
+            animation: animation,
         });
     }
 }

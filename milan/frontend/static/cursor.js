@@ -354,6 +354,7 @@
         focus = async ({
             elementOrSelector=required('elementOrSelector'),
             iframe=undefined,
+            animation=true,
         }={}) => {
 
             const element = await this.awaitElement({
@@ -361,14 +362,18 @@
                 iframe: iframe,
             });
 
-            await this.click({
-                elementOrSelector: element,
-                iframe: iframe,
-            });
+            if (animation) {
+                await this._playClickAnimation({
+                    elementOrSelector: element,
+                    iframe: iframe,
+                });
+            }
 
             element.focus();
 
-            await this.sleep(300);
+            if (animation) {
+                await this.sleep(300);
+            }
         }
 
         fill = async ({
@@ -384,11 +389,10 @@
             });
 
             if (animation) {
-
-                // focus element
                 await this.focus({
                     elementOrSelector: element,
                     iframe: iframe,
+                    animation: animation,
                 });
             }
 
@@ -408,6 +412,7 @@
             elementOrSelector=required('elementOrSelector'),
             iframe=undefined,
             value=true,
+            animation=true,
         }={}) => {
 
             const element = await this.awaitElement({
@@ -424,6 +429,7 @@
             await this.click({
                 elementOrSelector: element,
                 iframe: iframe,
+                animation: animation,
             });
         }
 
@@ -433,6 +439,7 @@
             value=undefined,
             index=undefined,
             label=undefined,
+            animation=true,
         }={}) => {
 
             if (index == undefined &&
@@ -451,6 +458,7 @@
             await this.focus({
                 elementOrSelector: element,
                 iframe: iframe,
+                animation: animation,
             });
 
             // actual select option
@@ -472,13 +480,18 @@
                 });
             }
 
-            await this.sleep(200);
+            if (animation) {
+                await this.sleep(200);
+            }
 
             // issue change event
             element.dispatchEvent(new Event('change'));
         }
 
-        moveToHome = async ({animation=true}={}) => {
+        moveToHome = async ({
+            animation=true,
+        }={}) => {
+
             await this.moveTo({
                 x: window.innerWidth / 2,
                 y: window.innerHeight / 2,
