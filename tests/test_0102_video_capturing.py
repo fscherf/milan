@@ -52,7 +52,7 @@ def run_test_application_test(browser):
 
 
 @pytest.mark.parametrize('video_format', ['mp4', 'webm', 'gif'])
-@pytest.mark.parametrize('fps', [30, 60])
+@pytest.mark.parametrize('fps', ['30fps', '60fps'])
 @pytest.mark.parametrize('browser_name', ['chromium'])
 def test_video_capturing(
         browser_name,
@@ -75,6 +75,7 @@ def test_video_capturing(
     }[browser_name]
 
     video_path = f'{browser_name}-{fps}fps.{video_format}'
+    fps = int(fps[:-3])
 
     with browser_class.start() as browser:
         browser.navigate_to_test_application()
