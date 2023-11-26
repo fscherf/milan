@@ -5,6 +5,7 @@ import os
 
 from milan.utils.reverse_proxy import ReverseProxy
 from milan.utils.misc import retry, unique_id
+from milan.utils.media import scale_image
 from milan.utils.process import Process
 from milan.cdp_client import CdpClient
 from milan.browser import Browser
@@ -153,16 +154,39 @@ class CdpBrowser(Browser):
             height=height,
         )
 
-    def screenshot(self, path, quality=100):
-        output_format = os.path.splitext(path)[1][1:]
+    def screenshot(
+            self,
+            output_path,
+            quality=100,
+            width=0,
+            height=0,
+    ):
+
+        output_format = os.path.splitext(output_path)[1][1:]
+        output_path_scaled = ''
 
         if output_format not in ('jpeg', 'png'):
             raise ValueError(f'invalid output format: {output_format}')
 
-        return self.cdp_client.page_screenshot(
-            path=path,
+        if width or height:
+            output_path_scaled = output_path
+            output_path = f'{output_path}.unscaled.{output_format}'
+
+        self.cdp_client.page_screenshot(
+            path=output_path,
             quality=quality,
         )
+
+        if width or height:
+            scale_image(
+                input_path=output_path,
+                output_path=output_path_scaled,
+                width=width,
+                height=height,
+                logger=self._get_sub_logger('ffmpeg.image-scale'),
+            )
+
+            os.unlink(output_path)
 
     def start_video_capturing(
             self,
