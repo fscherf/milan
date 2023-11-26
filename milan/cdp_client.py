@@ -315,6 +315,8 @@ class CdpClient:
     def start_video_capturing(
             self,
             output_path,
+            width=0,
+            height=0,
             fps=60,
             image_format='png',
             image_quality=100,
@@ -324,6 +326,8 @@ class CdpClient:
 
         self.video_recorder.start(
             output_path=output_path,
+            width=width,
+            height=height,
             fps=fps,
         )
 

@@ -1,3 +1,6 @@
+import time
+import os
+
 import pytest
 
 
@@ -52,10 +55,17 @@ def run_test_application_test(browser):
 
 
 @pytest.mark.parametrize('video_format', ['mp4', 'webm', 'gif'])
-@pytest.mark.parametrize('fps', ['30fps', '60fps'])
+@pytest.mark.parametrize('fps', ['24fps', '30fps', '60fps'])
+@pytest.mark.parametrize('video_dimensions', [
+    '0x0',
+    '800x0',
+    '0x800',
+    '800x800',
+])
 @pytest.mark.parametrize('browser_name', ['chromium'])
 def test_video_capturing(
         browser_name,
+        video_dimensions,
         fps,
         video_format,
         milan_artifacts_directory,
@@ -74,15 +84,21 @@ def test_video_capturing(
         'chromium': Chromium,
     }[browser_name]
 
-    video_path = f'{browser_name}-{fps}fps.{video_format}'
     fps = int(fps[:-3])
+    width, height = (int(i) for i in video_dimensions.split('x'))
+    video_path = f'{browser_name}-{width}x{height}-{fps}fps.{video_format}'
 
     with browser_class.start() as browser:
         browser.navigate_to_test_application()
         browser.animation = True
         browser.resize(1280, 720)
 
-        browser.start_video_capturing(output_path=video_path, fps=fps)
+        browser.start_video_capturing(
+            output_path=video_path,
+            width=width,
+            height=height,
+            fps=fps,
+        )
 
         run_test_application_test(browser)
 
@@ -95,6 +111,7 @@ def test_video_capturing(
     assert video.size > 0
     assert video_format in video.format
 
+    # format
     if video_format in ('mp4', 'webm'):
         assert video.fps == fps
 
@@ -106,3 +123,52 @@ def test_video_capturing(
 
     elif video_format == 'gif':
         assert video.fps == 24  # 24 is the max fps for gifs
+
+    # scaling
+    if width:
+        assert video.width == width
+
+    if height:
+        assert video.height == height
+
+    if not width and not height:
+        assert video.width == 1280
+        assert video.height == 720
+
+
+@pytest.mark.parametrize('video_format', ['mp4', 'webm', 'gif'])
+@pytest.mark.parametrize('video_dimensions', [
+    '801x0',
+    '0x801',
+    '801x801',
+])
+@pytest.mark.parametrize('browser_name', ['chromium'])
+def test_invalid_video_dimensions(
+        browser_name,
+        video_dimensions,
+        video_format,
+        milan_artifacts_directory,
+):
+
+    from milan import Chromium
+
+    browser_class = {
+        'chromium': Chromium,
+    }[browser_name]
+
+    width, height = (int(i) for i in video_dimensions.split('x'))
+    video_path = f'{browser_name}-{width}x{height}.{video_format}'
+
+    with browser_class.start() as browser:
+
+        # FIXME: there seems to be a race condition in milan.frontend.server
+        time.sleep(1)
+
+        with pytest.raises(ValueError):
+            browser.start_video_capturing(
+                output_path=video_path,
+                width=width,
+                height=height,
+            )
+
+    assert not os.path.exists(video_path)
