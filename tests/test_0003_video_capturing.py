@@ -61,7 +61,7 @@ def test_form_inputs(
         milan_artifacts_directory,
 ):
 
-    from milan.utils.video import Video
+    from milan.utils.media import Video
     from milan import Chromium
 
     def await_element_id(browser, element_id):
