@@ -50,7 +50,7 @@ class VideoRecorder:
             '-an',  # disable audio
         ]
 
-    def _get_ffmpeg_input_arguments(self):
+    def _get_ffmpeg_input_args(self):
         return [
             # We feed images without timestamps into ffmpeg. This tells ffmpeg
             # to use the wall clock instead to stabilize the framerate.
@@ -169,7 +169,7 @@ class VideoRecorder:
             command=[
                 self._ffmpeg_path,
                 *self._get_ffmpeg_global_args(),
-                *self._get_ffmpeg_input_arguments(),
+                *self._get_ffmpeg_input_args(),
                 *output_args,
                 self._output_path,
             ],
