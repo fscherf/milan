@@ -61,20 +61,44 @@ class VideoRecorder:
             '-i', '-',
         ]
 
-    def _get_ffmpeg_mp4_output_args(self, fps):
+    def _get_ffmpeg_output_filter_args(self, width, height):
+        filter_string = 'format=yuv420p'
+
+        if width or height:
+
+            # Some codecs, for example h264, need both dimensions to be
+            # divisible by two. `-2` tells ffmpeg to generate the all missing
+            # dimensions, to keep the aspect ratio, and then decrease it until
+            # it is divisible by 2.
+            width = int(width or -2)
+            height = int(height or -2)
+
+            filter_string = f'{filter_string},scale={width}:{height}'
+
         return [
-            '-f', 'mp4',              # format
-            '-c:v', 'libx264',        # codec
-            '-vf', 'format=yuv420p',  # video filter
-            '-r', str(fps),           # framerate
+            '-vf', filter_string,
         ]
 
-    def _get_ffmpeg_webm_output_args(self, fps):
+    def _get_ffmpeg_mp4_output_args(self, fps, width, height):
         return [
-            '-f', 'webm',             # format
-            '-c:v', 'libvpx-vp9',     # codec
-            '-vf', 'format=yuv420p',  # video filter
-            '-r', str(fps),           # framerate
+            '-f', 'mp4',        # format
+            '-c:v', 'libx264',  # codec
+            '-r', str(fps),     # framerate
+            *self._get_ffmpeg_output_filter_args(
+                width=width,
+                height=height,
+            )
+        ]
+
+    def _get_ffmpeg_webm_output_args(self, fps, width, height):
+        return [
+            '-f', 'webm',          # format
+            '-c:v', 'libvpx-vp9',  # codec
+            '-r', str(fps),        # framerate
+            *self._get_ffmpeg_output_filter_args(
+                width=width,
+                height=height,
+            )
         ]
 
     # public API ##############################################################
@@ -86,17 +110,21 @@ class VideoRecorder:
             self._ffmpeg_process.stdin_write(image_data)
 
         except Exception:
+            self._state = 'crashed'
+
             self.logger.exception('exception raised while writing to ffmpeg')
 
-    def start(self, output_path, fps=60):
+    def start(self, output_path, width=0, height=0, fps=60):
         # TODO: check if ffmpeg really started
         # TODO: add hook to handle ffmpeg closing unexpectedly
-        # TODO: add scaling
 
         output_format = os.path.splitext(output_path)[1][1:]
 
         if output_format not in ('mp4', 'webm', 'gif'):
             raise ValueError(f'invalid output format: {output_format}')
+
+        if width % 2 != 0 or height % 2 != 0:
+            raise ValueError('both width and height have to be divisible by 2')
 
         self._touch(path=output_path)
 
@@ -121,11 +149,19 @@ class VideoRecorder:
 
         # mp4
         if self._output_format in ('mp4', 'gif'):
-            output_args = self._get_ffmpeg_mp4_output_args(fps=fps)
+            output_args = self._get_ffmpeg_mp4_output_args(
+                fps=fps,
+                width=width,
+                height=height,
+            )
 
         # webm
         else:
-            output_args = self._get_ffmpeg_webm_output_args(fps=fps)
+            output_args = self._get_ffmpeg_webm_output_args(
+                fps=fps,
+                width=width,
+                height=height,
+            )
 
         self.logger.debug('starting recording to %s', self._output_path)
 

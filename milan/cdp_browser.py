@@ -191,6 +191,8 @@ class CdpBrowser(Browser):
     def start_video_capturing(
             self,
             output_path,
+            width=0,
+            height=0,
             fps=60,
             image_format='png',
             image_quality=100,
@@ -203,6 +205,8 @@ class CdpBrowser(Browser):
 
         return self.cdp_client.start_video_capturing(
             output_path=output_path,
+            width=width,
+            height=height,
             fps=fps,
             image_format=image_format,
             image_quality=image_quality,
