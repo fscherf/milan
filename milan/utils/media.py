@@ -1,8 +1,12 @@
 import subprocess
+import logging
 import json
 import os
 
-from milan.executables import find_ffprobe_executable
+from milan.executables import find_ffprobe_executable, find_ffmpeg_executable
+from milan.utils.process import Process
+
+default_logger = logging.getLogger('milan.media')
 
 
 class Media:
@@ -91,3 +95,88 @@ class Image(Media):
     @property
     def format(self):
         return self.meta_data['streams'][0].get('codec_name', '')
+
+
+def scale_image(
+        input_path,
+        output_path,
+        width=0,
+        height=0,
+        ffmpeg_path=None,
+        logger=default_logger,
+):
+
+    if not ffmpeg_path:
+        ffmpeg_path = find_ffmpeg_executable()
+
+    if not width and not height:
+        raise ValueError('either width, height, or both have to be set')
+
+    width = int(width or -1)
+    height = int(height or -1)
+
+    logger.debug(
+        'scaling %s to %s (%s:%s)',
+        input_path,
+        output_path,
+        width,
+        height,
+    )
+
+    Process(
+        command=[
+            ffmpeg_path,
+
+            '-v', 'quiet',
+            '-y',   # override existing files if needed
+
+            '-i', input_path,
+            '-vf', f'scale={width}:{height}',
+
+            output_path,
+        ],
+        logger=logger,
+    ).wait()
+
+    logger.debug(
+        'scaling of %s to %s (%s:%s) done',
+        input_path,
+        output_path,
+        width,
+        height,
+    )
+
+
+def convert_video_to_gif(
+        input_path,
+        output_path,
+        ffmpeg_path=None,
+        logger=default_logger,
+):
+
+    if not ffmpeg_path:
+        ffmpeg_path = find_ffmpeg_executable()
+
+    logger.debug('converting %s to %s', input_path, output_path)
+
+    Process(
+        command=[
+            ffmpeg_path,
+
+            '-v', 'quiet',
+            '-y',   # override existing files if needed
+
+            '-i', input_path,
+            '-filter_complex', '[0:v] palettegen [p]; [0:v][p] paletteuse',
+
+            # Most gif player don't display framerates over
+            # 30 correctly. Between 15 and 24 is recommended.
+            '-r', '24',
+
+            '-f', 'gif',  # output format
+            output_path,
+        ],
+        logger=logger,
+    ).wait()
+
+    logger.debug('converting %s to %s done', input_path, output_path)
