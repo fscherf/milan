@@ -1,6 +1,7 @@
 from tempfile import TemporaryDirectory
 import logging
 import time
+import os
 
 from milan.utils.reverse_proxy import ReverseProxy
 from milan.utils.misc import retry, unique_id
@@ -153,6 +154,11 @@ class CdpBrowser(Browser):
         )
 
     def screenshot(self, path, quality=100):
+        output_format = os.path.splitext(path)[1][1:]
+
+        if output_format not in ('jpeg', 'png'):
+            raise ValueError(f'invalid output format: {output_format}')
+
         return self.cdp_client.page_screenshot(
             path=path,
             quality=quality,
