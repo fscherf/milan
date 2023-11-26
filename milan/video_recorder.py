@@ -2,6 +2,7 @@ import logging
 import os
 
 from milan.executables import find_ffmpeg_executable
+from milan.utils.media import convert_video_to_gif
 from milan.utils.process import Process
 from milan.utils.misc import unique_id
 
@@ -42,7 +43,7 @@ class VideoRecorder:
         with open(path, 'w+') as file_handle:
             file_handle.close()
 
-    # ffmpeg: recording #######################################################
+    # ffmpeg args #############################################################
     def _get_ffmpeg_global_args(self):
         return [
             '-y',   # override existing files if needed
@@ -75,30 +76,6 @@ class VideoRecorder:
             '-vf', 'format=yuv420p',  # video filter
             '-r', str(fps),           # framerate
         ]
-
-    # ffmpeg: post processing #################################################
-    def _convert_video_to_gif(self, input_path, output_path):
-        self.logger.debug('converting %s to %s', input_path, output_path)
-
-        Process(
-            command=[
-                self._ffmpeg_path,
-                *self._get_ffmpeg_global_args(),
-
-                '-i', input_path,
-                '-filter_complex', '[0:v] palettegen [p]; [0:v][p] paletteuse',
-
-                # Most gif player don't display framerates over
-                # 30 correctly. Between 15 and 24 is recommended.
-                '-r', '24',
-
-                '-f', 'gif',  # output format
-                output_path,
-            ],
-            logger=self._get_sub_logger('ffmpeg.video2gif'),
-        ).wait()
-
-        self.logger.debug('converting %s to %s done', input_path, output_path)
 
     # public API ##############################################################
     def write_frame(self, image_data):
@@ -184,9 +161,10 @@ class VideoRecorder:
         if self._output_format == 'gif':
 
             # convert previously generated mp4 video to gif
-            self._convert_video_to_gif(
+            convert_video_to_gif(
                 input_path=self._output_path,
                 output_path=self._output_gif_path,
+                logger=self._get_sub_logger('ffmpeg.video2gif'),
             )
 
             # remove artifacts
