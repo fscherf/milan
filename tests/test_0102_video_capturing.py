@@ -54,7 +54,7 @@ def run_test_application_test(browser):
 @pytest.mark.parametrize('video_format', ['mp4', 'webm', 'gif'])
 @pytest.mark.parametrize('fps', [30, 60])
 @pytest.mark.parametrize('browser_name', ['chromium'])
-def test_form_inputs(
+def test_video_capturing(
         browser_name,
         fps,
         video_format,
