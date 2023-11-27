@@ -55,7 +55,7 @@ def run_test_application_test(browser):
 
 
 @pytest.mark.parametrize('video_format', ['mp4', 'webm', 'gif'])
-@pytest.mark.parametrize('fps', ['24fps', '30fps', '60fps'])
+@pytest.mark.parametrize('fps', ['0fps', '24fps', '30fps', '60fps'])
 @pytest.mark.parametrize('video_dimensions', [
     '0x0',
     '800x0',
@@ -83,7 +83,7 @@ def test_video_capturing(
     # not running in CI
     # only running basic tests
     if 'MILAN_CI_TEST' not in os.environ:
-        if (fps not in ('60fps',) or
+        if (fps not in ('0fps',) or
                 video_dimensions not in ('0x0', '800x0')):
 
             pytest.skip()
@@ -119,10 +119,6 @@ def test_video_capturing(
     assert video.size > 0
     assert video_format in video.format
 
-    # format
-    if video_format in ('mp4', 'webm'):
-        assert video.fps == fps
-
     if video_format == 'mp4':
         assert video.codec == 'h264'
 
@@ -130,7 +126,21 @@ def test_video_capturing(
         assert video.codec == 'vp9'
 
     elif video_format == 'gif':
-        assert video.fps == 24  # 24 is the max fps for gifs
+        assert video.codec == 'gif'
+
+    # fps
+    # default values
+    if fps == 0:
+        assert video.fps == {
+            'mp4': 60,
+            'webm': 60,
+            'gif': 24,
+        }[video_format]
+
+    # configured values
+    # for gifs, only the default value really works
+    elif video_format in ('mp4', 'webm'):
+        assert video.fps == fps
 
     # scaling
     if width:

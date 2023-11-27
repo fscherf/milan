@@ -101,12 +101,12 @@ class VideoRecorder:
         ]
 
     def _get_ffmpeg_gif_output_args(self, fps, width, height):
+        fps = fps or 24
+        width = int(width or -1)
+        height = int(height or -1)
 
         # scaling
         if width or height:
-            width = int(width or -1)
-            height = int(height or -1)
-
             filter_complex_string = (
                 f'[0:v] scale={width}:{height} [scaled];'
                 '[scaled] split [scaled_0][scaled_1];'
@@ -124,10 +124,7 @@ class VideoRecorder:
         return [
             '-f', 'gif',  # format
             '-filter_complex', filter_complex_string,
-
-            # Most gif player don't display framerates over
-            # 30 correctly. Between 15 and 24 is recommended.
-            '-r', '24',
+            '-r', str(fps),
         ]
 
     # public API ##############################################################
@@ -143,24 +140,32 @@ class VideoRecorder:
 
             self.logger.exception('exception raised while writing to ffmpeg')
 
-    def start(self, output_path, width=0, height=0, fps=60):
+    def start(self, output_path, width=0, height=0, fps=0):
         # TODO: check if ffmpeg really started
         # TODO: add hook to handle ffmpeg closing unexpectedly
 
         output_format = os.path.splitext(output_path)[1][1:]
 
+        # check arguments
         if output_format not in ('mp4', 'webm', 'gif'):
             raise ValueError(f'invalid output format: {output_format}')
+
+        if output_format == 'gif' and fps > 24:
+            self.logger.warning(
+                'Most gif player don\'t display framerates over'
+                '30 correctly. Between 15 and 24 is recommended.'
+            )
 
         if width % 2 != 0 or height % 2 != 0:
             raise ValueError('both width and height have to be divisible by 2')
 
+        # check if output path is writeable
         self._touch(path=output_path)
 
+        # update internal state
         if self.state != 'idle':
             raise ValueError('recorder is not idling')
 
-        # update internal state
         self._state = 'recording'
         self._output_path = output_path
         self._output_format = output_format
@@ -168,7 +173,7 @@ class VideoRecorder:
         # mp4
         if self._output_format == 'mp4':
             output_args = self._get_ffmpeg_mp4_output_args(
-                fps=fps,
+                fps=fps or 60,
                 width=width,
                 height=height,
             )
@@ -184,7 +189,7 @@ class VideoRecorder:
         # webm
         else:
             output_args = self._get_ffmpeg_webm_output_args(
-                fps=fps,
+                fps=fps or 60,
                 width=width,
                 height=height,
             )
