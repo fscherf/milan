@@ -154,7 +154,7 @@ def test_video_capturing(
         assert video.height == 720
 
 
-@pytest.mark.parametrize('video_format', ['mp4', 'webm', 'gif'])
+@pytest.mark.parametrize('video_format', ['mp4'])
 @pytest.mark.parametrize('video_dimensions', [
     '801x0',
     '0x801',

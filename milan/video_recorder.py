@@ -69,6 +69,9 @@ class VideoRecorder:
         width = int(width or -2)
         height = int(height or -2)
 
+        if width % 2 != 0 or height % 2 != 0:
+            raise ValueError('both width and height have to be divisible by 2')
+
         # scaling
         if width or height:
             filter_string = f'format=yuv420p,scale={width}:{height}'
@@ -86,8 +89,8 @@ class VideoRecorder:
 
     def _get_ffmpeg_webm_output_args(self, fps, width, height):
         fps = fps or 60
-        width = int(width or -2)
-        height = int(height or -2)
+        width = int(width or -1)
+        height = int(height or -1)
 
         # scaling
         if width or height:
@@ -106,8 +109,8 @@ class VideoRecorder:
 
     def _get_ffmpeg_gif_output_args(self, fps, width, height):
         fps = fps or 24
-        width = int(width or -2)
-        height = int(height or -2)
+        width = int(width or -1)
+        height = int(height or -1)
 
         if fps > 24:
             self.logger.warning(
@@ -160,9 +163,6 @@ class VideoRecorder:
 
         if output_format not in ('mp4', 'webm', 'gif'):
             raise ValueError(f'invalid output format: {output_format}')
-
-        if width % 2 != 0 or height % 2 != 0:
-            raise ValueError('both width and height have to be divisible by 2')
 
         # update internal state
         if self.state != 'idle':
