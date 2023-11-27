@@ -145,38 +145,3 @@ def scale_image(
         width,
         height,
     )
-
-
-def convert_video_to_gif(
-        input_path,
-        output_path,
-        ffmpeg_path=None,
-        logger=default_logger,
-):
-
-    if not ffmpeg_path:
-        ffmpeg_path = find_ffmpeg_executable()
-
-    logger.debug('converting %s to %s', input_path, output_path)
-
-    Process(
-        command=[
-            ffmpeg_path,
-
-            '-v', 'quiet',
-            '-y',   # override existing files if needed
-
-            '-i', input_path,
-            '-filter_complex', '[0:v] palettegen [p]; [0:v][p] paletteuse',
-
-            # Most gif player don't display framerates over
-            # 30 correctly. Between 15 and 24 is recommended.
-            '-r', '24',
-
-            '-f', 'gif',  # output format
-            output_path,
-        ],
-        logger=logger,
-    ).wait()
-
-    logger.debug('converting %s to %s done', input_path, output_path)
