@@ -60,50 +60,60 @@ class VideoRecorder:
             '-i', '-',
         ]
 
-    def _get_ffmpeg_output_filter_args(self, width, height):
-        filter_string = 'format=yuv420p'
-
-        if width or height:
-
-            # Some codecs, for example h264, need both dimensions to be
-            # divisible by two. `-2` tells ffmpeg to generate the all missing
-            # dimensions, to keep the aspect ratio, and then decrease it until
-            # it is divisible by 2.
-            width = int(width or -2)
-            height = int(height or -2)
-
-            filter_string = f'{filter_string},scale={width}:{height}'
-
-        return [
-            '-vf', filter_string,
-        ]
-
     def _get_ffmpeg_mp4_output_args(self, fps, width, height):
+        fps = fps or 60
+
+        # h264 needs both dimensions to be divisible by two.
+        # `-2` tells ffmpeg to generate the all missing dimensions, to keep the
+        # aspect ratio, and then decrease it until it is divisible by two.
+        width = int(width or -2)
+        height = int(height or -2)
+
+        # scaling
+        if width or height:
+            filter_string = f'format=yuv420p,scale={width}:{height}'
+
+        # no scaling
+        else:
+            filter_string = 'format=yuv420p'
+
         return [
-            '-f', 'mp4',        # format
-            '-c:v', 'libx264',  # codec
-            '-r', str(fps),     # framerate
-            *self._get_ffmpeg_output_filter_args(
-                width=width,
-                height=height,
-            )
+            '-f', 'mp4',           # format
+            '-c:v', 'libx264',     # codec
+            '-vf', filter_string,  # filter
+            '-r', str(fps),        # framerate
         ]
 
     def _get_ffmpeg_webm_output_args(self, fps, width, height):
+        fps = fps or 60
+        width = int(width or -2)
+        height = int(height or -2)
+
+        # scaling
+        if width or height:
+            filter_string = f'format=yuv420p,scale={width}:{height}'
+
+        # no scaling
+        else:
+            filter_string = 'format=yuv420p'
+
         return [
             '-f', 'webm',          # format
             '-c:v', 'libvpx-vp9',  # codec
+            '-vf', filter_string,  # filter
             '-r', str(fps),        # framerate
-            *self._get_ffmpeg_output_filter_args(
-                width=width,
-                height=height,
-            )
         ]
 
     def _get_ffmpeg_gif_output_args(self, fps, width, height):
         fps = fps or 24
-        width = int(width or -1)
-        height = int(height or -1)
+        width = int(width or -2)
+        height = int(height or -2)
+
+        if fps > 24:
+            self.logger.warning(
+                'Most gif player don\'t display framerates over'
+                '30 correctly. Between 15 and 24 is recommended.'
+            )
 
         # scaling
         if width or height:
@@ -144,23 +154,15 @@ class VideoRecorder:
         # TODO: check if ffmpeg really started
         # TODO: add hook to handle ffmpeg closing unexpectedly
 
+        self.logger.debug('starting recording to %s', self._output_path)
+
         output_format = os.path.splitext(output_path)[1][1:]
 
-        # check arguments
         if output_format not in ('mp4', 'webm', 'gif'):
             raise ValueError(f'invalid output format: {output_format}')
 
-        if output_format == 'gif' and fps > 24:
-            self.logger.warning(
-                'Most gif player don\'t display framerates over'
-                '30 correctly. Between 15 and 24 is recommended.'
-            )
-
         if width % 2 != 0 or height % 2 != 0:
             raise ValueError('both width and height have to be divisible by 2')
-
-        # check if output path is writeable
-        self._touch(path=output_path)
 
         # update internal state
         if self.state != 'idle':
@@ -170,10 +172,19 @@ class VideoRecorder:
         self._output_path = output_path
         self._output_format = output_format
 
+        # setup ffmpeg command
         # mp4
         if self._output_format == 'mp4':
             output_args = self._get_ffmpeg_mp4_output_args(
-                fps=fps or 60,
+                fps=fps,
+                width=width,
+                height=height,
+            )
+
+        # webm
+        elif self._output_format == 'webm':
+            output_args = self._get_ffmpeg_webm_output_args(
+                fps=fps,
                 width=width,
                 height=height,
             )
@@ -186,16 +197,10 @@ class VideoRecorder:
                 height=height,
             )
 
-        # webm
-        else:
-            output_args = self._get_ffmpeg_webm_output_args(
-                fps=fps or 60,
-                width=width,
-                height=height,
-            )
+        # check if output path is writeable
+        self._touch(path=output_path)
 
-        self.logger.debug('starting recording to %s', self._output_path)
-
+        # start ffmpeg
         self._ffmpeg_process = Process(
             command=[
                 self._ffmpeg_path,
@@ -217,7 +222,8 @@ class VideoRecorder:
 
         self._state = 'stopping'
 
-        self._ffmpeg_process.stdin_close()
-        self._ffmpeg_process.wait()
+        if self._ffmpeg_process:
+            self._ffmpeg_process.stdin_close()
+            self._ffmpeg_process.wait()
 
         self._state = 'idle'
