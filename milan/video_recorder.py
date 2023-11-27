@@ -2,7 +2,6 @@ import logging
 import os
 
 from milan.executables import find_ffmpeg_executable
-from milan.utils.media import convert_video_to_gif
 from milan.utils.process import Process
 from milan.utils.misc import unique_id
 
@@ -101,6 +100,36 @@ class VideoRecorder:
             )
         ]
 
+    def _get_ffmpeg_gif_output_args(self, fps, width, height):
+
+        # scaling
+        if width or height:
+            width = int(width or -1)
+            height = int(height or -1)
+
+            filter_complex_string = (
+                f'[0:v] scale={width}:{height} [scaled];'
+                '[scaled] split [scaled_0][scaled_1];'
+                '[scaled_0] palettegen [palette];'
+                '[scaled_1][palette] paletteuse'
+            )
+
+        # no scaling
+        else:
+            filter_complex_string = (
+                '[0:v] palettegen [palette];'
+                '[0:v] [palette] paletteuse'
+            )
+
+        return [
+            '-f', 'gif',  # format
+            '-filter_complex', filter_complex_string,
+
+            # Most gif player don't display framerates over
+            # 30 correctly. Between 15 and 24 is recommended.
+            '-r', '24',
+        ]
+
     # public API ##############################################################
     def write_frame(self, image_data):
         if not self.state == 'recording':
@@ -136,20 +165,17 @@ class VideoRecorder:
         self._output_path = output_path
         self._output_format = output_format
 
-        # start ffmpeg for recording
-        if self._output_format == 'gif':
-            # Creating gifs is a post processing step.
-            # We capture to .mp4 first and convert after the recording was
-            # stopped.
-
-            self._output_gif_path = self._output_path
-            self._output_path = f'{self._output_path}.mp4'
-
-            self._touch(path=self._output_path)
-
         # mp4
-        if self._output_format in ('mp4', 'gif'):
+        if self._output_format == 'mp4':
             output_args = self._get_ffmpeg_mp4_output_args(
+                fps=fps,
+                width=width,
+                height=height,
+            )
+
+        # gif
+        elif self._output_format == 'gif':
+            output_args = self._get_ffmpeg_gif_output_args(
                 fps=fps,
                 width=width,
                 height=height,
@@ -184,24 +210,9 @@ class VideoRecorder:
 
             return
 
-        # stop ffmpeg
         self._state = 'stopping'
 
         self._ffmpeg_process.stdin_close()
         self._ffmpeg_process.wait()
 
         self._state = 'idle'
-
-        # post processing
-        # gif
-        if self._output_format == 'gif':
-
-            # convert previously generated mp4 video to gif
-            convert_video_to_gif(
-                input_path=self._output_path,
-                output_path=self._output_gif_path,
-                logger=self._get_sub_logger('ffmpeg.video2gif'),
-            )
-
-            # remove artifacts
-            os.unlink(self._output_path)
