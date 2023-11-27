@@ -80,6 +80,14 @@ def test_video_capturing(
     def await_element_value(browser, element_value):
         browser.await_text(selector='#element-value', text=element_value)
 
+    # not running in CI
+    # only running basic tests
+    if 'MILAN_CI_TEST' not in os.environ:
+        if (fps not in ('60fps',) or
+                video_dimensions not in ('0x0', '800x0')):
+
+            pytest.skip()
+
     browser_class = {
         'chromium': Chromium,
     }[browser_name]
@@ -151,6 +159,12 @@ def test_invalid_video_dimensions(
 ):
 
     from milan import Chromium
+
+    # not running in CI
+    # only running basic tests
+    if 'MILAN_CI_TEST' not in os.environ:
+        if video_dimensions not in ('801x0',):
+            pytest.skip()
 
     browser_class = {
         'chromium': Chromium,

@@ -37,6 +37,10 @@ test: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	tox $(args)
 
+ci-test: | $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && \
+	MILAN_CI_TEST=1 tox $(args)
+
 frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	python -m milan.frontend.server --port=8080

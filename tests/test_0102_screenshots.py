@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 
@@ -13,6 +15,12 @@ def test_screenshots(
 
     from milan.utils.media import Image
     from milan import Chromium
+
+    # not running in CI
+    # only running basic tests
+    if 'MILAN_CI_TEST' not in os.environ:
+        if image_size not in ('0x0', '800x0'):
+            pytest.skip()
 
     browser_class = {
         'chromium': Chromium,
