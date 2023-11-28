@@ -12,12 +12,14 @@ class Process:
             command,
             name='',
             on_stdout_line=None,
+            on_stop=None,
             logger=None,
     ):
 
         self.command = command
         self.name = name
         self.on_stdout_line = on_stdout_line
+        self.on_stop = on_stop
         self.logger = logger
 
         self.id = unique_id()
@@ -72,6 +74,24 @@ class Process:
                     'exception raised while running %s',
                     self.on_stdout_line,
                 )
+
+        # process stopped
+        self.logger.debug('process stopped')
+
+        # run on_stop hook
+        if not self.on_stop:
+            return
+
+        self.logger.debug('running on_stop hook')
+
+        try:
+            self.on_stop(self)
+
+        except Exception:
+            self.logger.exception(
+                'exception raised while running %s',
+                self.on_stop,
+            )
 
     def stdin_write(self, data):
         self.logger.debug('writing %s bytes to stdin', len(data))
