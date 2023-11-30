@@ -78,6 +78,9 @@ class Process:
         # process stopped
         self.logger.debug('process stopped')
 
+        # read the process exit code to prevent zombie processes
+        self.wait()
+
         # run on_stop hook
         if not self.on_stop:
             return
