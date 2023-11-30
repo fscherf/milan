@@ -5,6 +5,7 @@ import os
 
 from milan.utils.reverse_proxy import ReverseProxy
 from milan.utils.misc import retry, unique_id
+from milan.errors import BrowserStoppedError
 from milan.utils.media import scale_image
 from milan.utils.process import Process
 from milan.cdp_client import CdpClient
@@ -62,6 +63,24 @@ class CdpBrowser(Browser):
             self.debug_port,
         )
 
+    def _handle_browser_process_stop(self, process):
+        # when the browser process stops before the browser.stop() was called
+        # the browser object is regarded crashed
+
+        if self._error != BrowserStoppedError:
+            self.logger.error('browser process stopped unexpectedly')
+
+            self._error = BrowserStoppedError
+
+    def _handle_json_rpc_client_stop(self, json_rpc_client):
+        # when the json rpc client stops before the browser.stop() was called
+        # the browser object is regarded crashed
+
+        if self._error != BrowserStoppedError:
+            self.logger.error('json rpc client stopped unexpectedly')
+
+            self._error = BrowserStoppedError
+
     def _start(self):
 
         # start browser process
@@ -70,6 +89,7 @@ class CdpBrowser(Browser):
         self.browser_process = Process(
             command=self.browser_command,
             on_stdout_line=self._find_devtools_debug_port,
+            on_stop=self._handle_browser_process_stop,
             logger=logging.getLogger(f'{self.logger.name}.browser'),
         )
 
@@ -110,6 +130,7 @@ class CdpBrowser(Browser):
             host='127.0.0.1',
             port=self.debug_port,
             event_router=self._event_router,
+            on_json_rpc_client_stop=self._handle_json_rpc_client_stop,
             logger=logging.getLogger(f'{self.logger.name}.cdp-client'),
         )
 
@@ -133,8 +154,12 @@ class CdpBrowser(Browser):
         if self.reverse_proxy:
             self.reverse_proxy.stop()
 
+        self.logger.debug('stopped')
+
     # browser hooks ###########################################################
     def _navigate_browser(self, url):
+        self._run_checks()
+
         future = self.await_browser_load(await_future=False)
 
         self.cdp_client.page_navigate(url=URL.normalize(url))
@@ -142,6 +167,8 @@ class CdpBrowser(Browser):
         future.result()
 
     def evaluate(self, expression):
+        self._run_checks()
+
         return self.cdp_client.runtime_evaluate(
             expression=expression,
             await_promise=True,
@@ -149,6 +176,8 @@ class CdpBrowser(Browser):
         )
 
     def resize(self, width, height):
+        self._run_checks()
+
         return self.cdp_client.emulation_set_device_metrics_override(
             width=width,
             height=height,
@@ -161,6 +190,8 @@ class CdpBrowser(Browser):
             width=0,
             height=0,
     ):
+
+        self._run_checks()
 
         output_format = os.path.splitext(output_path)[1][1:]
         output_path_scaled = ''
@@ -198,6 +229,8 @@ class CdpBrowser(Browser):
             image_quality=100,
     ):
 
+        self._run_checks()
+
         if self.is_firefox():
             raise NotImplementedError(
                 'CDP based video recording is not supported in firefox',
@@ -213,6 +246,8 @@ class CdpBrowser(Browser):
         )
 
     def stop_video_capturing(self):
+        self._run_checks()
+
         if self.is_firefox():
             raise NotImplementedError(
                 'CDP based video recording is not supported in firefox',

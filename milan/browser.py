@@ -3,6 +3,7 @@ import logging
 from milan.frontend.commands import frontend_function
 from milan.utils.event_router import EventRouter
 from milan.frontend.server import FrontendServer
+from milan.errors import BrowserStoppedError
 from milan.utils.misc import unique_id
 from milan.frontend import commands
 from milan.utils.url import URL
@@ -40,6 +41,7 @@ class Browser:
         )
 
         self._event_router = EventRouter()
+        self._error = None
 
     def __repr__(self):
         return f'<{self.__class__.__name__}(id={self.id})>'
@@ -53,7 +55,14 @@ class Browser:
 
         return self.animations
 
+    def _run_checks(self):
+
+        # check if browser is in an error state
+        if self._error:
+            raise self._error
+
     def stop(self):
+        self._error = BrowserStoppedError
         self._frontend_server.stop()
 
     def is_chrome(self):
@@ -64,6 +73,8 @@ class Browser:
 
     # events ##################################################################
     def await_browser_load(self, timeout=None, await_future=True):
+        self._run_checks()
+
         return self._event_router.await_event(
             name='browser_load',
             timeout=timeout,
@@ -76,6 +87,8 @@ class Browser:
             timeout=None,
             await_future=True,
     ):
+
+        self._run_checks()
 
         if url:
             return self._event_router.await_state(
@@ -95,12 +108,16 @@ class Browser:
     # window manager
     @frontend_function
     def get_window_count(self):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_manager_get_window_count_command(),
         )
 
     @frontend_function
     def split(self):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_manager_split_command(),
         )
@@ -108,18 +125,24 @@ class Browser:
     # cursor
     @frontend_function
     def show_cursor(self):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_cursor_show_command(),
         )
 
     @frontend_function
     def hide_cursor(self):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_cursor_hide_command(),
         )
 
     @frontend_function
     def cursor_is_visible(self):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_cursor_is_visible_command(),
         )
@@ -132,6 +155,8 @@ class Browser:
             animation=None,
     ):
 
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_cursor_move_to_command(
                 x=float(x),
@@ -142,6 +167,8 @@ class Browser:
 
     @frontend_function
     def move_cursor_to_home(self, animation=None):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_cursor_move_to_home_command(
                 animation=self._get_animation(animation),
@@ -150,6 +177,8 @@ class Browser:
 
     @frontend_function
     def get_cursor_position(self):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_cursor_get_position_command(),
         )
@@ -157,6 +186,8 @@ class Browser:
     # window
     @frontend_function
     def reload(self, window=0, animation=None):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_reload_command(
                 window_index=window,
@@ -166,6 +197,8 @@ class Browser:
 
     @frontend_function
     def navigate_back(self, window=0, animation=None):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_navigate_back_command(
                 window_index=window,
@@ -175,6 +208,8 @@ class Browser:
 
     @frontend_function
     def navigate_forward(self, window=0, animation=None):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_navigate_forward_command(
                 window_index=window,
@@ -185,10 +220,14 @@ class Browser:
     # window: selectors
     @frontend_function
     def await_load(self, window=0, url=''):
+        self._run_checks()
+
         raise NotImplementedError()
 
     @frontend_function
     def await_element(self, selector, window=0):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_await_element_command(
                 window_index=window,
@@ -198,6 +237,8 @@ class Browser:
 
     @frontend_function
     def await_text(self, selector, text, window=0):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_await_text_command(
                 window_index=window,
@@ -209,6 +250,8 @@ class Browser:
     # window: user input
     @frontend_function
     def click(self, selector, window=0, animation=None):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_click_command(
                 window_index=window,
@@ -219,6 +262,8 @@ class Browser:
 
     @frontend_function
     def fill(self, selector, value, window=0, animation=None):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_fill_command(
                 window_index=window,
@@ -230,6 +275,8 @@ class Browser:
 
     @frontend_function
     def check(self, selector, value=True, window=0, animation=None):
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_check_command(
                 window_index=window,
@@ -250,6 +297,8 @@ class Browser:
             animation=None,
     ):
 
+        self._run_checks()
+
         return self.evaluate(
             expression=commands.gen_window_select_command(
                 window_index=window,
@@ -265,6 +314,8 @@ class Browser:
     def navigate(self, url, window=0, animation=None):
         # TODO: add support for external sites besides 'localhost'
         # TODO: add support for cursor bootstrapping
+
+        self._run_checks()
 
         url = URL(url)
 
@@ -284,6 +335,8 @@ class Browser:
         )
 
     def navigate_to_test_application(self, *args, **kwargs):
+        self._run_checks()
+
         return self.navigate(
             url=self._frontend_server.get_test_application_url(),
             *args,
@@ -292,19 +345,31 @@ class Browser:
 
     # hooks ###################################################################
     def _navigate_browser(self, url):
+        self._run_checks()
+
         raise NotImplementedError()
 
     def resize(self, width=0, height=0):
+        self._run_checks()
+
         raise NotImplementedError()
 
     def evaluate(self, expression):
+        self._run_checks()
+
         raise NotImplementedError()
 
     def screenshot(self, path):
+        self._run_checks()
+
         raise NotImplementedError()
 
     def start_video_capturing(self, path):
+        self._run_checks()
+
         raise NotImplementedError()
 
     def stop_video_capturing(self):
+        self._run_checks()
+
         raise NotImplementedError()
