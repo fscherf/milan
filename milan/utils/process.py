@@ -106,6 +106,11 @@ class Process:
 
         return self.proc.stdin.close()
 
+    def terminate(self):
+        self.logger.debug('terminating process')
+
+        return self.proc.terminate()
+
     def kill(self):
         self.logger.debug('killing process')
 
