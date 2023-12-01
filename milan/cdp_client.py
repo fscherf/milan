@@ -317,7 +317,7 @@ class CdpClient:
             output_path,
             width=0,
             height=0,
-            fps=60,
+            fps=0,
             image_format='png',
             image_quality=100,
     ):
