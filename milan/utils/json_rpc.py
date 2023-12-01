@@ -1,5 +1,4 @@
 import concurrent
-import contextlib
 import functools
 import threading
 import logging
@@ -17,6 +16,10 @@ default_logger = logging.getLogger('milan.json-rpc')
 class JsonRpcError(Exception):
     def __init__(self, *args, json_rpc_message=None, **kwargs):
         self.json_rpc_message = json_rpc_message
+
+
+class JsonRpcStoppedError(JsonRpcError):
+    pass
 
 
 class JsonRpcMessage:
@@ -144,7 +147,7 @@ class JsonRpcClient:
     def _handle_messages(self):
         self.logger.debug('message worker started')
 
-        with contextlib.suppress(ConnectionClosedError):
+        try:
             for websocket_message in self._websocket:
                 try:
                     json_rpc_message = JsonRpcMessage(
@@ -166,6 +169,9 @@ class JsonRpcClient:
                 self._handle_json_rpc_message(
                     json_rpc_message=json_rpc_message,
                 )
+
+        except ConnectionClosedError:
+            self.stop()
 
         self.logger.debug('message worker stopped')
 
@@ -236,11 +242,19 @@ class JsonRpcClient:
         self.logger.debug('worker %s: stopped', worker_id)
 
     def stop(self):
-        self._running = False
-        self._websocket.close()
+        with self._lock:
+            self._running = False
 
-        for _ in range(self.worker_thread_count):
-            self._job_queue.put(None)
+            # cancel all pending requests
+            for future in self._pending_requests.values():
+                if future.done():
+                    continue
+
+                future.set_exception(JsonRpcStoppedError())
+
+            # stop all message worker
+            for _ in range(self.worker_thread_count):
+                self._job_queue.put(None)
 
     def send_request(self, method, params=None, await_result=True):
         message_id = self._message_id_counter.increment()
@@ -259,8 +273,21 @@ class JsonRpcClient:
             json_rpc_message.get_lazy_string(),
         )
 
-        self._pending_requests[message_id] = future
-        self._websocket.send(json_rpc_message.serialize())
+        with self._lock:
+
+            # the client was stopped while we were waiting for the lock
+            if not self._running:
+                raise JsonRpcStoppedError()
+
+            self._pending_requests[message_id] = future
+
+        try:
+            self._websocket.send(json_rpc_message.serialize())
+
+        except ConnectionClosedError:
+            self.stop()
+
+            raise
 
         if not await_result:
             return future
