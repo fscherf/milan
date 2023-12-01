@@ -113,9 +113,17 @@ class JsonRpcMessage:
 
 
 class JsonRpcClient:
-    def __init__(self, url, worker_thread_count=2, logger=default_logger):
+    def __init__(
+            self,
+            url,
+            worker_thread_count=2,
+            on_stop=None,
+            logger=default_logger,
+    ):
+
         self.url = url
         self.worker_thread_count = worker_thread_count
+        self.on_stop = on_stop
         self.logger = logger
 
         self._lock = threading.Lock()
@@ -255,6 +263,21 @@ class JsonRpcClient:
             # stop all message worker
             for _ in range(self.worker_thread_count):
                 self._job_queue.put(None)
+
+        # run on_stop hook
+        if not self.on_stop:
+            return
+
+        self.logger.debug('running on_stop hook')
+
+        try:
+            self.on_stop(self)
+
+        except Exception:
+            self.logger.exception(
+                'exception raised while running %s',
+                self.on_stop,
+            )
 
     def send_request(self, method, params=None, await_result=True):
         message_id = self._message_id_counter.increment()
