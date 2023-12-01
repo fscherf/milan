@@ -14,7 +14,15 @@ class CdpClient:
     https://chromedevtools.github.io/devtools-protocol/
     """
 
-    def __init__(self, host, port, event_router=None, logger=None):
+    def __init__(
+            self,
+            host,
+            port,
+            event_router=None,
+            on_json_rpc_client_stop=None,
+            logger=None,
+    ):
+
         self.host = host
         self.port = port
         self.event_router = event_router
@@ -24,6 +32,7 @@ class CdpClient:
             logger=logging.getLogger(f'{self.logger.name}.video-recorder'),  # NOQA
         )
 
+        self.on_json_rpc_client_stop = on_json_rpc_client_stop
         self.json_rpc_client = None
 
         self._browser_info = {}
@@ -70,6 +79,7 @@ class CdpClient:
         self.json_rpc_client = JsonRpcClient(
             url=self.get_websocket_url(),
             worker_thread_count=2,
+            on_stop=self.on_json_rpc_client_stop,
             logger=logging.getLogger(f'{self.logger.name}.json-rpc'),
         )
 
