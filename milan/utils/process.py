@@ -122,4 +122,4 @@ class Process:
         return self.proc.wait()
 
     def stop(self):
-        return self.kill()
+        return self.terminate()
