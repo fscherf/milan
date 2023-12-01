@@ -71,6 +71,7 @@ def test_video_capturing(
         milan_artifacts_directory,
 ):
 
+    from milan.utils.misc import compare_numbers
     from milan.utils.media import Video
     from milan import Chromium
 
@@ -131,16 +132,18 @@ def test_video_capturing(
     # fps
     # default values
     if fps == 0:
-        assert video.fps == {
+        expected_frame_rate = {
             'mp4': 60,
             'webm': 60,
             'gif': 24,
         }[video_format]
 
+        assert compare_numbers(expected_frame_rate, video.fps)
+
     # configured values
     # for gifs, only the default value really works
     elif video_format in ('mp4', 'webm'):
-        assert video.fps == fps
+        assert compare_numbers(fps, video.fps)
 
     # scaling
     if width:

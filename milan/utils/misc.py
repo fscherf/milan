@@ -15,6 +15,17 @@ def decode_base64(string):
     return base64.b64decode(string.encode('ascii'))
 
 
+def compare_numbers(a, b, error_in_percent=0.01):
+    """
+    compare_numbers(24, 23.976023976023978) == True
+    """
+
+    min_value = a - a * error_in_percent
+    max_value = a + a * error_in_percent
+
+    return b >= min_value and b < max_value
+
+
 def pformat_dict(data, indent=False, trim=False):
     def _trim(_data):
         for key, value in _data.items():
