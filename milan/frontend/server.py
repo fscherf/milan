@@ -64,7 +64,7 @@ class FrontendServer:
     def stop(self):
         self.logger.debug('stopping')
 
-        self.http_server.server_close()
+        self.http_server.shutdown()
 
 
 if __name__ == '__main__':
