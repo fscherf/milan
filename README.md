@@ -42,6 +42,21 @@ with Chromium.start(headless=True) as browser:
     browser.stop_video_capturing()
 ```
 
+All browser methods can also used asynchronously when running in an async
+context.
+
+```python
+from milan import Chromium, Firefox
+
+
+async with Chromium.start(headless=True) as browser:
+    await browser.resize(width=1280, height=720)
+    await browser.navigate('localhost:8080')
+    await browser.await_text('h1', 'Milan Test Application')
+    await browser.click('#submit')
+```
+
+
 ## Demos
 
 **Single Window**

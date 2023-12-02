@@ -1,3 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor
+import contextlib
+import asyncio
 import logging
 
 from milan.frontend.commands import frontend_function
@@ -10,14 +13,76 @@ from milan.utils.url import URL
 
 
 class BrowserContext:
-    def __init__(self, browser_class, *args, **kwargs):
-        self.browser = browser_class(*args, **kwargs)
+    def __init__(
+            self,
+            browser_class,
+            *args,
+            loop=None,
+            max_workers=2,
+            **kwargs,
+    ):
 
+        self._browser_class = browser_class
+        self._browser_args = args
+        self._loop = loop
+        self._max_workers = max_workers
+        self._browser_kwargs = kwargs
+
+        self._browser = None
+        self._executor = None
+
+    def _start_browser(self):
+        self._browser = self._browser_class(
+            *self._browser_args,
+            **self._browser_kwargs,
+        )
+
+    def _stop_browser(self):
+        self._browser.stop()
+
+    def __getattr__(self, name):
+        with contextlib.suppress(AttributeError):
+            return super().__getattr__(name)
+
+        attribute = getattr(self._browser, name)
+
+        if not callable(attribute):
+            return attribute
+
+        async def shim(*args, **kwargs):
+            return await self._loop.run_in_executor(
+                executor=self._executor,
+                func=attribute,
+            )
+
+        return shim
+
+    # sync API
     def __enter__(self):
-        return self.browser
+        self._start_browser()
+
+        return self._browser
 
     def __exit__(self, type, value, traceback):
-        self.browser.stop()
+        self._stop_browser()
+
+    # async API
+    async def __aenter__(self):
+        self._loop = self._loop or asyncio.get_running_loop()
+        self._executor = ThreadPoolExecutor(max_workers=self._max_workers)
+
+        await self._loop.run_in_executor(
+            executor=self._executor,
+            func=self._start_browser,
+        )
+
+        return self
+
+    async def __aexit__(self, type, value, traceback):
+        await self._loop.run_in_executor(
+            executor=self._executor,
+            func=self._stop_browser,
+        )
 
 
 class Browser:
