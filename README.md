@@ -36,6 +36,7 @@ with Chromium.start(headless=True) as browser:
     browser.click('#submit')
 
     # screenshot
+    # supported formats: png, jpeg, webp
     browser.screenshot('screenshot.png')
 
     # stop video capturing

@@ -3,7 +3,7 @@ import os
 import pytest
 
 
-@pytest.mark.parametrize('image_format', ['jpeg', 'png'])
+@pytest.mark.parametrize('image_format', ['jpeg', 'png', 'webp'])
 @pytest.mark.parametrize('image_size', ['0x0', '800x0', '0x800', '800x800'])
 @pytest.mark.parametrize('browser_name', ['chromium'])
 def test_screenshots(

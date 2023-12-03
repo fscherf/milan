@@ -196,7 +196,7 @@ class CdpBrowser(Browser):
         output_format = os.path.splitext(output_path)[1][1:]
         output_path_scaled = ''
 
-        if output_format not in ('jpeg', 'png'):
+        if output_format not in ('jpeg', 'png', 'webp'):
             raise ValueError(f'invalid output format: {output_format}')
 
         if width or height:
