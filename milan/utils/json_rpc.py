@@ -23,11 +23,6 @@ class JsonRpcStoppedError(JsonRpcError):
 
 
 class JsonRpcMessage:
-    """
-    Implements client-side JSONRPC v1
-    https://www.jsonrpc.org/specification_v1
-    """
-
     def __init__(self, payload):
         self.payload = payload
 
@@ -113,6 +108,11 @@ class JsonRpcMessage:
 
 
 class JsonRpcClient:
+    """
+    Implements client-side JSONRPC v1
+    https://www.jsonrpc.org/specification_v1
+    """
+
     def __init__(
             self,
             url,
