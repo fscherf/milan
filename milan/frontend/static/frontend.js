@@ -163,12 +163,39 @@ class BrowserWindow {
     }
 
     // browser functions ------------------------------------------------------
+    // fullscreen
+    getFullscreen = () => {
+        return this.rootElement.classList.contains('fullscreen');
+    }
+
+    setFullscreen = ({
+        fullscreen=true,
+    }={}) => {
+
+        if (fullscreen) {
+            this.rootElement.classList.add('fullscreen');
+        } else {
+            this.rootElement.classList.remove('fullscreen');
+        }
+    }
+
+    // navigation
     navigate = async ({
         url=required('url'),
         animation=true,
     }={}) => {
 
         const loadPromise = this.awaitLoad();
+
+        // in fullscreen, the address bar is not visible
+        // therefore we skip all animations
+        if (this.getFullscreen()) {
+            this._iframeNavigate({url: url});
+
+            await loadPromise;
+
+            return;
+        }
 
         await this.cursor.fill({
             elementOrSelector: this.addressBarElement,
@@ -186,7 +213,18 @@ class BrowserWindow {
     reload = async ({
         animation=true,
     }) => {
+
         const loadPromise = this.awaitLoad();
+
+        // in fullscreen, the reload button is not visible
+        // therefore we skip all animations
+        if (this.getFullscreen()) {
+            this._iframeReload();
+
+            await loadPromise;
+
+            return;
+        }
 
         await this.cursor.click({
             elementOrSelector: this.reloadElement,
@@ -203,7 +241,18 @@ class BrowserWindow {
     navigateBack = async ({
         animation=true,
     }) => {
+
         const loadPromise = this.awaitLoad();
+
+        // in fullscreen, the back button is not visible
+        // therefore we skip all animations
+        if (this.getFullscreen()) {
+            this._iframeBack();
+
+            await loadPromise;
+
+            return;
+        }
 
         await this.cursor.click({
             elementOrSelector: this.backElement,
@@ -220,7 +269,18 @@ class BrowserWindow {
     navigateForward = async ({
         animation=true,
     }) => {
+
         const loadPromise = this.awaitLoad();
+
+        // in fullscreen, the forward button is not visible
+        // therefore we skip all animations
+        if (this.getFullscreen()) {
+            this._iframeForward();
+
+            await loadPromise;
+
+            return;
+        }
 
         await this.cursor.click({
             elementOrSelector: this.forwardElement,

@@ -260,6 +260,7 @@ class Browser:
             ),
         )
 
+    # window
     @frontend_function
     def navigate_back(self, window=0, animation=None):
         self._run_checks()
@@ -279,6 +280,27 @@ class Browser:
             expression=commands.gen_window_navigate_forward_command(
                 window_index=window,
                 animation=self._get_animation(animation),
+            ),
+        )
+
+    @frontend_function
+    def get_fullscreen(self, window=0):
+        self._run_checks()
+
+        return self.evaluate(
+            expression=commands.gen_window_get_fullscreen_command(
+                window_index=window,
+            ),
+        )
+
+    @frontend_function
+    def set_fullscreen(self, window=0, fullscreen=True):
+        self._run_checks()
+
+        return self.evaluate(
+            expression=commands.gen_window_set_fullscreen_command(
+                window_index=window,
+                fullscreen=fullscreen,
             ),
         )
 

@@ -163,6 +163,15 @@ main > .grid {
     border: 0;
 }
 
+/* fullscreen */
+.browser-window.fullscreen .tab-panes .tab-pane {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
 /* browser-window / top-bar ------------------------------------------------ */
 .top-bar {
     background-color: var(--color-grey-2);

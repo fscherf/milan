@@ -195,6 +195,27 @@ def gen_window_reload_command(window_index, animation):
     )
 
 
+def gen_window_get_fullscreen_command(window_index):
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='getFullscreen',
+        ),
+    )
+
+
+def gen_window_set_fullscreen_command(window_index, fullscreen):
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='setFullscreen',
+        ),
+        args={
+            'fullscreen': fullscreen,
+        },
+    )
+
+
 # window: selectors
 def gen_window_await_element_command(window_index, selector):
     return _gen_frontend_run_command(
