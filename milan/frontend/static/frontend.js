@@ -56,17 +56,17 @@ class BrowserWindow {
 
         // setup back
         this.backElement.onclick = () => {
-            this.iframeElement.contentWindow.history.back();
+            this._iframeBack();
         };
 
         // setup forward
         this.forwardElement.onclick = () => {
-            this.iframeElement.contentWindow.history.forward();
+            this._iframeForward();
         };
 
         // setup reload
         this.reloadElement.onclick = () => {
-            this.iframeElement.contentDocument.location.reload();
+            this._iframeReload();
         };
 
         // setup address-bar
@@ -75,7 +75,7 @@ class BrowserWindow {
         };
 
         this.addressBarElement.onchange = () => {
-            this._setUrl({url: this.addressBarElement.value});
+            this._iframeNavigate({url: this.addressBarElement.value});
             this.addressBarElement.blur();
         };
 
@@ -99,10 +99,10 @@ class BrowserWindow {
             this._updateIframeData();
         }, IFRAME_UPDATE_INTERVAL);
 
-        this._setUrl({url: initialUrl});
+        this._iframeNavigate({url: initialUrl});
     }
 
-    _setUrl = ({
+    _iframeNavigate = ({
         url=required('url'),
     }={}) => {
         // Sets the URL shown in the iframe, and cares about missing
@@ -118,6 +118,18 @@ class BrowserWindow {
         }
 
         this.iframeElement.src = url;
+    }
+
+    _iframeBack = () => {
+        this.iframeElement.contentWindow.history.back();
+    }
+
+    _iframeForward = () => {
+        this.iframeElement.contentWindow.history.forward();
+    }
+
+    _iframeReload = () => {
+        this.iframeElement.contentDocument.location.reload();
     }
 
     _updateIframeData = () => {
