@@ -24,6 +24,7 @@ dev = [
   "lona==1.16",
   "lona-picocss==0.4.3",
   "rlpython",
+  "playwright",
 ]
 
 test = [

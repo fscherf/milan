@@ -45,6 +45,11 @@ frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	python -m milan.frontend.server --port=8080
 
+# browser #####################################################################
+install-browser: | $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && \
+	playwright install $(args)
+
 chromium: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	$(PYTHON) scripts/run-browser.py --browser=chromium $(args)
