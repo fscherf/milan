@@ -36,23 +36,29 @@ def _discover_executables():
 
     logger.debug('searching for a playwright installation')
 
-    abs_local_playwright_root = os.path.expanduser(LOCAL_PLAYWRIGHT_ROOT)
+    if 'MILAN_IGNORE_PLAYWRIGHT' in os.environ:
+        logger.debug('ignoring playwright')
 
-    if os.path.exists(abs_local_playwright_root):
-        logger.debug(
-            'local playwright installation found: %s',
-            abs_local_playwright_root,
-        )
+    else:
+        logger.debug('searching for a playwright installation')
 
-        playwright_root = abs_local_playwright_root
+        abs_local_playwright_root = os.path.expanduser(LOCAL_PLAYWRIGHT_ROOT)
 
-    elif os.path.exists(GLOBAL_PLAYWRIGHT_ROOT):
-        logger.debug(
-            'global playwright installation found: %s',
-            GLOBAL_PLAYWRIGHT_ROOT,
-        )
+        if os.path.exists(abs_local_playwright_root):
+            logger.debug(
+                'local playwright installation found: %s',
+                abs_local_playwright_root,
+            )
 
-        playwright_root = GLOBAL_PLAYWRIGHT_ROOT
+            playwright_root = abs_local_playwright_root
+
+        elif os.path.exists(GLOBAL_PLAYWRIGHT_ROOT):
+            logger.debug(
+                'global playwright installation found: %s',
+                GLOBAL_PLAYWRIGHT_ROOT,
+            )
+
+            playwright_root = GLOBAL_PLAYWRIGHT_ROOT
 
     # chromium ################################################################
     logger.debug('searching for chromium executable')
