@@ -1,9 +1,9 @@
 import pytest
 
 
-@pytest.mark.parametrize('browser_name', ['chromium'])
+@pytest.mark.parametrize('browser_name', ['chromium', 'firefox'])
 def test_form_inputs(browser_name):
-    from milan import Chromium
+    from milan import Chromium, Firefox
 
     def await_element_id(browser, element_id):
         browser.await_text(selector='#element-id', text=element_id)
@@ -13,6 +13,7 @@ def test_form_inputs(browser_name):
 
     browser_class = {
         'chromium': Chromium,
+        'firefox': Firefox,
     }[browser_name]
 
     with browser_class.start() as browser:

@@ -2,12 +2,13 @@ import pytest
 
 
 # sync API ####################################################################
-@pytest.mark.parametrize('browser_name', ['chromium'])
+@pytest.mark.parametrize('browser_name', ['chromium', 'firefox'])
 def test_sync_start(browser_name):
-    from milan import Chromium, BrowserStoppedError
+    from milan import Chromium, Firefox, BrowserStoppedError
 
     browser_class = {
         'chromium': Chromium,
+        'firefox': Firefox,
     }[browser_name]
 
     browser = browser_class()
@@ -20,12 +21,13 @@ def test_sync_start(browser_name):
         browser.get_window_count()
 
 
-@pytest.mark.parametrize('browser_name', ['chromium'])
+@pytest.mark.parametrize('browser_name', ['chromium', 'firefox'])
 def test_sync_start_context_manager(browser_name):
-    from milan import Chromium, BrowserStoppedError
+    from milan import Chromium, Firefox, BrowserStoppedError
 
     browser_class = {
         'chromium': Chromium,
+        'firefox': Firefox,
     }[browser_name]
 
     _browser = None
@@ -39,12 +41,13 @@ def test_sync_start_context_manager(browser_name):
         _browser.get_window_count()
 
 
-@pytest.mark.parametrize('browser_name', ['chromium'])
+@pytest.mark.parametrize('browser_name', ['chromium', 'firefox'])
 def test_sync_unexpected_stop(browser_name):
-    from milan import Chromium, BrowserStoppedError
+    from milan import Chromium, Firefox, BrowserStoppedError
 
     browser_class = {
         'chromium': Chromium,
+        'firefox': Firefox,
     }[browser_name]
 
     with browser_class.start() as browser:
@@ -58,13 +61,14 @@ def test_sync_unexpected_stop(browser_name):
 
 
 # async API ###################################################################
-@pytest.mark.parametrize('browser_name', ['chromium'])
+@pytest.mark.parametrize('browser_name', ['chromium', 'firefox'])
 @pytest.mark.asyncio
 async def test_async_start_context_manager(browser_name):
-    from milan import Chromium, BrowserStoppedError
+    from milan import Chromium, Firefox, BrowserStoppedError
 
     browser_class = {
         'chromium': Chromium,
+        'firefox': Firefox,
     }[browser_name]
 
     _browser = None
@@ -78,13 +82,14 @@ async def test_async_start_context_manager(browser_name):
         await _browser.get_window_count()
 
 
-@pytest.mark.parametrize('browser_name', ['chromium'])
+@pytest.mark.parametrize('browser_name', ['chromium', 'firefox'])
 @pytest.mark.asyncio
 async def test_async_unexpected_stop(browser_name):
-    from milan import Chromium, BrowserStoppedError
+    from milan import Chromium, Firefox, BrowserStoppedError
 
     browser_class = {
         'chromium': Chromium,
+        'firefox': Firefox,
     }[browser_name]
 
     async with browser_class.start() as browser:
