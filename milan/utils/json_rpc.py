@@ -4,6 +4,7 @@ import threading
 import logging
 import queue
 import json
+import os
 
 from websockets.exceptions import ConnectionClosedError
 from websockets.sync.client import connect
@@ -29,10 +30,13 @@ class JsonRpcMessage:
         if isinstance(self.payload, str):
             self.payload = json.loads(self.payload)
 
-    def __str__(self, trim=True):
+    def __str__(self, trim=None):
+        if trim is None:
+            trim = 'MILAN_DEBUG' not in os.environ
+
         return (
             f"<JsonRpcMessage(type={self.type.upper()}, id={self.id!r}>\n"
-            f"{pformat_dict(data=self.payload, indent=True, trim=True)}\n"
+            f"{pformat_dict(data=self.payload, indent=True, trim=trim)}\n"
             f"</JsonRpcMessage>"
         )
 
@@ -104,7 +108,10 @@ class JsonRpcMessage:
             )
 
     def get_lazy_string(self):
-        return LazyString(obj=self, indent=True)
+        return LazyString(
+            obj=self,
+            indent=True,
+        )
 
 
 class JsonRpcClient:
