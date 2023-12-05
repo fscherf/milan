@@ -4,7 +4,9 @@ PYTHON_ENV=env/$(shell hostname)/$(PYTHON)
 DOC_ROOT=doc
 
 .PHONY: milan build clean fullclean \
-	application chromium headless-chromium firefox headless-firefox demos
+	test ci-test frontend \
+	install-browser chromium headless-chromium firefox headless-firefox \
+	demos
 
 
 # docker ######################################################################
