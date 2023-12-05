@@ -1,4 +1,4 @@
-from milan.executables import find_firefox_executable
+from milan.executables import get_executable
 from milan.cdp_browser import CdpBrowser
 
 
@@ -13,7 +13,7 @@ class Firefox(CdpBrowser):
     ):
 
         if not executable:
-            executable = find_firefox_executable()
+            executable = get_executable('firefox')
 
         super().__init__(
             *args,

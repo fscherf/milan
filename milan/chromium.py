@@ -1,6 +1,6 @@
 import webbrowser
 
-from milan.executables import find_chromium_executable
+from milan.executables import get_executable
 from milan.cdp_browser import CdpBrowser
 
 
@@ -16,7 +16,7 @@ class Chromium(CdpBrowser):
     ):
 
         if not executable:
-            executable = find_chromium_executable()
+            executable = get_executable('chromium')
 
         super().__init__(
             *args,

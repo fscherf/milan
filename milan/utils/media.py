@@ -3,7 +3,7 @@ import logging
 import json
 import os
 
-from milan.executables import find_ffprobe_executable, find_ffmpeg_executable
+from milan.executables import get_executable
 from milan.utils.process import Process
 
 default_logger = logging.getLogger('milan.media')
@@ -28,7 +28,7 @@ class Media:
             raise FileNotFoundError(self.input_path)
 
         # run ffprobe
-        self.ffprobe_path = find_ffprobe_executable()
+        self.ffprobe_path = get_executable('ffprobe')
 
         self.ffprobe_command = [
             self.ffprobe_path,
@@ -107,7 +107,7 @@ def scale_image(
 ):
 
     if not ffmpeg_path:
-        ffmpeg_path = find_ffmpeg_executable()
+        ffmpeg_path = get_executable('ffmpeg')
 
     if not width and not height:
         raise ValueError('either width, height, or both have to be set')

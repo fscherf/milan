@@ -1,7 +1,7 @@
 import logging
 import os
 
-from milan.executables import find_ffmpeg_executable
+from milan.executables import get_executable
 from milan.utils.process import Process
 from milan.utils.misc import unique_id
 
@@ -16,7 +16,7 @@ class VideoRecorder:
             )
 
         # internal state
-        self._ffmpeg_path = find_ffmpeg_executable()
+        self._ffmpeg_path = get_executable('ffmpeg')
         self._ffmpeg_process = None
         self._output_path = ''
         self._output_format = ''
