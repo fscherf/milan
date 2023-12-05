@@ -1,22 +1,39 @@
 import os
 
-PLAYWRIGHT_ROOT = '/ms-playwright'
 FFMPEG_EXECUTABLE_PATH = '/usr/bin/ffmpeg'
 FFPROBE_EXECUTABLE_PATH = '/usr/bin/ffprobe'
 CHROMIUM_EXECUTABLE_PATH = '/usr/bin/chromium'
 FIREFOX_EXECUTABLE_PATH = '/usr/bin/firefox'
 
 
-def _running_in_playwright_docker_image():
-    return os.path.isdir(PLAYWRIGHT_ROOT)
+def _get_playwright_root():
+
+    # local installation
+    # ~/.cache/ms-playwright
+    path = os.path.expanduser('~/.cache/ms-playwright')
+
+    if os.path.exists(path):
+        return path
+
+    # global installation (docker)
+    # /ms-playwright
+    path = '/ms-playwright'
+
+    if os.path.exists(path):
+        return path
+
+    # playwright is not installed
+    return ''
 
 
 def _get_playwright_distribution_dir(prefix):
-    for name in os.listdir(PLAYWRIGHT_ROOT):
-        if name.startswith(prefix):
-            return os.path.join(PLAYWRIGHT_ROOT, name)
+    playwright_root = _get_playwright_root()
 
-    raise FileNotFoundError(os.path.join(PLAYWRIGHT_ROOT, f'{prefix}*'))
+    for name in os.listdir(playwright_root):
+        if name.startswith(prefix):
+            return os.path.join(playwright_root, name)
+
+    raise FileNotFoundError(os.path.join(playwright_root, f'{prefix}*'))
 
 
 def find_ffmpeg_executable():
@@ -38,7 +55,7 @@ def find_chromium_executable():
         raise FileNotFoundError('no chromium executable found')
 
     # OS
-    if not _running_in_playwright_docker_image():
+    if not _get_playwright_root():
         if not os.path.exists(CHROMIUM_EXECUTABLE_PATH):
             _not_found()
 
@@ -59,7 +76,7 @@ def find_firefox_executable():
         raise FileNotFoundError('no firefox executable found')
 
     # OS
-    if not _running_in_playwright_docker_image():
+    if not _get_playwright_root():
         if not os.path.exists(FIREFOX_EXECUTABLE_PATH):
             _not_found()
 
