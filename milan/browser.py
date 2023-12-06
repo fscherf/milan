@@ -430,6 +430,9 @@ class Browser:
             **kwargs,
         )
 
+    def reload_frontend(self):
+        self._navigate_browser(url=self._frontend_server.get_url())
+
     # hooks ###################################################################
     def _navigate_browser(self, url):
         self._run_checks()

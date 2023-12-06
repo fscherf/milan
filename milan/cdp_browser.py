@@ -135,7 +135,7 @@ class CdpBrowser(Browser):
         )
 
         # navigate to frontend
-        self._navigate_browser(url=self._frontend_server.get_url())
+        self.reload_frontend()
 
         # finish
         self.logger.debug('browser started')
