@@ -36,6 +36,8 @@ class CdpClient:
         self.json_rpc_client = None
 
         self._browser_info = {}
+        self._top_frame_id = ''
+        self._execution_contexts = {}
 
         if not self.logger:
             self.logger = logging.getLogger(f'milan.cdp-client.{unique_id()}')
@@ -94,6 +96,14 @@ class CdpClient:
 
         self.json_rpc_client.subscribe(
             methods=[
+                'Runtime.executionContextCreated',
+                'Runtime.executionContextDestroyed',
+            ],
+            handler=self._handle_runtime_execution_context_events,
+        )
+
+        self.json_rpc_client.subscribe(
+            methods=[
                 'Page.screencastFrame',
             ],
             handler=self._handle_screen_cast_frame,
@@ -101,6 +111,10 @@ class CdpClient:
 
         # enable events
         self.page_enable()
+        self.runtime_enable()
+
+        # find top frame id
+        self._top_frame_id = self._get_top_frame_id()
 
     def stop(self):
         self.logger.debug('stopping')
@@ -109,6 +123,10 @@ class CdpClient:
 
         if self.json_rpc_client:
             self.json_rpc_client.stop()
+
+    # helper
+    def _get_top_frame_id(self):
+        return self.page_get_frame_tree()['frameTree']['frame']['id']
 
     # REST API ################################################################
     def get_browser_info(self, refresh=False):
@@ -167,6 +185,7 @@ class CdpClient:
                 'expression': expression,
                 'awaitPromise': await_promise,
                 'replMode': repl_mode,
+                'contextId': self._execution_contexts[self._top_frame_id],
             },
         )
 
@@ -217,13 +236,11 @@ class CdpClient:
         https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-navigate
         """
 
-        frame_id = self.page_get_frame_tree()['frameTree']['frame']['id']
-
         return self.json_rpc_client.send_request(
             method='Page.navigate',
             params={
                 'url': url,
-                'frameId': frame_id,
+                'frameId': self._top_frame_id,
                 'transitionType': 'link',
             },
         )
@@ -311,6 +328,24 @@ class CdpClient:
 
         elif method in ('Page.frameNavigated', 'Page.navigatedWithinDocument'):
             self.event_router.fire_event('browser_navigated')
+
+    def _handle_runtime_execution_context_events(self, json_rpc_message):
+        method = json_rpc_message.method
+
+        if method == 'Runtime.executionContextCreated':
+            frame_id = json_rpc_message.params['context']['auxData']['frameId']
+            context_id = json_rpc_message.params['context']['id']
+
+            self._execution_contexts[frame_id] = context_id
+
+        elif method == 'Runtime.executionContextDestroyed':
+            context_id = json_rpc_message.params['executionContextId']
+
+            for key, value in self._execution_contexts.items():
+                if value == context_id:
+                    self._execution_contexts.pop(key, None)
+
+                    break
 
     # video capturing #########################################################
     def _handle_screen_cast_frame(self, json_rpc_message):
