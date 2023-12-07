@@ -1,3 +1,4 @@
+import functools
 import json
 import os
 
@@ -52,11 +53,12 @@ def parse_frontend_return_value(return_value):
     return return_value.get('returnValue', None)
 
 
-def frontend_function(function):
-    def decorator(*args, **kwargs):
-        return parse_frontend_return_value(function(*args, **kwargs))
+def frontend_function(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return parse_frontend_return_value(func(*args, **kwargs))
 
-    return decorator
+    return wrapper
 
 
 # misc ########################################################################
