@@ -205,6 +205,9 @@ class JsonRpcClient:
 
                 return
 
+            if future.done():
+                return
+
             if json_rpc_message.type == 'response':
                 future.set_result(result=json_rpc_message.result)
 
