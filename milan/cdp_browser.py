@@ -3,17 +3,25 @@ import logging
 import time
 import os
 
+from websockets import ConnectionClosedError
+
+from milan.utils.json_rpc import JsonRpcStoppedError
+from milan.browser import Browser, browser_function
 from milan.utils.reverse_proxy import ReverseProxy
 from milan.utils.misc import retry, unique_id
 from milan.errors import BrowserStoppedError
 from milan.utils.media import scale_image
 from milan.utils.process import Process
 from milan.cdp_client import CdpClient
-from milan.browser import Browser
 from milan.utils.url import URL
 
 
 class CdpBrowser(Browser):
+    TRANSLATE_ERRORS = {
+        ConnectionClosedError: BrowserStoppedError,
+        JsonRpcStoppedError: BrowserStoppedError,
+    }
+
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -157,32 +165,30 @@ class CdpBrowser(Browser):
         self.logger.debug('stopped')
 
     # browser hooks ###########################################################
+    @browser_function
     def _navigate_browser(self, url):
-        self._run_checks()
-
         future = self.await_browser_load(await_future=False)
 
         self.cdp_client.page_navigate(url=URL.normalize(url))
 
         future.result()
 
+    @browser_function
     def evaluate(self, expression):
-        self._run_checks()
-
         return self.cdp_client.runtime_evaluate(
             expression=expression,
             await_promise=True,
             repl_mode=False,
         )
 
+    @browser_function
     def resize(self, width, height):
-        self._run_checks()
-
         return self.cdp_client.emulation_set_device_metrics_override(
             width=width,
             height=height,
         )
 
+    @browser_function
     def screenshot(
             self,
             output_path,
@@ -190,8 +196,6 @@ class CdpBrowser(Browser):
             width=0,
             height=0,
     ):
-
-        self._run_checks()
 
         output_format = os.path.splitext(output_path)[1][1:]
         output_path_scaled = ''
@@ -219,6 +223,7 @@ class CdpBrowser(Browser):
 
             os.unlink(output_path)
 
+    @browser_function
     def start_video_capturing(
             self,
             output_path,
@@ -228,8 +233,6 @@ class CdpBrowser(Browser):
             image_format='png',
             image_quality=100,
     ):
-
-        self._run_checks()
 
         if self.is_firefox():
             raise NotImplementedError(
@@ -245,9 +248,8 @@ class CdpBrowser(Browser):
             image_quality=image_quality,
         )
 
+    @browser_function
     def stop_video_capturing(self):
-        self._run_checks()
-
         if self.is_firefox():
             raise NotImplementedError(
                 'CDP based video recording is not supported in firefox',
