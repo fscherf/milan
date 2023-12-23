@@ -15,6 +15,7 @@ _executables_discovered = False
 _executables = {
     'chromium': None,
     'firefox': None,
+    'webkit': None,
     'ffmpeg': None,
     'ffprobe': None,
 }
@@ -127,6 +128,30 @@ def _discover_executables():
     # not found
     if not _executables['firefox']:
         logger.debug('no firefox executable found')
+
+    # webkit ##################################################################
+    logger.debug('searching for webkit executable')
+
+    # playwright
+    if playwright_root:
+        playwright_distribution_dir = _get_playwright_distribution_dir(
+            playwright_root=playwright_root,
+            prefix='webkit-',
+        )
+
+        path = os.path.join(playwright_distribution_dir, 'pw_run.sh')
+
+        if os.path.exists(path):
+            logger.debug(
+                'webkit executable in playwright installation found: %s',
+                path,
+            )
+
+        _executables['webkit'] = path
+
+    # not found
+    if not _executables['webkit']:
+        logger.debug('no webkit executable found')
 
     # ffmpeg ##################################################################
     logger.debug('searching for ffmpeg executable')
