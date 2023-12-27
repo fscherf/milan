@@ -82,15 +82,14 @@ class Process:
             stderr=subprocess.STDOUT,
         )
 
-        # start stdout/stderr reader thread
+        # start process handling thread
         threading.Thread(
-            target=self._read_stdout,
+            target=self._handle_process,
             name=f'{self.logger.name}.stdout',
-            args=[self.proc.stdout],
         ).start()
 
-    def _read_stdout(self, pipe):
-        for line_bytes in pipe:
+    def _handle_process(self):
+        for line_bytes in self.proc.stdout:
             line = line_bytes.decode().strip()
 
             if not line:
