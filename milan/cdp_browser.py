@@ -1,5 +1,4 @@
 from tempfile import TemporaryDirectory
-import logging
 import time
 import os
 
@@ -98,7 +97,7 @@ class CdpBrowser(Browser):
             command=self.browser_command,
             on_stdout_line=self._find_devtools_debug_port,
             on_stop=self._handle_browser_process_stop,
-            logger=logging.getLogger(f'{self.logger.name}.browser'),
+            logger=self._get_sub_logger('browser'),
         )
 
         # wait for devtools debug port to open
@@ -120,7 +119,7 @@ class CdpBrowser(Browser):
                 port=self.reverse_proxy_port,
                 remote_host='127.0.0.1',
                 remote_port=self.debug_port,
-                logger=logging.getLogger(f'{self.logger.name}.reverse-proxy'),
+                logger=self._get_sub_logger('reverse-proxy'),
             )
 
         # HACK: prevent race conditions between non-headless chrome and X11
@@ -139,7 +138,7 @@ class CdpBrowser(Browser):
             port=self.debug_port,
             event_router=self._event_router,
             on_json_rpc_client_stop=self._handle_json_rpc_client_stop,
-            logger=logging.getLogger(f'{self.logger.name}.cdp-client'),
+            logger=self._get_sub_logger('cdp-client'),
         )
 
         # navigate to frontend
