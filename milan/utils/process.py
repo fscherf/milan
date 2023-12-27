@@ -17,6 +17,7 @@ class Process:
             command,
             name='',
             on_stdout_line=None,
+            capture_stdout=True,
             on_stop=None,
             open_fds=(),
             logger=None,
@@ -25,6 +26,7 @@ class Process:
         self.command = command
         self.name = name
         self.on_stdout_line = on_stdout_line
+        self.capture_stdout = capture_stdout
         self.on_stop = on_stop
         self.logger = logger
 
@@ -75,12 +77,21 @@ class Process:
         # start process
         self.logger.debug(f"starting {' '.join(self.command)}")
 
-        self.proc = subprocess.Popen(
-            args=self.command,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
+        popen_kwargs = {
+            'args': self.command,
+        }
+
+        if self.capture_stdout:
+            popen_kwargs.update({
+                'stdin': subprocess.PIPE,
+                'stdout': subprocess.PIPE,
+                'stderr': subprocess.STDOUT,
+            })
+
+        elif self.on_stdout_line:
+            self.logger.warning('`on_stdout_line` has no effect if `capture_stdout` is disabled')
+
+        self.proc = subprocess.Popen(**popen_kwargs)
 
         # start process handling thread
         threading.Thread(
@@ -89,31 +100,32 @@ class Process:
         ).start()
 
     def _handle_process(self):
-        for line_bytes in self.proc.stdout:
-            line = line_bytes.decode().strip()
+        if self.capture_stdout:
+            for line_bytes in self.proc.stdout:
+                line = line_bytes.decode().strip()
 
-            if not line:
-                continue
+                if not line:
+                    continue
 
-            self.logger.debug(line)
+                self.logger.debug(line)
 
-            if not self.on_stdout_line:
-                continue
+                if not self.on_stdout_line:
+                    continue
 
-            try:
-                self.on_stdout_line(line)
+                try:
+                    self.on_stdout_line(line)
 
-            except Exception:
-                self.logger.exception(
-                    'exception raised while running %s',
-                    self.on_stdout_line,
-                )
-
-        # process stopped
-        self.logger.debug('process stopped')
+                except Exception:
+                    self.logger.exception(
+                        'exception raised while running %s',
+                        self.on_stdout_line,
+                    )
 
         # read the process exit code to prevent zombie processes
         self.wait()
+
+        # process stopped
+        self.logger.debug('process stopped')
 
         # close fifos
         if self.fifo_root:
