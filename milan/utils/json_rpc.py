@@ -6,7 +6,7 @@ import queue
 import json
 import os
 
-from websockets.exceptions import ConnectionClosedError
+from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 from websockets.sync.client import connect
 
 from milan.utils.misc import AtomicCounter, LazyString, pformat_dict
@@ -21,6 +21,17 @@ class JsonRpcError(Exception):
 
 class JsonRpcStoppedError(JsonRpcError):
     pass
+
+
+class JsonRpcTransport:
+    def read_message(self):
+        raise NotImplementedError
+
+    def write_message(self, message):
+        raise NotImplementedError
+
+    def stop(self):
+        pass
 
 
 class JsonRpcMessage:
@@ -122,13 +133,13 @@ class JsonRpcClient:
 
     def __init__(
             self,
-            url,
+            transport,
             worker_thread_count=2,
             on_stop=None,
             logger=default_logger,
     ):
 
-        self.url = url
+        self.transport = transport
         self.worker_thread_count = worker_thread_count
         self.on_stop = on_stop
         self.logger = logger
@@ -138,11 +149,6 @@ class JsonRpcClient:
         self._message_id_counter = AtomicCounter()
         self._pending_requests = {}
         self._notification_handler = {}
-
-        # connect websocket
-        self.logger.debug('connecting to %s', self.url)
-
-        self._websocket = connect(self.url)
 
         # start receiver thread
         threading.Thread(target=self._handle_messages).start()
@@ -157,21 +163,23 @@ class JsonRpcClient:
             ).start()
 
     def __repr__(self):
-        return 'f<JsonRpcClient({self.url=}, {self.worker_thread_count=})>'
+        return f'<JsonRpcClient({self.transport=}, {self.worker_thread_count=})>'
 
     def _handle_messages(self):
         self.logger.debug('message worker started')
 
-        try:
-            for websocket_message in self._websocket:
+        while True:
+            try:
+                message = self.transport.read_message()
+
                 try:
                     json_rpc_message = JsonRpcMessage(
-                        payload=websocket_message,
+                        payload=message,
                     )
 
                 except JsonRpcError:
                     self.logger.exception(
-                        'exception raised while reading websocket message',
+                        'exception raised while reading message from transport',
                     )
 
                     continue
@@ -185,8 +193,8 @@ class JsonRpcClient:
                     json_rpc_message=json_rpc_message,
                 )
 
-        except ConnectionClosedError:
-            self.stop()
+            except JsonRpcStoppedError:
+                break
 
         self.logger.debug('message worker stopped')
 
@@ -274,6 +282,16 @@ class JsonRpcClient:
             for _ in range(self.worker_thread_count):
                 self._job_queue.put(None)
 
+        # stop transport
+        try:
+            self.transport.stop()
+
+        except Exception:
+            self.logger.exception(
+                'exception raised while running %s',
+                self.transport.stop,
+            )
+
         # run on_stop hook
         if not self.on_stop:
             return
@@ -315,9 +333,9 @@ class JsonRpcClient:
             self._pending_requests[message_id] = future
 
         try:
-            self._websocket.send(json_rpc_message.serialize())
+            self.transport.write_message(json_rpc_message.serialize())
 
-        except ConnectionClosedError:
+        except JsonRpcStoppedError:
             self.stop()
 
             raise
@@ -339,3 +357,30 @@ class JsonRpcClient:
                 self._notification_handler[method].append(handler)
 
         self.logger.debug('%s subscribed to %s', handler, methods)
+
+
+class JsonRpcWebsocketTransport(JsonRpcTransport):
+    def __init__(self, url):
+        self.url = url
+
+        self._websocket = connect(self.url)
+
+    def __repr__(self):
+        return f'<JsonRpcWebsocketTransport({self.url=})>'
+
+    def read_message(self):
+        try:
+            return self._websocket.recv()
+
+        except (ConnectionClosedError, ConnectionClosedOK) as exception:
+            raise JsonRpcStoppedError from exception
+
+    def write_message(self, message):
+        try:
+            self._websocket.send(message)
+
+        except (ConnectionClosedError, ConnectionClosedOK) as exception:
+            raise JsonRpcStoppedError from exception
+
+    def stop(self):
+        self._websocket.close()

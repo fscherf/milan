@@ -2,10 +2,10 @@ import logging
 import time
 import os
 
+from milan.utils.json_rpc import JsonRpcClient, JsonRpcWebsocketTransport
 from milan.utils.misc import decode_base64, retry, unique_id
 from milan.utils.event_router import EventRouter
 from milan.video_recorder import VideoRecorder
-from milan.utils.json_rpc import JsonRpcClient
 from milan.utils.http import http_json_request
 
 
@@ -78,8 +78,12 @@ class CdpClient:
         )
 
         # setup JsonRpcClient
-        self.json_rpc_client = JsonRpcClient(
+        self.json_rpc_transport = JsonRpcWebsocketTransport(
             url=self.get_websocket_url(),
+        )
+
+        self.json_rpc_client = JsonRpcClient(
+            self.json_rpc_transport,
             worker_thread_count=2,
             on_stop=self.on_json_rpc_client_stop,
             logger=logging.getLogger(f'{self.logger.name}.json-rpc'),
