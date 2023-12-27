@@ -312,3 +312,5 @@ tags
 # End of https://www.toptal.com/developers/gitignore/api/python,vim,emacs,eclipse
 /envs/
 /tests/artifacts/
+/playwright-video/*
+/playwright.log

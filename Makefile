@@ -1,11 +1,12 @@
 SHELL=/bin/bash
 PYTHON=python3.11
-PYTHON_ENV=env/$(shell hostname)/$(PYTHON)
+PYTHON_ENV=env
 DOC_ROOT=doc
 
 .PHONY: milan build clean fullclean \
 	test ci-test frontend \
-	install-browser chromium headless-chromium firefox headless-firefox \
+	playwright-install playwright-browser \
+	chromium headless-chromium firefox headless-firefox \
 	demos
 
 
@@ -47,11 +48,16 @@ frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	python -m milan.frontend.server --port=8080
 
-# browser #####################################################################
-install-browser: | $(PYTHON_ENV)
+# playwright ##################################################################
+playwright-install: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	playwright install $(args)
 
+playwright-browser: | $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && \
+	$(PYTHON) scripts/run-playwright.py
+
+# browser #####################################################################
 chromium: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	$(PYTHON) scripts/run-browser.py --browser=chromium $(args)
