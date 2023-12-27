@@ -5,7 +5,8 @@ import logging
 import shlex
 import os
 
-from milan.utils.misc import unique_id
+from milan.utils.misc import unique_id, retry
+from milan.utils.stream import Stream
 
 PASS_FDS_PATH = os.path.join(os.path.dirname(__file__), 'pass-fds.sh')
 
@@ -133,6 +134,31 @@ class Process:
                 'exception raised while running %s',
                 self.on_stop,
             )
+
+    def get_readable_stream(self, fd):
+        return Stream.get_readable_stream(
+            path=os.path.join(self.fifo_root.name, str(fd)),
+        )
+
+    def get_writable_stream(self, fd):
+        # To open the writable side of a FIFO in nonblocking mode, the readable
+        # side has to be open first. We don't get notified when the readable
+        # side was open, so we retry a few times.
+        #
+        # "A process can open a FIFO in nonblocking mode. In this case, opening
+        # for read-only succeeds even if no one has opened on the write side
+        # yet and opening for write-only fails with ENXIO (no such device or
+        # address) unless the other end has already been opened."
+        #
+        # (man 7 fifo)
+
+        @retry
+        def _get_stream():
+            return Stream.get_writable_stream(
+                path=os.path.join(self.fifo_root.name, str(fd)),
+            )
+
+        return _get_stream()
 
     def stdin_write(self, data):
         self.logger.debug('writing %s bytes to stdin', len(data))
