@@ -1,9 +1,13 @@
 import subprocess
 import threading
+import tempfile
 import logging
 import shlex
+import os
 
 from milan.utils.misc import unique_id
+
+PASS_FDS_PATH = os.path.join(os.path.dirname(__file__), 'pass-fds.sh')
 
 
 class Process:
@@ -13,6 +17,7 @@ class Process:
             name='',
             on_stdout_line=None,
             on_stop=None,
+            open_fds=(),
             logger=None,
     ):
 
@@ -23,6 +28,7 @@ class Process:
         self.logger = logger
 
         self.id = unique_id()
+        self.fifo_root = None
 
         if not self.logger:
             self.logger = logging.getLogger(f'milan.process.{self.id}')
@@ -36,6 +42,34 @@ class Process:
         # find name
         if not self.name:
             self.name = [i for i in self.command[0].split('/') if i][-1]
+
+        # setup additional fds
+        if open_fds:
+            # subprocess.Popen's pass_fds does not support fd mapping, as it
+            # passes the parent process's fd numbers to the child process
+            # as-is. Mapping these fds to arbitrary numbers is not directly
+            # possible. As a workaround, we use a temp dir, which holds fifos
+            # as pipe rendezvous points, and a bash script to open the fifos
+            # on the correct fds on the child process.
+
+            self.fifo_root = tempfile.TemporaryDirectory()
+            fd_args = []
+
+            for fifo_name in open_fds:
+                fifo_name = str(fifo_name)
+                fifo_path = os.path.join(self.fifo_root.name, fifo_name)
+
+                os.mkfifo(fifo_path)
+
+                fd_args.extend([fifo_name, fifo_path])
+
+            # update command to use the pass-fds.sh shim
+            self.command = [
+                PASS_FDS_PATH,
+                *fd_args,
+                '--',
+                *self.command,
+            ]
 
         # start process
         self.logger.debug(f"starting {' '.join(self.command)}")
@@ -80,6 +114,10 @@ class Process:
 
         # read the process exit code to prevent zombie processes
         self.wait()
+
+        # close fifos
+        if self.fifo_root:
+            self.fifo_root.cleanup()
 
         # run on_stop hook
         if not self.on_stop:
