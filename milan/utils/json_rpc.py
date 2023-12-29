@@ -151,7 +151,15 @@ class JsonRpcClient:
         self._notification_handler = {}
 
         # start receiver thread
-        threading.Thread(target=self._handle_messages).start()
+        threading.Thread(
+            target=self._handle_messages,
+
+            # The message handling thread has to run as a daemon thread because
+            # the `JsonRpcDebuggingPipeTransport` uses streams which use
+            # `select.select`. In some cases, `select.select` blocks, even if
+            # the fd is already closed.
+            daemon=True,
+        ).start()
 
         # start worker threads
         self._job_queue = queue.Queue()
@@ -384,3 +392,41 @@ class JsonRpcWebsocketTransport(JsonRpcTransport):
 
     def stop(self):
         self._websocket.close()
+
+
+class JsonRpcDebuggingPipeTransport(JsonRpcTransport):
+    def __init__(self, stream_in, stream_out, message_delimiter=b'\0'):
+        self.stream_in = stream_in
+        self.stream_out = stream_out
+        self.message_delimiter = message_delimiter
+
+    def __repr__(self):
+        return f'<JsonRpcDebuggingPipeTransport({self.stream_in=}, {self.stream_out=})>'
+
+    def read_message(self):
+        try:
+            binary_message = self.stream_out.read_message(
+                delimiter=self.message_delimiter,
+            )
+
+            string_message = binary_message.decode()
+
+            return string_message
+
+        except OSError as exception:
+            raise JsonRpcStoppedError from exception
+
+    def write_message(self, message):
+        try:
+            binary_message = message.encode()
+
+            binary_message += self.message_delimiter
+
+            return self.stream_in.write(binary_message)
+
+        except OSError as exception:
+            raise JsonRpcStoppedError from exception
+
+    def stop(self):
+        self.stream_in.close()
+        self.stream_out.close()
