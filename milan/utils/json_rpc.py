@@ -109,6 +109,14 @@ class JsonRpcMessage:
 
         return error.get('data', {})
 
+    @property
+    def extra_properties(self):
+        return {
+            key: value
+            for key, value in self.payload.items()
+            if key not in ('id', 'method', 'params', 'result', 'error')
+        }
+
     def serialize(self):
         try:
             return json.dumps(self.payload)
@@ -339,7 +347,14 @@ class JsonRpcClient:
                 self.on_stop,
             )
 
-    def send_request(self, method, params=None, await_result=True):
+    def send_request(
+            self,
+            method,
+            params=None,
+            await_result=True,
+            extra_properties=None,
+    ):
+
         message_id = self._message_id_counter.increment()
         future = concurrent.futures.Future()
 
@@ -348,6 +363,7 @@ class JsonRpcClient:
                 'id': message_id,
                 'method': method,
                 'params': params or {},
+                **(extra_properties or {})
             },
         )
 
