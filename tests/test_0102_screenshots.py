@@ -5,7 +5,7 @@ import pytest
 
 @pytest.mark.parametrize('image_format', ['jpeg', 'png', 'webp'])
 @pytest.mark.parametrize('image_size', ['0x0', '800x0', '0x800', '800x800'])
-@pytest.mark.parametrize('browser_name', ['chromium', 'firefox'])
+@pytest.mark.parametrize('browser_name', ['chromium', 'firefox', 'webkit'])
 def test_screenshots(
         browser_name,
         image_size,
@@ -13,8 +13,8 @@ def test_screenshots(
         milan_artifacts_directory,
 ):
 
+    from milan import Chromium, Firefox, Webkit
     from milan.utils.media import Image
-    from milan import Chromium, Firefox
 
     # not running in CI
     # only running basic tests
@@ -25,6 +25,7 @@ def test_screenshots(
     browser_class = {
         'chromium': Chromium,
         'firefox': Firefox,
+        'webkit': Webkit,
     }[browser_name]
 
     width, height = (int(i) for i in image_size.split('x'))

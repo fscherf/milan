@@ -5,8 +5,8 @@ from simple_logging_setup import setup
 import debugpy
 
 from milan.utils.http import http_get_request
+from milan import Chromium, Firefox, Webkit
 from milan.utils.process import Process
-from milan import Chromium, Firefox
 from milan.utils.misc import retry
 
 BROWSER = 'chromium'
@@ -81,8 +81,8 @@ if __name__ == '__main__':
 
     parser.add_argument(
         '--browser',
-        choices=['chromium', 'firefox'],
-        default='chromium',
+        choices=['chromium', 'firefox', 'webkit'],
+        default=BROWSER,
     )
 
     parser.add_argument('--headless', action='store_true', default=HEADLESS)
@@ -123,6 +123,7 @@ if __name__ == '__main__':
     browser_class = {
         'chromium': Chromium,
         'firefox': Firefox,
+        'webkit': Webkit,
     }[args.browser]
 
     browser_args = {

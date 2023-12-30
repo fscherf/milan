@@ -2,7 +2,7 @@ import tempfile
 
 from playwright.sync_api import sync_playwright
 
-BROWSER = 'chromium'
+BROWSER = 'webkit'
 VIDEO_PATH = 'playwright-video'
 HEADLESS = False
 VIDEO_CAPTURE = False
