@@ -148,6 +148,7 @@ class JsonRpcClient:
         self._running = True
         self._message_id_counter = AtomicCounter()
         self._pending_requests = {}
+        self._pending_notifications = {}
         self._notification_handler = {}
 
         # start receiver thread
@@ -234,6 +235,8 @@ class JsonRpcClient:
 
         # notifications
         elif json_rpc_message.type == 'notification':
+
+            # subscriptions
             handlers = self._notification_handler.get(
                 json_rpc_message.method,
                 [],
@@ -244,7 +247,20 @@ class JsonRpcClient:
                     functools.partial(handler, json_rpc_message),
                 )
 
-            if not handlers:
+            # awaited notifications
+            futures = self._pending_notifications.pop(
+                json_rpc_message.method,
+                [],
+            )
+
+            for future in futures:
+                if future.done():
+                    continue
+
+                future.set_result(json_rpc_message)
+
+            # nothing to do
+            if not handlers and not futures:
                 self.logger.debug(
                     'no handler found for %s',
                     json_rpc_message.method,
@@ -285,6 +301,14 @@ class JsonRpcClient:
                     continue
 
                 future.set_exception(JsonRpcStoppedError())
+
+            # cancel all pending notifications
+            for future_list in self._pending_notifications.values():
+                for future in future_list:
+                    if future.done():
+                        continue
+
+                    future.set_exception(JsonRpcStoppedError())
 
             # stop all message worker
             for _ in range(self.worker_thread_count):
@@ -365,6 +389,20 @@ class JsonRpcClient:
                 self._notification_handler[method].append(handler)
 
         self.logger.debug('%s subscribed to %s', handler, methods)
+
+    def await_notification(self, method, await_result=True):
+        future = concurrent.futures.Future()
+
+        with self._lock:
+            if method not in self._pending_notifications:
+                self._pending_notifications[method] = []
+
+            self._pending_notifications[method].append(future)
+
+        if not await_result:
+            return future
+
+        return future.result()
 
 
 class JsonRpcWebsocketTransport(JsonRpcTransport):
