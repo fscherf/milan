@@ -7,6 +7,8 @@ from websockets import ConnectionClosedError
 from milan.utils.json_rpc import JsonRpcStoppedError
 from milan.browser import Browser, browser_function
 from milan.utils.reverse_proxy import ReverseProxy
+from milan.utils.event_router import EventRouter
+from milan.frontend.server import FrontendServer
 from milan.utils.misc import retry, unique_id
 from milan.errors import BrowserStoppedError
 from milan.utils.media import scale_image
@@ -21,11 +23,18 @@ class CdpBrowser(Browser):
         JsonRpcStoppedError: BrowserStoppedError,
     }
 
-    def __init__(self, **kwargs):
-        super().__init__()
+    def __init__(
+            self,
+            *args,
+            debug_port=0,
+            reverse_proxy_port=None,
+            **kwargs,
+    ):
 
-        self.debug_port = kwargs.get('debug_port', 0)
-        self.reverse_proxy_port = kwargs.get('reverse_proxy_port', None)
+        super().__init__(*args, **kwargs)
+
+        self.debug_port = debug_port
+        self.reverse_proxy_port = reverse_proxy_port
 
         self.user_data_dir = TemporaryDirectory()
         self.profile_id = unique_id()
@@ -34,6 +43,7 @@ class CdpBrowser(Browser):
         self.browser_process = None
         self.cdp_client = None
         self.reverse_proxy = None
+        self._event_router = EventRouter()
 
         try:
             self._start()
@@ -141,6 +151,13 @@ class CdpBrowser(Browser):
             logger=self._get_sub_logger('cdp-client'),
         )
 
+        # start frontend
+        self._frontend_server = FrontendServer(
+            host='127.0.0.1',
+            port=0,
+            logger=self._get_sub_logger('frontend.server'),
+        )
+
         # navigate to frontend
         self.reload_frontend()
 
@@ -150,7 +167,7 @@ class CdpBrowser(Browser):
     def stop(self):
         self.logger.debug('stopping')
 
-        super().stop()
+        self._error = BrowserStoppedError
 
         if self.cdp_client:
             self.cdp_client.stop()
@@ -161,7 +178,16 @@ class CdpBrowser(Browser):
         if self.reverse_proxy:
             self.reverse_proxy.stop()
 
+        if self._frontend_server:
+            self._frontend_server.stop()
+
         self.logger.debug('stopped')
+
+    def is_chrome(self):
+        return False
+
+    def is_firefox(self):
+        return False
 
     # browser hooks ###########################################################
     @browser_function

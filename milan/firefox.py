@@ -8,25 +8,21 @@ class Firefox(CdpBrowser):
             *args,
             executable=None,
             headless=True,
-            debug_port=0,
             **kwargs,
     ):
 
-        if not executable:
-            executable = get_executable('firefox')
+        self.executable = executable
+        self.headless = headless
 
-        super().__init__(
-            *args,
-            executable=executable,
-            headless=headless,
-            debug_port=debug_port,
-            **kwargs,
-        )
+        if not self.executable:
+            self.executable = get_executable('firefox')
+
+        super().__init__(*args, **kwargs)
 
     def _get_browser_command(self, kwargs):
         return [
-            kwargs['executable'],
-            '--headless' if kwargs['headless'] else '',
+            self.executable,
+            '--headless' if self.headless else '',
             f'--remote-debugging-port={self.debug_port}',
             '--remote-allow-origins=*',
             f'--profile={self.profile_id}',

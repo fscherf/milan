@@ -6,8 +6,6 @@ import logging
 
 from milan.frontend.commands import frontend_function
 from milan.utils.event_router import EventRouter
-from milan.frontend.server import FrontendServer
-from milan.errors import BrowserStoppedError
 from milan.utils.misc import unique_id
 from milan.frontend import commands
 from milan.utils.url import URL
@@ -120,18 +118,12 @@ class Browser:
         return BrowserContext(cls, *args, **kwargs)
 
     def __init__(self, animations=True):
+        self.animations = animations
+
         self.id = unique_id()
 
         self.logger = logging.getLogger(
             f'milan.{self.__class__.__name__.lower()}.{self.id}',
-        )
-
-        self.animations = animations
-
-        self._frontend_server = FrontendServer(
-            host='127.0.0.1',
-            port=0,
-            logger=self._get_sub_logger('frontend.server'),
         )
 
         self._event_router = EventRouter()
@@ -148,16 +140,6 @@ class Browser:
             return local_override
 
         return self.animations
-
-    def stop(self):
-        self._error = BrowserStoppedError
-        self._frontend_server.stop()
-
-    def is_chrome(self):
-        return False
-
-    def is_firefox(self):
-        return False
 
     # events ##################################################################
     @browser_function
@@ -434,6 +416,9 @@ class Browser:
         self._navigate_browser(url=self._frontend_server.get_url())
 
     # hooks ###################################################################
+    def stop(self):
+        raise NotImplementedError()
+
     @browser_function
     def _navigate_browser(self, url):
         raise NotImplementedError()

@@ -10,22 +10,18 @@ class Chromium(CdpBrowser):
             *args,
             executable=None,
             headless=True,
-            debug_port=0,
             disable_web_security=False,
             **kwargs,
     ):
 
-        if not executable:
-            executable = get_executable('chromium')
+        self.executable = executable
+        self.headless = headless
+        self.disable_web_security = disable_web_security
 
-        super().__init__(
-            *args,
-            executable=executable,
-            headless=headless,
-            debug_port=debug_port,
-            disable_web_security=disable_web_security,
-            **kwargs,
-        )
+        if not self.executable:
+            self.executable = get_executable('chromium')
+
+        super().__init__(*args, **kwargs)
 
     def _get_browser_command(self, kwargs):
         """
@@ -33,8 +29,8 @@ class Chromium(CdpBrowser):
         """
 
         return [
-            kwargs['executable'],
-            '--headless' if kwargs['headless'] else '',
+            self.executable,
+            '--headless' if self.headless else '',
             '--disable-gpu',
             '--no-sandbox',
             '--disable-web-security',
