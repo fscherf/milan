@@ -135,7 +135,7 @@ class Browser:
     def _get_sub_logger(self, name):
         return logging.getLogger(f'{self.logger.name}.{name}')
 
-    def _get_animation(self, local_override):
+    def _get_animations(self, local_override):
         if local_override:
             return local_override
 
@@ -223,7 +223,7 @@ class Browser:
             expression=commands.gen_cursor_move_to_command(
                 x=float(x),
                 y=float(y),
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -232,7 +232,7 @@ class Browser:
     def move_cursor_to_home(self, animation=None):
         return self.evaluate(
             expression=commands.gen_cursor_move_to_home_command(
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -250,7 +250,7 @@ class Browser:
         return self.evaluate(
             expression=commands.gen_window_reload_command(
                 window_index=window,
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -261,7 +261,7 @@ class Browser:
         return self.evaluate(
             expression=commands.gen_window_navigate_back_command(
                 window_index=window,
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -271,7 +271,7 @@ class Browser:
         return self.evaluate(
             expression=commands.gen_window_navigate_forward_command(
                 window_index=window,
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -329,7 +329,7 @@ class Browser:
             expression=commands.gen_window_click_command(
                 window_index=window,
                 selector=selector,
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -341,7 +341,7 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 value=value,
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -353,7 +353,7 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 value=value,
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -376,7 +376,7 @@ class Browser:
                 value=value,
                 index=index,
                 label=label,
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
@@ -399,7 +399,7 @@ class Browser:
             expression=commands.gen_window_navigate_command(
                 window_index=window,
                 url=str(url),
-                animation=self._get_animation(animation),
+                animation=self._get_animations(animation),
             ),
         )
 
