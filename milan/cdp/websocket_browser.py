@@ -4,6 +4,7 @@ import os
 
 from websockets import ConnectionClosedError
 
+from milan.cdp.websocket_client import CdpWebsocketClient
 from milan.utils.json_rpc import JsonRpcStoppedError
 from milan.browser import Browser, browser_function
 from milan.utils.reverse_proxy import ReverseProxy
@@ -13,11 +14,10 @@ from milan.utils.misc import retry, unique_id
 from milan.errors import BrowserStoppedError
 from milan.utils.media import scale_image
 from milan.utils.process import Process
-from milan.cdp_client import CdpClient
 from milan.utils.url import URL
 
 
-class CdpBrowser(Browser):
+class CdpWebsocketBrowser(Browser):
     TRANSLATE_ERRORS = {
         ConnectionClosedError: BrowserStoppedError,
         JsonRpcStoppedError: BrowserStoppedError,
@@ -41,7 +41,7 @@ class CdpBrowser(Browser):
 
         self.browser_command = self._get_browser_command(kwargs)
         self.browser_process = None
-        self.cdp_client = None
+        self.cdp_websocket_client = None
         self.reverse_proxy = None
         self._event_router = EventRouter()
 
@@ -143,7 +143,7 @@ class CdpBrowser(Browser):
         # connect to debug port
         self.logger.debug('connecting to the browsers debug port')
 
-        self.cdp_client = CdpClient(
+        self.cdp_websocket_client = CdpWebsocketClient(
             host='127.0.0.1',
             port=self.debug_port,
             event_router=self._event_router,
@@ -169,8 +169,8 @@ class CdpBrowser(Browser):
 
         self._error = BrowserStoppedError
 
-        if self.cdp_client:
-            self.cdp_client.stop()
+        if self.cdp_websocket_client:
+            self.cdp_websocket_client.stop()
 
         if self.browser_process:
             self.browser_process.stop()
@@ -194,13 +194,13 @@ class CdpBrowser(Browser):
     def _navigate_browser(self, url):
         future = self.await_browser_load(await_future=False)
 
-        self.cdp_client.page_navigate(url=URL.normalize(url))
+        self.cdp_websocket_client.page_navigate(url=URL.normalize(url))
 
         future.result()
 
     @browser_function
     def evaluate(self, expression):
-        return self.cdp_client.runtime_evaluate(
+        return self.cdp_websocket_client.runtime_evaluate(
             expression=expression,
             await_promise=True,
             repl_mode=False,
@@ -208,7 +208,7 @@ class CdpBrowser(Browser):
 
     @browser_function
     def resize(self, width, height):
-        return self.cdp_client.emulation_set_device_metrics_override(
+        return self.cdp_websocket_client.emulation_set_device_metrics_override(
             width=width,
             height=height,
         )
@@ -232,7 +232,7 @@ class CdpBrowser(Browser):
             output_path_scaled = output_path
             output_path = f'{output_path}.unscaled.{output_format}'
 
-        self.cdp_client.page_screenshot(
+        self.cdp_websocket_client.page_screenshot(
             path=output_path,
             quality=quality,
         )
@@ -264,7 +264,7 @@ class CdpBrowser(Browser):
                 'CDP based video recording is not supported in firefox',
             )
 
-        return self.cdp_client.start_video_capturing(
+        return self.cdp_websocket_client.start_video_capturing(
             output_path=output_path,
             width=width,
             height=height,
@@ -280,4 +280,4 @@ class CdpBrowser(Browser):
                 'CDP based video recording is not supported in firefox',
             )
 
-        return self.cdp_client.stop_video_capturing()
+        return self.cdp_websocket_client.stop_video_capturing()

@@ -9,7 +9,7 @@ from milan.video_recorder import VideoRecorder
 from milan.utils.http import http_json_request
 
 
-class CdpClient:
+class CdpWebsocketClient:
     """
     https://chromedevtools.github.io/devtools-protocol/
     """

@@ -1,8 +1,8 @@
+from milan.cdp.websocket_browser import CdpWebsocketBrowser
 from milan.executables import get_executable
-from milan.cdp_browser import CdpBrowser
 
 
-class Firefox(CdpBrowser):
+class Firefox(CdpWebsocketBrowser):
     def __init__(
             self,
             *args,
