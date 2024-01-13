@@ -25,6 +25,7 @@ dev = [
   "lona-picocss==0.4.3",
   "rlpython",
   "playwright",
+  "debugpy",
 ]
 
 test = [

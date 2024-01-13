@@ -6,9 +6,9 @@ DOC_ROOT=doc
 .PHONY: milan build clean fullclean \
 	test ci-test frontend \
 	playwright-install playwright-browser \
-	chromium headless-chromium firefox headless-firefox \
-	demos
+	browser demos
 
+all: browser
 
 # docker ######################################################################
 milan:
@@ -57,24 +57,11 @@ playwright-browser: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	$(PYTHON) scripts/run-playwright.py
 
-# browser #####################################################################
-chromium: | $(PYTHON_ENV)
+# milan #######################################################################
+browser: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/run-browser.py --browser=chromium $(args)
+	$(PYTHON) scripts/run-browser.py $(args)
 
-headless-chromium: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/run-browser.py --browser=chromium --headless $(args)
-
-firefox: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/run-browser.py --browser=firefox $(args)
-
-headless-firefox: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/run-browser.py --browser=firefox --headless $(args)
-
-# demos #######################################################################
 demos: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	rm $(DOC_ROOT)/*.gif && \

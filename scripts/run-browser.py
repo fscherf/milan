@@ -2,11 +2,17 @@ from argparse import ArgumentParser
 import time
 
 from simple_logging_setup import setup
+import debugpy
 
 from milan.utils.http import http_get_request
 from milan.utils.process import Process
 from milan import Chromium, Firefox
 from milan.utils.misc import retry
+
+BROWSER = 'chromium'
+HEADLESS = False
+DEBUGGER = False
+DEBUGGER_PORT = 5678
 
 
 def run_form_demo(browser, capture=''):
@@ -65,6 +71,11 @@ def run_multi_window_demo(browser, capture=''):
 
 if __name__ == '__main__':
 
+    # start debugger
+    if DEBUGGER:
+        debugpy.listen(('localhost', DEBUGGER_PORT))
+        debugpy.wait_for_client()
+
     # parse arguments
     parser = ArgumentParser()
 
@@ -74,7 +85,7 @@ if __name__ == '__main__':
         default='chromium',
     )
 
-    parser.add_argument('--headless', action='store_true')
+    parser.add_argument('--headless', action='store_true', default=HEADLESS)
 
     parser.add_argument('--run-form-demo', action='store_true')
     parser.add_argument('--run-multi-window-demo', action='store_true')
