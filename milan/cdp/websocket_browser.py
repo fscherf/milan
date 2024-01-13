@@ -7,7 +7,6 @@ from websockets import ConnectionClosedError
 from milan.cdp.websocket_client import CdpWebsocketClient
 from milan.utils.json_rpc import JsonRpcStoppedError
 from milan.browser import Browser, browser_function
-from milan.utils.reverse_proxy import ReverseProxy
 from milan.utils.event_router import EventRouter
 from milan.frontend.server import FrontendServer
 from milan.utils.misc import retry, unique_id
@@ -27,14 +26,12 @@ class CdpWebsocketBrowser(Browser):
             self,
             *args,
             debug_port=0,
-            reverse_proxy_port=None,
             **kwargs,
     ):
 
         super().__init__(*args, **kwargs)
 
         self.debug_port = debug_port
-        self.reverse_proxy_port = reverse_proxy_port
 
         self.user_data_dir = TemporaryDirectory()
         self.profile_id = unique_id()
@@ -42,7 +39,6 @@ class CdpWebsocketBrowser(Browser):
         self.browser_command = self._get_browser_command(kwargs)
         self.browser_process = None
         self.cdp_websocket_client = None
-        self.reverse_proxy = None
         self._event_router = EventRouter()
 
         try:
@@ -121,17 +117,6 @@ class CdpWebsocketBrowser(Browser):
 
             wait_for_devtools_debug_port()
 
-        # setup reverse proxy
-        if self.reverse_proxy_port:
-            self.logger.debug('starting reverse proxy')
-
-            self.reverse_proxy = ReverseProxy(
-                port=self.reverse_proxy_port,
-                remote_host='127.0.0.1',
-                remote_port=self.debug_port,
-                logger=self._get_sub_logger('reverse-proxy'),
-            )
-
         # HACK: prevent race conditions between non-headless chrome and X11
         if self.is_chrome() and '--headless' not in self.browser_command:
             self.logger.warning(
@@ -174,9 +159,6 @@ class CdpWebsocketBrowser(Browser):
 
         if self.browser_process:
             self.browser_process.stop()
-
-        if self.reverse_proxy:
-            self.reverse_proxy.stop()
 
         if self._frontend_server:
             self._frontend_server.stop()

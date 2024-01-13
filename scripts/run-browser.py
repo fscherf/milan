@@ -116,7 +116,6 @@ if __name__ == '__main__':
 
     browser_args = {
         'headless': args.headless,
-        'reverse_proxy_port': 9223,
     }
 
     with browser_class.start(**browser_args) as browser:
