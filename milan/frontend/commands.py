@@ -25,7 +25,15 @@ def _gen_frontend_run_command(func, args=None):
             }});
 
             return JSON.stringify(returnValue);
-        }})();
+        }})()
+    """
+
+
+def wrap_expression_into_function_declaration(expression):
+    return f"""
+        async () => {{
+            return ({expression});
+        }}
     """
 
 
