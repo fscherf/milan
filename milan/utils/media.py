@@ -97,7 +97,7 @@ class Image(Media):
         return self.meta_data['streams'][0].get('codec_name', '')
 
 
-def scale_image(
+def image_convert(
         input_path,
         output_path,
         width=0,
@@ -109,14 +109,11 @@ def scale_image(
     if not ffmpeg_path:
         ffmpeg_path = get_executable('ffmpeg')
 
-    if not width and not height:
-        raise ValueError('either width, height, or both have to be set')
-
     width = int(width or -1)
     height = int(height or -1)
 
     logger.debug(
-        'scaling %s to %s (%s:%s)',
+        'converting %s to %s (%s:%s)',
         input_path,
         output_path,
         width,
@@ -139,7 +136,7 @@ def scale_image(
     ).wait()
 
     logger.debug(
-        'scaling of %s to %s (%s:%s) done',
+        'converting of %s to %s (%s:%s) done',
         input_path,
         output_path,
         width,

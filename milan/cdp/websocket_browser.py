@@ -11,7 +11,7 @@ from milan.utils.event_router import EventRouter
 from milan.frontend.server import FrontendServer
 from milan.utils.misc import retry, unique_id
 from milan.errors import BrowserStoppedError
-from milan.utils.media import scale_image
+from milan.utils.media import image_convert
 from milan.utils.process import Process
 from milan.utils.url import URL
 
@@ -206,14 +206,14 @@ class CdpWebsocketBrowser(Browser):
     ):
 
         output_format = os.path.splitext(output_path)[1][1:]
-        output_path_scaled = ''
+        output_path_converted = ''
 
         if output_format not in ('jpeg', 'png', 'webp'):
             raise ValueError(f'invalid output format: {output_format}')
 
         if width or height:
-            output_path_scaled = output_path
-            output_path = f'{output_path}.unscaled.{output_format}'
+            output_path_converted = output_path
+            output_path = f'{output_path}.raw.{output_format}'
 
         self.cdp_websocket_client.page_screenshot(
             path=output_path,
@@ -221,12 +221,12 @@ class CdpWebsocketBrowser(Browser):
         )
 
         if width or height:
-            scale_image(
+            image_convert(
                 input_path=output_path,
-                output_path=output_path_scaled,
+                output_path=output_path_converted,
                 width=width,
                 height=height,
-                logger=self._get_sub_logger('ffmpeg.image-scale'),
+                logger=self._get_sub_logger('ffmpeg.image-convert'),
             )
 
             os.unlink(output_path)
