@@ -39,6 +39,7 @@ class CdpWebsocketBrowser(Browser):
         self.browser_command = self._get_browser_command(kwargs)
         self.browser_process = None
         self.cdp_websocket_client = None
+        self._frontend_server = None
         self._event_router = EventRouter()
 
         try:
