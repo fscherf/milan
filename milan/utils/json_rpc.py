@@ -152,7 +152,6 @@ class JsonRpcClient:
         self.on_stop = on_stop
         self.logger = logger
 
-        self._lock = threading.Lock()
         self._running = True
         self._message_id_counter = AtomicCounter()
         self._pending_requests = {}
@@ -300,27 +299,26 @@ class JsonRpcClient:
         self.logger.debug('worker %s: stopped', worker_id)
 
     def stop(self):
-        with self._lock:
-            self._running = False
+        self._running = False
 
-            # cancel all pending requests
-            for future in self._pending_requests.values():
+        # cancel all pending requests
+        for future in self._pending_requests.values():
+            if future.done():
+                continue
+
+            future.set_exception(JsonRpcStoppedError())
+
+        # cancel all pending notifications
+        for future_list in self._pending_notifications.values():
+            for future in future_list:
                 if future.done():
                     continue
 
                 future.set_exception(JsonRpcStoppedError())
 
-            # cancel all pending notifications
-            for future_list in self._pending_notifications.values():
-                for future in future_list:
-                    if future.done():
-                        continue
-
-                    future.set_exception(JsonRpcStoppedError())
-
-            # stop all message worker
-            for _ in range(self.worker_thread_count):
-                self._job_queue.put(None)
+        # stop all message worker
+        for _ in range(self.worker_thread_count):
+            self._job_queue.put(None)
 
         # stop transport
         try:
@@ -372,13 +370,10 @@ class JsonRpcClient:
             json_rpc_message.get_lazy_string(),
         )
 
-        with self._lock:
+        if not self._running:
+            raise JsonRpcStoppedError()
 
-            # the client was stopped while we were waiting for the lock
-            if not self._running:
-                raise JsonRpcStoppedError()
-
-            self._pending_requests[message_id] = future
+        self._pending_requests[message_id] = future
 
         try:
             self.transport.write_message(json_rpc_message.serialize())
@@ -397,23 +392,16 @@ class JsonRpcClient:
         if not isinstance(methods, (list, tuple)):
             methods = [methods]
 
-        with self._lock:
-            for method in methods:
-                if method not in self._notification_handler:
-                    self._notification_handler[method] = []
-
-                self._notification_handler[method].append(handler)
+        for method in methods:
+            handler_list = self._notification_handler.setdefault(method, [])
+            handler_list.append(handler)
 
         self.logger.debug('%s subscribed to %s', handler, methods)
 
     def await_notification(self, method, await_result=True):
         future = concurrent.futures.Future()
-
-        with self._lock:
-            if method not in self._pending_notifications:
-                self._pending_notifications[method] = []
-
-            self._pending_notifications[method].append(future)
+        future_list = self._pending_notifications.setdefault(method, [])
+        future_list.append(future)
 
         if not await_result:
             return future
