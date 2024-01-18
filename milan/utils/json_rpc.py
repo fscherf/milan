@@ -233,7 +233,7 @@ class JsonRpcClient:
                 return
 
             if json_rpc_message.type == 'response':
-                future.set_result(result=json_rpc_message.result)
+                future.set_result(json_rpc_message)
 
             else:
                 future.set_exception(

@@ -162,7 +162,11 @@ class CdpClient:
         https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-enable
         """
 
-        return self.json_rpc_client.send_request(method='Network.enable')
+        response = self.json_rpc_client.send_request(
+            method='Network.enable',
+        )
+
+        return response.result
 
     # runtime
     def runtime_enable(self):
@@ -170,7 +174,11 @@ class CdpClient:
         https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-enable
         """
 
-        return self.json_rpc_client.send_request(method='Runtime.enable')
+        response = self.json_rpc_client.send_request(
+            method='Runtime.enable',
+        )
+
+        return response.result
 
     def runtime_evaluate(
             self,
@@ -183,7 +191,7 @@ class CdpClient:
         https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-evaluate
         """
 
-        return self.json_rpc_client.send_request(
+        response = self.json_rpc_client.send_request(
             method='Runtime.evaluate',
             params={
                 'expression': expression,
@@ -192,6 +200,8 @@ class CdpClient:
                 'contextId': self._execution_contexts[self._top_frame_id],
             },
         )
+
+        return response.result
 
     # emulation
     def emulation_set_device_metrics_override(
@@ -218,7 +228,7 @@ class CdpClient:
 
         time.sleep(1)  # FIXME: wait for resize
 
-        return response
+        return response.result
 
     # page
     def page_enable(self):
@@ -226,21 +236,27 @@ class CdpClient:
         https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-enable
         """
 
-        return self.json_rpc_client.send_request(method='Page.enable')
+        response = self.json_rpc_client.send_request(method='Page.enable')
+
+        return response.result
 
     def page_get_frame_tree(self):
         """
         https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-getFrameTree
         """
 
-        return self.json_rpc_client.send_request(method='Page.getFrameTree')
+        response = self.json_rpc_client.send_request(
+            method='Page.getFrameTree',
+        )
+
+        return response.result
 
     def page_navigate(self, url):
         """
         https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-navigate
         """
 
-        return self.json_rpc_client.send_request(
+        response = self.json_rpc_client.send_request(
             method='Page.navigate',
             params={
                 'url': url,
@@ -249,6 +265,8 @@ class CdpClient:
             },
         )
 
+        return response.result
+
     def page_screenshot(self, path, quality=100):
         """
         https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-captureScreenshot
@@ -256,7 +274,7 @@ class CdpClient:
 
         image_format = os.path.splitext(path)[1][1:]
 
-        data = self.json_rpc_client.send_request(
+        response = self.json_rpc_client.send_request(
             method='Page.captureScreenshot',
             params={
                 'format': image_format,
@@ -265,7 +283,7 @@ class CdpClient:
         )
 
         with open(path, 'wb+') as f:
-            f.write(decode_base64(data['data']))
+            f.write(decode_base64(response.result['data']))
 
     def page_start_screen_cast(
             self,
@@ -297,31 +315,37 @@ class CdpClient:
         if every_nth_frame is not None:
             params['everyNthFrame'] = every_nth_frame
 
-        return self.json_rpc_client.send_request(
+        response = self.json_rpc_client.send_request(
             method='Page.startScreencast',
             params=params,
         )
+
+        return response.result
 
     def page_stop_screen_cast(self):
         """
         https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-stopScreencast
         """
 
-        return self.json_rpc_client.send_request(
+        response = self.json_rpc_client.send_request(
             method='Page.stopScreencast',
         )
+
+        return response.result
 
     def page_screen_cast_frame_ack(self, session_id):
         """
         https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-screencastFrameAck
         """
 
-        return self.json_rpc_client.send_request(
+        response = self.json_rpc_client.send_request(
             method='Page.screencastFrameAck',
             params={
                 'sessionId': session_id,
             },
         )
+
+        return response.result
 
     # events ##################################################################
     def _handle_navigation_events(self, json_rpc_message):
