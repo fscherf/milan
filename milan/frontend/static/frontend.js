@@ -406,6 +406,13 @@ class WindowManager {
         this.split();
     }
 
+    getSize = () => {
+        return {
+            width: this.rootElement.clientWidth,
+            height: this.rootElement.clientHeight,
+        };
+    }
+
     split = () => {
         if(this.windows.length > 3) {
             throw('More than 4 windows are not supported');

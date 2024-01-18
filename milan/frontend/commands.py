@@ -143,6 +143,12 @@ def gen_cursor_get_position_command():
 
 
 # window manager
+def gen_window_manager_get_size_command():
+    return _gen_frontend_run_command(
+        func=_gen_window_manager_function_name(name='getSize'),
+    )
+
+
 def gen_window_manager_split_command():
     return _gen_frontend_run_command(
         func=_gen_window_manager_function_name(name='split'),

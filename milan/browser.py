@@ -176,6 +176,13 @@ class Browser:
     # window manager
     @frontend_function
     @browser_function
+    def get_size(self):
+        return self.evaluate(
+            expression=commands.gen_window_manager_get_size_command(),
+        )
+
+    @frontend_function
+    @browser_function
     def get_window_count(self):
         return self.evaluate(
             expression=commands.gen_window_manager_get_window_count_command(),
