@@ -3,6 +3,8 @@ import os
 
 import pytest
 
+DEBUG = False
+
 TEST_ARTIFACTS_DIRECTORY = os.path.join(
     os.path.dirname(__file__),
     'artifacts',
@@ -35,3 +37,13 @@ def milan_artifacts_directory(_setup_milan_artifacts_directory):
     yield TEST_ARTIFACTS_DIRECTORY
 
     os.chdir(old_cwd)
+
+
+@pytest.fixture(autouse=True, scope='session')
+def embed(request):
+    def _run_rlpython():
+        import rlpython
+        rlpython.embed()
+
+    if DEBUG:
+        request.addfinalizer(_run_rlpython)
