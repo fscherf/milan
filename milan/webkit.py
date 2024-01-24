@@ -12,7 +12,7 @@ from milan.frontend.commands import wrap_expression_into_function_declaration
 from milan.utils.background_loop import BackgroundLoop
 from milan.browser import Browser, browser_function
 from milan.utils.misc import retry, decode_base64
-from milan.frontend.server2 import FrontendServer
+from milan.frontend.server import FrontendServer
 from milan.errors import BrowserStoppedError
 from milan.executables import get_executable
 from milan.utils.media import image_convert

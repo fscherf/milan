@@ -8,8 +8,8 @@ from milan.cdp.websocket_client import CdpWebsocketClient
 from milan.utils.background_loop import BackgroundLoop
 from milan.utils.json_rpc import JsonRpcStoppedError
 from milan.browser import Browser, browser_function
-from milan.frontend.server2 import FrontendServer
 from milan.utils.event_router import EventRouter
+from milan.frontend.server import FrontendServer
 from milan.utils.misc import retry, unique_id
 from milan.errors import BrowserStoppedError
 from milan.utils.media import image_convert

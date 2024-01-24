@@ -44,9 +44,9 @@ ci-test: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	MILAN_CI_TEST=1 tox $(args)
 
-frontend2: | $(PYTHON_ENV)
+frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	python -m milan.frontend.server2 --port=8080
+	python -m milan.frontend.server --port=8080
 
 # playwright ##################################################################
 playwright-install: | $(PYTHON_ENV)
