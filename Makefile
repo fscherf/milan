@@ -4,7 +4,7 @@ PYTHON_ENV=env
 DOC_ROOT=doc
 
 .PHONY: milan build clean fullclean \
-	test ci-test frontend frontend2\
+	test ci-test frontend2\
 	playwright-install playwright-browser \
 	browser demos
 
@@ -43,10 +43,6 @@ test: | $(PYTHON_ENV)
 ci-test: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	MILAN_CI_TEST=1 tox $(args)
-
-frontend: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	python -m milan.frontend.server --port=8080
 
 frontend2: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
