@@ -9,9 +9,10 @@ from milan.utils.json_rpc import (
 )
 
 from milan.frontend.commands import wrap_expression_into_function_declaration
+from milan.utils.background_loop import BackgroundLoop
 from milan.browser import Browser, browser_function
 from milan.utils.misc import retry, decode_base64
-from milan.frontend.server import FrontendServer
+from milan.frontend.server2 import FrontendServer
 from milan.errors import BrowserStoppedError
 from milan.executables import get_executable
 from milan.utils.media import image_convert
@@ -75,6 +76,7 @@ class Webkit(Browser):
         self.executable = executable
         self.headless = headless
 
+        self._background_loop = None
         self._browser_process = None
         self._frontend_server = None
         self._json_rpc_client = None
@@ -177,6 +179,13 @@ class Webkit(Browser):
     def _start(self):
         self.logger.debug('starting')
 
+        # start background loop
+        self.logger.debug('starting background loop')
+
+        self._background_loop = BackgroundLoop(
+            logger=self._get_sub_logger('background-loop'),
+        )
+
         # start browser process
         if not self.executable:
             self.executable = get_executable('webkit')
@@ -221,9 +230,11 @@ class Webkit(Browser):
         self.logger.debug('starting frontend server')
 
         self._frontend_server = FrontendServer(
+            loop=self._background_loop.loop,
             host='127.0.0.1',
             port=0,
             logger=self._get_sub_logger('frontend.server'),
+            access_logger=self._get_sub_logger('frontend.server.access'),
         )
 
         # navigate to frontend
@@ -274,6 +285,12 @@ class Webkit(Browser):
 
         if self._browser_process:
             self._browser_process.stop()
+
+        # stop background loop
+        self.logger.debug('stopping background loop')
+
+        if self._background_loop:
+            self._background_loop.stop()
 
         # finish
         self.logger.debug('successfully stopped')

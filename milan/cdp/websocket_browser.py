@@ -5,10 +5,11 @@ import os
 from websockets import ConnectionClosedError
 
 from milan.cdp.websocket_client import CdpWebsocketClient
+from milan.utils.background_loop import BackgroundLoop
 from milan.utils.json_rpc import JsonRpcStoppedError
 from milan.browser import Browser, browser_function
+from milan.frontend.server2 import FrontendServer
 from milan.utils.event_router import EventRouter
-from milan.frontend.server import FrontendServer
 from milan.utils.misc import retry, unique_id
 from milan.errors import BrowserStoppedError
 from milan.utils.media import image_convert
@@ -36,6 +37,7 @@ class CdpWebsocketBrowser(Browser):
         self.user_data_dir = TemporaryDirectory()
         self.profile_id = unique_id()
 
+        self._background_loop = None
         self.browser_command = self._get_browser_command(kwargs)
         self.browser_process = None
         self.cdp_websocket_client = None
@@ -97,6 +99,13 @@ class CdpWebsocketBrowser(Browser):
 
     def _start(self):
 
+        # start background loop
+        self.logger.debug('starting background loop')
+
+        self._background_loop = BackgroundLoop(
+            logger=self._get_sub_logger('background-loop'),
+        )
+
         # start browser process
         self.logger.debug('starting browser process')
 
@@ -139,9 +148,11 @@ class CdpWebsocketBrowser(Browser):
 
         # start frontend
         self._frontend_server = FrontendServer(
+            loop=self._background_loop.loop,
             host='127.0.0.1',
             port=0,
             logger=self._get_sub_logger('frontend.server'),
+            access_logger=self._get_sub_logger('frontend.server.access'),
         )
 
         # navigate to frontend
@@ -163,6 +174,9 @@ class CdpWebsocketBrowser(Browser):
 
         if self._frontend_server:
             self._frontend_server.stop()
+
+        if self._background_loop:
+            self._background_loop.stop()
 
         self.logger.debug('stopped')
 
