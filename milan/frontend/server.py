@@ -12,6 +12,8 @@ from aiohttp.web import (
     TCPSite,
 )
 
+from milan.frontend.proxy import Proxy
+
 FRONTEND_STATIC_ROOT = os.path.join(os.path.dirname(__file__), 'static')
 
 default_logger = logging.getLogger('milan.frontend.server')
@@ -44,11 +46,18 @@ class FrontendServer:
 
         # setup aiohttp
         self.app = Application()
+        self.proxy = Proxy(loop=self.loop)
+
+        self.app.router.add_route(
+            '*',
+            '/_milan/frontend/{path:.*}',
+            self._handle_static_frontend_request,
+        )
 
         self.app.router.add_route(
             '*',
             '/{path:.*}',
-            self._handle_static_frontend_request,
+            self.proxy.handle_request,
         )
 
         # start aiohttp
@@ -80,6 +89,7 @@ class FrontendServer:
 
     def stop(self):
         async def _stop():
+            await self.proxy.stop()
             await self.site.stop()
             await self.app_runner.cleanup()
 
@@ -99,10 +109,10 @@ class FrontendServer:
         return f'http://{host}:{port}'
 
     def get_frontend_url(self):
-        return f'{self.get_url()}/'
+        return f'{self.get_url()}/_milan/frontend/'
 
     def get_test_application_url(self):
-        return f'{self.get_url()}/test-application/'
+        return f'{self.get_url()}/_milan/frontend/test-application/'
 
     # static files ############################################################
     async def _handle_static_request(self, request, static_root):
