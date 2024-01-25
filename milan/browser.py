@@ -413,7 +413,7 @@ class Browser:
 
     @browser_function
     def reload_frontend(self):
-        self._navigate_browser(url=self._frontend_server.get_url())
+        self._navigate_browser(url=self._frontend_server.get_frontend_url())
 
     # hooks ###################################################################
     def stop(self):
