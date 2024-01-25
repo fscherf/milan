@@ -2,12 +2,12 @@ import concurrent
 import functools
 import threading
 import logging
+import asyncio
 import queue
 import json
 import os
 
-from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
-from websockets.sync.client import connect
+from aiohttp import ClientSession, WSMsgType
 
 from milan.utils.misc import AtomicCounter, LazyString, pformat_dict
 
@@ -410,30 +410,110 @@ class JsonRpcClient:
 
 
 class JsonRpcWebsocketTransport(JsonRpcTransport):
-    def __init__(self, url):
+    def __init__(self, loop, url):
+        self.loop = loop
         self.url = url
 
-        self._websocket = connect(self.url)
+        self._stopped = asyncio.Future(loop=self.loop)
+        self._websocket_open = asyncio.Future(loop=self.loop)
+        self._websocket = None
+        self._read_queue = asyncio.Queue()
+        self._write_queue = asyncio.Queue()
+
+        self.loop.create_task(coro=self._handle_read_queue())
+        self.loop.create_task(coro=self._handle_write_queue())
+
+        # wait for websocket to open
+        async def _await_websocket_open():
+            await self._websocket_open
+
+        asyncio.run_coroutine_threadsafe(
+            coro=_await_websocket_open(),
+            loop=self.loop,
+        ).result()
 
     def __repr__(self):
-        return f'<JsonRpcWebsocketTransport({self.url=})>'
+        return f'<JsonRpcWebsocketTransport({self.loop=}, {self.url=})>'
+
+    # read ####################################################################
+    async def _read_websocket_messages(self):
+        async for message in self._websocket:
+            if message.type in (WSMsgType.CLOSED, WSMsgType.ERROR):
+                return
+
+            yield message.data
+
+    async def _handle_read_queue(self):
+        async with ClientSession() as client:
+            async with client.ws_connect(self.url) as websocket:
+                self._websocket = websocket
+                self._websocket_open.set_result(None)
+
+                async for message in self._read_websocket_messages():
+                    await self._read_queue.put(message)
+
+                await self._stop()
 
     def read_message(self):
-        try:
-            return self._websocket.recv()
+        async def get_message():
+            if self._stopped.done():
+                raise JsonRpcStoppedError()
 
-        except (ConnectionClosedError, ConnectionClosedOK) as exception:
-            raise JsonRpcStoppedError from exception
+            message = await self._read_queue.get()
+
+            if message is None:
+                raise JsonRpcStoppedError()
+
+            return message
+
+        future = asyncio.run_coroutine_threadsafe(
+            coro=get_message(),
+            loop=self.loop,
+        )
+
+        return future.result()
+
+    # write ###################################################################
+    async def _handle_write_queue(self):
+        while not self._stopped.done():
+            message = await self._write_queue.get()
+
+            if message is None:
+                return
+
+            await self._websocket.send_str(message)
 
     def write_message(self, message):
-        try:
-            self._websocket.send(message)
+        async def put_message():
+            if self._stopped.done():
+                raise JsonRpcStoppedError()
 
-        except (ConnectionClosedError, ConnectionClosedOK) as exception:
-            raise JsonRpcStoppedError from exception
+            await self._write_queue.put(message)
+
+        future = asyncio.run_coroutine_threadsafe(
+            coro=put_message(),
+            loop=self.loop,
+        )
+
+        return future.result()
+
+    # stop ####################################################################
+    async def _stop(self):
+        if not self._stopped.done():
+            self._stopped.set_result(None)
+
+            await self._read_queue.put(None)
+            await self._write_queue.put(None)
+
+        await self._websocket.close()
 
     def stop(self):
-        self._websocket.close()
+        future = asyncio.run_coroutine_threadsafe(
+            coro=self._stop(),
+            loop=self.loop,
+        )
+
+        return future.result()
 
 
 class JsonRpcDebuggingPipeTransport(JsonRpcTransport):

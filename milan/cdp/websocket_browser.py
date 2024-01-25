@@ -2,8 +2,6 @@ from tempfile import TemporaryDirectory
 import time
 import os
 
-from websockets import ConnectionClosedError
-
 from milan.cdp.websocket_client import CdpWebsocketClient
 from milan.utils.background_loop import BackgroundLoop
 from milan.utils.json_rpc import JsonRpcStoppedError
@@ -19,7 +17,6 @@ from milan.utils.url import URL
 
 class CdpWebsocketBrowser(Browser):
     TRANSLATE_ERRORS = {
-        ConnectionClosedError: BrowserStoppedError,
         JsonRpcStoppedError: BrowserStoppedError,
     }
 
@@ -139,6 +136,7 @@ class CdpWebsocketBrowser(Browser):
         self.logger.debug('connecting to the browsers debug port')
 
         self.cdp_websocket_client = CdpWebsocketClient(
+            loop=self._background_loop.loop,
             host='127.0.0.1',
             port=self.debug_port,
             event_router=self._event_router,

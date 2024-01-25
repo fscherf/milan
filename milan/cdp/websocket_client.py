@@ -16,6 +16,7 @@ class CdpWebsocketClient:
 
     def __init__(
             self,
+            loop,
             host,
             port,
             event_router=None,
@@ -23,6 +24,7 @@ class CdpWebsocketClient:
             logger=None,
     ):
 
+        self.loop = loop
         self.host = host
         self.port = port
         self.event_router = event_router
@@ -79,6 +81,7 @@ class CdpWebsocketClient:
 
         # setup JsonRpcClient
         self.json_rpc_transport = JsonRpcWebsocketTransport(
+            loop=self.loop,
             url=self.get_websocket_url(),
         )
 
