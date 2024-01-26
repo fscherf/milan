@@ -4,9 +4,10 @@ import time
 from simple_logging_setup import setup
 import debugpy
 
-from milan.utils.http import http_get_request
+from milan.utils.background_loop import BackgroundLoop
 from milan import Chromium, Firefox, Webkit
 from milan.utils.process import Process
+from milan.utils.http import HttpClient
 from milan.utils.misc import retry
 
 BROWSER = 'chromium'
@@ -104,6 +105,9 @@ if __name__ == '__main__':
     )
 
     # start demo application
+    background_loop = BackgroundLoop()
+    http_client = HttpClient(loop=background_loop.loop)
+
     demo_application = Process([
         '/usr/bin/env',
         'python3',
@@ -115,9 +119,16 @@ if __name__ == '__main__':
 
     @retry
     def _await_demo_application_started():
-        http_get_request(url='http://127.0.0.1:8080')
+        status_code, _ = http_client.get(
+            url='http://127.0.0.1:8080',
+        )
+
+        if status_code != 200:
+            raise RuntimeError()
 
     _await_demo_application_started()
+    http_client.stop()
+    background_loop.stop()
 
     # start browser
     browser_class = {

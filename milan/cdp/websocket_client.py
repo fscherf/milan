@@ -6,7 +6,7 @@ from milan.utils.json_rpc import JsonRpcClient, JsonRpcWebsocketTransport
 from milan.utils.misc import decode_base64, retry, unique_id
 from milan.utils.event_router import EventRouter
 from milan.video_recorder import VideoRecorder
-from milan.utils.http import http_json_request
+from milan.utils.http import HttpClient
 
 
 class CdpWebsocketClient:
@@ -35,6 +35,8 @@ class CdpWebsocketClient:
         )
 
         self.on_json_rpc_client_stop = on_json_rpc_client_stop
+
+        self.http_client = None
         self.json_rpc_client = None
 
         self._browser_info = {}
@@ -59,6 +61,13 @@ class CdpWebsocketClient:
 
     def _start(self):
 
+        # setup HttpClient
+        self.http_client = HttpClient(
+            loop=self.loop,
+            logger=self.logger,
+        )
+
+        # connect to debug port
         @retry
         def wait_for_browser_info():
             self.logger.debug(
@@ -128,6 +137,10 @@ class CdpWebsocketClient:
 
         self.video_recorder.stop()
 
+        if self.http_client:
+            print('>> stop')
+            self.http_client.stop()
+
         if self.json_rpc_client:
             self.json_rpc_client.stop()
 
@@ -138,9 +151,10 @@ class CdpWebsocketClient:
     # REST API ################################################################
     def get_browser_info(self, refresh=False):
         if (not self._browser_info) or refresh:
-            self._browser_info = http_json_request(
+            self._browser_info = self.http_client.get(
                 url=f'http://{self.host}:{self.port}/json/list',
-            )[0]
+                json_response=True,
+            )[1][0]
 
         return self._browser_info
 
