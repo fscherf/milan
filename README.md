@@ -1,6 +1,7 @@
 # milan
 
 [![ci](https://github.com/fscherf/milan/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fscherf/milan/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/fscherf/milan/graph/badge.svg?token=2VRXXVNCVU)](https://codecov.io/gh/fscherf/milan)
 
 milan is a Python based browser testing and capturing tool, designed for
 end-to-end testing and for creating beautiful screenshots and video clips of
