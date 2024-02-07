@@ -32,6 +32,8 @@ jobs:
         python -m playwright install
 
     - name: Run Tox
+      env:
+        MILAN_CI_TEST: 1
       run: tox -e py
 
     - name: Upload coverage to Codecov
