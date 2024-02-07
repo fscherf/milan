@@ -26,7 +26,6 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -y
-        npm install
         pip install --upgrade setuptools tox
         pip install .[test]
         python -m playwright install-deps
