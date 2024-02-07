@@ -1,5 +1,7 @@
 # milan
 
+[![ci](https://github.com/fscherf/milan/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fscherf/milan/actions/workflows/ci.yml)
+
 milan is a Python based browser testing and capturing tool, designed for
 end-to-end testing and for creating beautiful screenshots and video clips of
 web applications. To do so, milan visually emultates one or more browser
