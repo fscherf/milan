@@ -9,7 +9,7 @@ windows and a cursor, in HTML and JavaScript.
 
 ## Usage
 ```python
-from milan import Chromium, Firefox
+from milan import Chromium, Firefox, Webkit
 
 
 with Chromium.start(headless=True) as browser:
@@ -47,7 +47,7 @@ All browser methods can also used asynchronously when running in an async
 context.
 
 ```python
-from milan import Chromium, Firefox
+from milan import Chromium, Firefox, Webkit
 
 
 async with Chromium.start(headless=True) as browser:
