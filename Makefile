@@ -42,7 +42,7 @@ test: | $(PYTHON_ENV)
 
 ci-test: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	MILAN_CI_TEST=1 tox $(args)
+	MILAN_CI_TEST=1 tox -e py38,py39,py310,py311 $(args)
 
 frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
