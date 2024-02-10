@@ -5,6 +5,7 @@ import logging
 import asyncio
 import queue
 import json
+import sys
 import os
 
 from aiohttp import ClientSession, WSMsgType
@@ -417,8 +418,14 @@ class JsonRpcWebsocketTransport(JsonRpcTransport):
         self._stopped = asyncio.Future(loop=self.loop)
         self._websocket_open = asyncio.Future(loop=self.loop)
         self._websocket = None
-        self._read_queue = asyncio.Queue()
-        self._write_queue = asyncio.Queue()
+
+        if sys.version_info < (3, 10):
+            self._read_queue = asyncio.Queue(loop=self.loop)
+            self._write_queue = asyncio.Queue(loop=self.loop)
+
+        else:
+            self._read_queue = asyncio.Queue()
+            self._write_queue = asyncio.Queue()
 
         self.loop.create_task(coro=self._handle_read_queue())
         self.loop.create_task(coro=self._handle_write_queue())
