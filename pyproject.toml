@@ -20,7 +20,7 @@ dev = [
   "twine",
   "tox",
   "simple-logging-setup",
-  "lona==1.16",
+  "lona==1.16.1",
   "lona-picocss==0.4.3",
   "rlpython",
   "playwright",
