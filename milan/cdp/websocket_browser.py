@@ -250,6 +250,7 @@ class CdpWebsocketBrowser(Browser):
             width=0,
             height=0,
             fps=0,
+            frame_dir=None,
             image_format='png',
             image_quality=100,
     ):
@@ -264,6 +265,7 @@ class CdpWebsocketBrowser(Browser):
             width=width,
             height=height,
             fps=fps,
+            frame_dir=frame_dir,
             image_format=image_format,
             image_quality=image_quality,
         )

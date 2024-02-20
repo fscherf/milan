@@ -1,9 +1,10 @@
+import tempfile
 import logging
 import os
 
+from milan.utils.misc import unique_id, AtomicCounter
 from milan.executables import get_executable
 from milan.utils.process import Process
-from milan.utils.misc import unique_id
 
 
 class VideoRecorder:
@@ -15,20 +16,11 @@ class VideoRecorder:
                 f'milan.video-recorder.{unique_id()}',
             )
 
-        # internal state
-        self._ffmpeg_path = get_executable('ffmpeg')
-        self._ffmpeg_process = None
-        self._output_path = ''
-        self._output_format = ''
-        self._output_gif_path = ''
         self._state = 'idle'
+        self._frame_counter = AtomicCounter()
 
     def __repr__(self):
-        return f'<VideoRecorder({self.ffmpeg_path=}, {self.state=})>'
-
-    @property
-    def ffmpeg_path(self):
-        return self._ffmpeg_path
+        return f'<VideoRecorder({self.state=})>'
 
     @property
     def state(self):
@@ -51,13 +43,13 @@ class VideoRecorder:
 
     def _get_ffmpeg_input_args(self):
         return [
-            # We feed images without timestamps into ffmpeg. This tells ffmpeg
-            # to use the wall clock instead to stabilize the framerate.
-            '-use_wallclock_as_timestamps', '1',
+            '-f', 'image2',  # format
 
-            # read images from the stdin
-            '-f', 'image2pipe',
-            '-i', '-',
+            # This tells ffmpeg to use the file modification timestamps as
+            # frame timestamps. `2` sets the precision to nanosecond.
+            '-ts_from_file', '2',
+
+            '-i', f'{self._frame_dir_path}/%*.png',  # input
         ]
 
     def _get_ffmpeg_mp4_output_args(self, fps, width, height):
@@ -141,41 +133,62 @@ class VideoRecorder:
         ]
 
     # public API ##############################################################
-    def write_frame(self, image_data):
+    def write_frame(self, timestamp, image_data):
         if not self.state == 'recording':
             return
 
         try:
-            self._ffmpeg_process.stdin_write(image_data)
+            frame_number = self._frame_counter.increment()
+
+            path = os.path.join(
+                self._frame_dir_path,
+                f'{frame_number:024d}.png',
+            )
+
+            # write image to temp dir
+            with open(path, 'wb') as file_handle:
+                file_handle.write(image_data)
+
+            # set the file timestamps to the frame timestamps for ffmpeg
+            # to pickup
+            os.utime(path, (timestamp, timestamp))
 
         except Exception:
             self._state = 'crashed'
 
             self.logger.exception('exception raised while writing to ffmpeg')
 
-    def start(self, output_path, width=0, height=0, fps=0):
-        # TODO: check if ffmpeg really started
-        # TODO: add hook to handle ffmpeg closing unexpectedly
+    def start(self, output_path, width=0, height=0, fps=0, frame_dir=None):
+        self._output_path = output_path
+        self._output_format = os.path.splitext(output_path)[1][1:]
 
         self.logger.debug('starting recording to %s', self._output_path)
 
-        output_format = os.path.splitext(output_path)[1][1:]
-
-        if output_format not in ('mp4', 'webm', 'gif'):
-            raise ValueError(f'invalid output format: {output_format}')
+        if self._output_format not in ('mp4', 'webm', 'gif'):
+            raise ValueError(f'invalid output format: {self._output_format}')
 
         # update internal state
         if self.state != 'idle':
             raise ValueError('recorder is not idling')
 
-        self._state = 'recording'
-        self._output_path = output_path
-        self._output_format = output_format
+        # setup frame dir
+        if not frame_dir:
+            self._frame_temp_dir = tempfile.TemporaryDirectory()
+            self._frame_dir_path = self._frame_temp_dir.name
 
-        # setup ffmpeg command
+        else:
+            self._frame_temp_dir = None
+            self._frame_dir_path = frame_dir
+
+        self.logger.debug('saving frames to %s', self._frame_dir_path)
+
+        # reset frame count
+        self._frame_counter.set(0)
+
+        # setup ffmpeg output args
         # mp4
         if self._output_format == 'mp4':
-            output_args = self._get_ffmpeg_mp4_output_args(
+            self._output_args = self._get_ffmpeg_mp4_output_args(
                 fps=fps,
                 width=width,
                 height=height,
@@ -183,7 +196,7 @@ class VideoRecorder:
 
         # webm
         elif self._output_format == 'webm':
-            output_args = self._get_ffmpeg_webm_output_args(
+            self._output_args = self._get_ffmpeg_webm_output_args(
                 fps=fps,
                 width=width,
                 height=height,
@@ -191,7 +204,7 @@ class VideoRecorder:
 
         # gif
         elif self._output_format == 'gif':
-            output_args = self._get_ffmpeg_gif_output_args(
+            self._output_args = self._get_ffmpeg_gif_output_args(
                 fps=fps,
                 width=width,
                 height=height,
@@ -200,30 +213,40 @@ class VideoRecorder:
         # check if output path is writeable
         self._touch(path=output_path)
 
-        # start ffmpeg
-        self._ffmpeg_process = Process(
-            command=[
-                self._ffmpeg_path,
-                *self._get_ffmpeg_global_args(),
-                *self._get_ffmpeg_input_args(),
-                *output_args,
-                self._output_path,
-            ],
-            logger=self._get_sub_logger('ffmpeg.recording'),
-        )
+        # start accepting frames
+        self._state = 'recording'
 
     def stop(self):
-        self.logger.debug('stopping recording to %s', self._output_path)
-
         if self.state != 'recording':
-            self.logger.debug('nothing to do')
+            self.logger.debug('stopping. nothing to do')
 
             return
 
-        self._state = 'stopping'
+        self.logger.debug('stopping recording to %s', self._output_path)
 
-        if self._ffmpeg_process:
-            self._ffmpeg_process.stdin_close()
-            self._ffmpeg_process.wait()
+        # render images to video
+        self.logger.debug(
+            'rendering %s frames from %s to %s',
+            self._frame_counter.value,
+            self._frame_dir_path,
+            self._output_path,
+        )
+
+        self._state = 'rendering'
+
+        Process(
+            command=[
+                get_executable('ffmpeg'),
+                *self._get_ffmpeg_global_args(),
+                *self._get_ffmpeg_input_args(),
+                *self._output_args,
+                self._output_path,
+            ],
+            logger=self._get_sub_logger('ffmpeg.rendering'),
+        ).wait()
+
+        # cleanup
+        if self._frame_temp_dir:
+            self._frame_temp_dir.cleanup()
 
         self._state = 'idle'

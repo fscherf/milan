@@ -393,13 +393,17 @@ class CdpWebsocketClient:
 
     # video capturing #########################################################
     def _handle_screen_cast_frame(self, json_rpc_message):
+        timestamp = json_rpc_message.params['metadata']['timestamp']
         image_data = decode_base64(json_rpc_message.params['data'])
 
         self.page_screen_cast_frame_ack(
             session_id=json_rpc_message.params['sessionId'],
         )
 
-        self.video_recorder.write_frame(image_data=image_data)
+        self.video_recorder.write_frame(
+            timestamp=timestamp,
+            image_data=image_data,
+        )
 
     def start_video_capturing(
             self,
@@ -407,6 +411,7 @@ class CdpWebsocketClient:
             width=0,
             height=0,
             fps=0,
+            frame_dir=None,
             image_format='png',
             image_quality=100,
     ):
@@ -418,6 +423,7 @@ class CdpWebsocketClient:
             width=width,
             height=height,
             fps=fps,
+            frame_dir=frame_dir,
         )
 
         self.page_start_screen_cast(
