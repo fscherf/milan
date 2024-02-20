@@ -138,7 +138,6 @@ class CdpWebsocketClient:
         self.video_recorder.stop()
 
         if self.http_client:
-            print('>> stop')
             self.http_client.stop()
 
         if self.json_rpc_client:
