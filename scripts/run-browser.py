@@ -16,12 +16,15 @@ DEBUGGER = False
 DEBUGGER_PORT = 5678
 
 
-def run_form_demo(browser, capture=''):
+def run_form_demo(browser, output_path=None, frame_dir=None):
     browser.resize(1280, 720)
 
     # start video capturing:
-    if capture:
-        browser.start_video_capturing(capture)
+    if output_path:
+        browser.start_video_capturing(
+            output_path=output_path,
+            frame_dir=frame_dir,
+        )
 
     # navigate to view
     browser.navigate('localhost:8080')
@@ -39,16 +42,19 @@ def run_form_demo(browser, capture=''):
     browser.click('#close')
 
     # stop video capturing
-    if capture:
+    if output_path:
         browser.stop_video_capturing()
 
 
-def run_multi_window_demo(browser, capture=''):
+def run_multi_window_demo(browser, output_path=None, frame_dir=None):
     browser.resize(1280, 720)
 
     # start video capturing:
-    if capture:
-        browser.start_video_capturing(capture)
+    if output_path:
+        browser.start_video_capturing(
+            output_path=output_path,
+            frame_dir=frame_dir,
+        )
 
     # open second window
     if browser.get_window_count() < 2:
@@ -65,7 +71,7 @@ def run_multi_window_demo(browser, capture=''):
     browser.fill('#text-input-2', 'bar', window=1)
 
     # stop video capturing
-    if capture:
+    if output_path:
         time.sleep(2)
         browser.stop_video_capturing()
 
@@ -90,7 +96,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--run-form-demo', action='store_true')
     parser.add_argument('--run-multi-window-demo', action='store_true')
-    parser.add_argument('--capture')
+    parser.add_argument('--output-path')
+    parser.add_argument('--frame-dir')
 
     args = parser.parse_args()
 
@@ -145,13 +152,15 @@ if __name__ == '__main__':
         if args.run_form_demo:
             run_form_demo(
                 browser=browser,
-                capture=args.capture,
+                output_path=args.output_path,
+                frame_dir=args.frame_dir,
             )
 
         elif args.run_multi_window_demo:
             run_multi_window_demo(
                 browser=browser,
-                capture=args.capture,
+                output_path=args.output_path,
+                frame_dir=args.frame_dir,
             )
 
         else:

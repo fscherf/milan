@@ -69,9 +69,9 @@ demos: | $(PYTHON_ENV)
 		--browser=chromium \
 		--headless \
 		--run-form-demo \
-		--capture=$(DOC_ROOT)/form-demo.gif && \
+		--output-path=$(DOC_ROOT)/form-demo.gif && \
 	$(PYTHON) scripts/run-browser.py \
 		--browser=chromium \
 		--headless \
 		--run-multi-window-demo \
-		--capture=$(DOC_ROOT)/multi-window-demo.gif
+		--output-path=$(DOC_ROOT)/multi-window-demo.gif
