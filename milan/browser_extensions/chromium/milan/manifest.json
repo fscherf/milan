@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "version": "0.0.0",
+  "name": "Milan",
+  "description": "",
+  "permissions": [
+    "<all_urls>",
+    "webRequest",
+    "webRequestBlocking",
+    "cookies"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  }
+}
