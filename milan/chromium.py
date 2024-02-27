@@ -1,6 +1,7 @@
 import webbrowser
 
 from milan.cdp.websocket_browser import CdpWebsocketBrowser
+from milan.browser_extensions import CHROMIUM_EXTENSIONS
 from milan.executables import get_executable
 
 
@@ -10,13 +11,11 @@ class Chromium(CdpWebsocketBrowser):
             *args,
             executable=None,
             headless=True,
-            disable_web_security=False,
             **kwargs,
     ):
 
         self.executable = executable
         self.headless = headless
-        self.disable_web_security = disable_web_security
 
         if not self.executable:
             self.executable = get_executable('chromium')
@@ -30,13 +29,24 @@ class Chromium(CdpWebsocketBrowser):
 
         return [
             self.executable,
-            '--headless' if self.headless else '',
-            '--disable-gpu',
+            '--headless=new' if self.headless else '',
+            f'--user-data-dir={self.user_data_dir.name}',
+
+            # browser extensions
+            f'--load-extension={CHROMIUM_EXTENSIONS.MILAN}',
+
+            # disable security features
             '--no-sandbox',
             '--disable-web-security',
-            f'--user-data-dir={self.user_data_dir.name}',
+            '--disable-site-isolation-trials',
+
+            # disable optimizations
+            '--disable-gpu',
+
+            # remote debugging
             f'--remote-debugging-port={self.debug_port}',
-            '--remote-allow-origins=*',
+
+            # initial page
             'about:blank',
         ]
 
