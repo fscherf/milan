@@ -150,10 +150,18 @@ class CdpWebsocketClient:
     # REST API ################################################################
     def get_browser_info(self, refresh=False):
         if (not self._browser_info) or refresh:
-            self._browser_info = self.http_client.get(
+            response_status, json_data = self.http_client.get(
                 url=f'http://{self.host}:{self.port}/json/list',
                 json_response=True,
-            )[1][0]
+            )
+
+            for target_info in json_data:
+                if target_info['type'] != 'page':
+                    continue
+
+                self._browser_info = target_info
+
+                break
 
         return self._browser_info
 
