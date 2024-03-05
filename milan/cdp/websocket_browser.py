@@ -125,7 +125,7 @@ class CdpWebsocketBrowser(Browser):
             wait_for_devtools_debug_port()
 
         # HACK: prevent race conditions between non-headless chrome and X11
-        if self.is_chrome() and '--headless' not in self.browser_command:
+        if self.is_chrome() and not self.headless:
             self.logger.warning(
                 'HACK: sleeping 1s before connecting to the debug port to prevent race conditions with X11',
             )
