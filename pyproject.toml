@@ -11,6 +11,8 @@ requires-python = ">=3.8"
 
 dependencies = [
   "aiohttp~=3.9.0",
+  "simple-logging-setup",
+  "rlpython",
 ]
 
 
@@ -39,3 +41,7 @@ test = [
 
 [tool.setuptools]
 include-package-data = true
+
+script-files = [
+  "bin/milan",
+]
