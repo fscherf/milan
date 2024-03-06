@@ -73,4 +73,8 @@ demos: | $(PYTHON_ENV)
 		--await-app-port=8080 \
 		--headless \
 		--windows=2 \
-		--capture=$(DOC_ROOT)/multi-window-demo.gif
+		--capture=$(DOC_ROOT)/multi-window-demo.gif && \
+	milan \
+		run demos/youtube.py::open_trending_movies \
+		--headless \
+		--capture=$(DOC_ROOT)/youtube-demo.gif
