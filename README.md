@@ -68,3 +68,6 @@ async with Chromium.start(headless=True) as browser:
 
 **Multi Window**
 ![multi-window-demo.gif](doc/multi-window-demo.gif)
+
+**YouTube**
+![youtube-demo.gif](doc/youtube-demo.gif)
