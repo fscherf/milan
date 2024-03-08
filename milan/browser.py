@@ -191,6 +191,8 @@ class Browser:
     @frontend_function
     @browser_function
     def split(self):
+        self.logger.info('splitting window')
+
         return self.evaluate(
             expression=commands.gen_window_manager_split_command(),
         )
@@ -199,6 +201,8 @@ class Browser:
     @frontend_function
     @browser_function
     def show_cursor(self):
+        self.logger.info('showing cursor')
+
         return self.evaluate(
             expression=commands.gen_cursor_show_command(),
         )
@@ -206,6 +210,8 @@ class Browser:
     @frontend_function
     @browser_function
     def hide_cursor(self):
+        self.logger.info('hiding cursor')
+
         return self.evaluate(
             expression=commands.gen_cursor_hide_command(),
         )
@@ -226,6 +232,8 @@ class Browser:
             animation=None,
     ):
 
+        self.logger.info('moving cursor to x=%s y=%s', x, y)
+
         return self.evaluate(
             expression=commands.gen_cursor_move_to_command(
                 x=float(x),
@@ -237,6 +245,8 @@ class Browser:
     @frontend_function
     @browser_function
     def move_cursor_to_home(self, animation=None):
+        self.logger.info('moving cursor to home')
+
         return self.evaluate(
             expression=commands.gen_cursor_move_to_home_command(
                 animation=self._get_animations(animation),
@@ -254,6 +264,8 @@ class Browser:
     @frontend_function
     @browser_function
     def reload(self, window=0, animation=None):
+        self.logger.info('reloading window %s', window)
+
         return self.evaluate(
             expression=commands.gen_window_reload_command(
                 window_index=window,
@@ -265,6 +277,8 @@ class Browser:
     @frontend_function
     @browser_function
     def navigate_back(self, window=0, animation=None):
+        self.logger.info('navigating window %s back', window)
+
         return self.evaluate(
             expression=commands.gen_window_navigate_back_command(
                 window_index=window,
@@ -275,6 +289,8 @@ class Browser:
     @frontend_function
     @browser_function
     def navigate_forward(self, window=0, animation=None):
+        self.logger.info('navigating window %s forward', window)
+
         return self.evaluate(
             expression=commands.gen_window_navigate_forward_command(
                 window_index=window,
@@ -294,6 +310,12 @@ class Browser:
     @frontend_function
     @browser_function
     def set_fullscreen(self, window=0, fullscreen=True):
+        self.logger.info(
+            '%s fullscreen for window %s',
+            'enabling' if fullscreen else 'disabling',
+            window,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_set_fullscreen_command(
                 window_index=window,
@@ -310,6 +332,12 @@ class Browser:
     @frontend_function
     @browser_function
     def await_element(self, selector, window=0):
+        self.logger.info(
+            "waiting for element with selector '%s' in window %s",
+            selector,
+            window,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_await_element_command(
                 window_index=window,
@@ -320,6 +348,13 @@ class Browser:
     @frontend_function
     @browser_function
     def await_text(self, selector, text, window=0):
+        self.logger.info(
+            "waiting for element with selector '%s' to contain '%s' in window %s",  # NOQA
+            selector,
+            text,
+            window,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_await_text_command(
                 window_index=window,
@@ -332,6 +367,12 @@ class Browser:
     @frontend_function
     @browser_function
     def click(self, selector, window=0, animation=None):
+        self.logger.info(
+            "clicking on element with selector '%s' in window %s",
+            selector,
+            window,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_click_command(
                 window_index=window,
@@ -343,6 +384,13 @@ class Browser:
     @frontend_function
     @browser_function
     def fill(self, selector, value, window=0, animation=None):
+        self.logger.info(
+            "filling value '%s' into an element with selector '%s' in window %s",  # NOQA
+            value,
+            selector,
+            window,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_fill_command(
                 window_index=window,
@@ -355,6 +403,13 @@ class Browser:
     @frontend_function
     @browser_function
     def check(self, selector, value=True, window=0, animation=None):
+        self.logger.info(
+            "%s checkbox with selector '%s' in window %s",
+            'checking' if value else 'unchecking',
+            selector,
+            window,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_check_command(
                 window_index=window,
@@ -375,6 +430,24 @@ class Browser:
             window=0,
             animation=None,
     ):
+
+        identifier = ''
+
+        if value:
+            identifier = f"value '{value}'"
+
+        elif value:
+            identifier = f"index '{index}'"
+
+        elif label:
+            identifier = f"label '{label}'"
+
+        self.logger.info(
+            "selecting option with %s in select with selector '%s' in window %s",  # NOQA
+            identifier,
+            selector,
+            window,
+        )
 
         return self.evaluate(
             expression=commands.gen_window_select_command(
@@ -400,7 +473,7 @@ class Browser:
         if url.host == 'localhost':
             url.host = '127.0.0.1'
 
-        self.logger.debug('navigating frontend to %s', url)
+        self.logger.info('navigating frontend to %s', url)
 
         self.evaluate(
             expression=commands.gen_window_navigate_command(
@@ -420,6 +493,8 @@ class Browser:
 
     @browser_function
     def reload_frontend(self):
+        self.logger.info('loading frontend')
+
         self._navigate_browser(url=self._frontend_server.get_frontend_url())
 
     # hooks ###################################################################
