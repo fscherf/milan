@@ -136,7 +136,7 @@ class Browser:
         return logging.getLogger(f'{self.logger.name}.{name}')
 
     def _get_animations(self, local_override):
-        if local_override:
+        if local_override is not None:
             return local_override
 
         return self.animations
