@@ -233,7 +233,13 @@ def gen_window_set_fullscreen_command(window_index, fullscreen):
 
 
 # window: selectors
-def gen_window_await_element_command(window_index, selector):
+def gen_window_await_element_command(
+        window_index,
+        selector,
+        timeout,
+        timeout_max,
+):
+
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
@@ -241,11 +247,20 @@ def gen_window_await_element_command(window_index, selector):
         ),
         args={
             'elementOrSelector': selector,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
         },
     )
 
 
-def gen_window_await_text_command(window_index, selector, text):
+def gen_window_await_text_command(
+        window_index,
+        selector,
+        text,
+        timeout,
+        timeout_max,
+):
+
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
@@ -254,12 +269,21 @@ def gen_window_await_text_command(window_index, selector, text):
         args={
             'elementOrSelector': selector,
             'text': text,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
         },
     )
 
 
 # window: user input
-def gen_window_click_command(window_index, selector, animation):
+def gen_window_click_command(
+        window_index,
+        selector,
+        animation,
+        timeout,
+        timeout_max,
+):
+
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
@@ -268,11 +292,21 @@ def gen_window_click_command(window_index, selector, animation):
         args={
             'elementOrSelector': selector,
             'animation': animation,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
         },
     )
 
 
-def gen_window_fill_command(window_index, selector, value, animation):
+def gen_window_fill_command(
+        window_index,
+        selector,
+        value,
+        animation,
+        timeout,
+        timeout_max,
+):
+
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
@@ -282,11 +316,21 @@ def gen_window_fill_command(window_index, selector, value, animation):
             'elementOrSelector': selector,
             'value': value,
             'animation': animation,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
         },
     )
 
 
-def gen_window_check_command(window_index, selector, value, animation):
+def gen_window_check_command(
+        window_index,
+        selector,
+        value,
+        animation,
+        timeout,
+        timeout_max,
+):
+
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
@@ -296,6 +340,8 @@ def gen_window_check_command(window_index, selector, value, animation):
             'elementOrSelector': selector,
             'value': value,
             'animation': animation,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -307,6 +353,8 @@ def gen_window_select_command(
         index,
         label,
         animation,
+        timeout,
+        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -320,5 +368,7 @@ def gen_window_select_command(
             'index': index,
             'label': label,
             'animation': animation,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
         },
     )
