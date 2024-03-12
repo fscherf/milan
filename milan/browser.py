@@ -117,8 +117,16 @@ class Browser:
     def start(cls, *args, **kwargs):
         return BrowserContext(cls, *args, **kwargs)
 
-    def __init__(self, animations=True):
+    def __init__(
+            self,
+            animations=True,
+            selector_timeout=0.2,
+            selector_timeout_max=3,
+    ):
+
         self.animations = animations
+        self.selector_timeout = selector_timeout
+        self.selector_timeout_max = selector_timeout_max
 
         self.id = unique_id()
 
@@ -140,6 +148,18 @@ class Browser:
             return local_override
 
         return self.animations
+
+    def _get_selector_timeout(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.selector_timeout
+
+    def _get_selector_timeout_max(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.selector_timeout_max
 
     # events ##################################################################
     @browser_function
@@ -331,28 +351,53 @@ class Browser:
 
     @frontend_function
     @browser_function
-    def await_element(self, selector, window=0):
+    def await_element(
+            self,
+            selector,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
         self.logger.info(
-            "waiting for element with selector '%s' in window %s",
+            "waiting for element with selector '%s' in window %s with a timeout of %ss",  # NOQA
             selector,
             window,
+            timeout_max,
         )
 
         return self.evaluate(
             expression=commands.gen_window_await_element_command(
                 window_index=window,
                 selector=selector,
+                timeout=timeout,
+                timeout_max=timeout_max,
             ),
         )
 
     @frontend_function
     @browser_function
-    def await_text(self, selector, text, window=0):
+    def await_text(
+            self,
+            selector,
+            text,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
         self.logger.info(
-            "waiting for element with selector '%s' to contain '%s' in window %s",  # NOQA
+            "waiting for element with selector '%s' to contain '%s' in window %s with a timeout of %ss",  # NOQA
             selector,
             text,
             window,
+            timeout_max,
         )
 
         return self.evaluate(
@@ -360,35 +405,64 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 text=text,
+                timeout=timeout,
+                timeout_max=timeout_max,
             ),
         )
 
     # window: user input
     @frontend_function
     @browser_function
-    def click(self, selector, window=0, animation=None):
+    def click(
+            self,
+            selector,
+            timeout=None,
+            timeout_max=None,
+            animation=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
         self.logger.info(
-            "clicking on element with selector '%s' in window %s",
+            "clicking on element with selector '%s' in window %s with a timeout of %ss",  # NOQA
             selector,
             window,
+            timeout_max,
         )
 
         return self.evaluate(
             expression=commands.gen_window_click_command(
                 window_index=window,
                 selector=selector,
+                timeout=timeout,
+                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
 
     @frontend_function
     @browser_function
-    def fill(self, selector, value, window=0, animation=None):
+    def fill(
+            self,
+            selector,
+            value,
+            timeout=None,
+            timeout_max=None,
+            animation=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
         self.logger.info(
-            "filling value '%s' into an element with selector '%s' in window %s",  # NOQA
+            "filling value '%s' into an element with selector '%s' in window %s with a timeout of %ss",  # NOQA
             value,
             selector,
             window,
+            timeout_max,
         )
 
         return self.evaluate(
@@ -396,18 +470,33 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 value=value,
+                timeout=timeout,
+                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
 
     @frontend_function
     @browser_function
-    def check(self, selector, value=True, window=0, animation=None):
+    def check(
+            self,
+            selector,
+            value=True,
+            timeout=None,
+            timeout_max=None,
+            animation=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
         self.logger.info(
-            "%s checkbox with selector '%s' in window %s",
+            "%s checkbox with selector '%s' in window %s with a timeout of %ss",  # NOQA
             'checking' if value else 'unchecking',
             selector,
             window,
+            timeout_max,
         )
 
         return self.evaluate(
@@ -415,6 +504,8 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 value=value,
+                timeout=timeout,
+                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
@@ -427,10 +518,14 @@ class Browser:
             value=None,
             index=None,
             label=None,
+            timeout=None,
+            timeout_max=None,
             window=0,
             animation=None,
     ):
 
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
         identifier = ''
 
         if value:
@@ -443,10 +538,11 @@ class Browser:
             identifier = f"label '{label}'"
 
         self.logger.info(
-            "selecting option with %s in select with selector '%s' in window %s",  # NOQA
+            "selecting option with %s in select with selector '%s' in window %s with a timeout of %ss",  # NOQA
             identifier,
             selector,
             window,
+            timeout_max
         )
 
         return self.evaluate(
@@ -456,6 +552,8 @@ class Browser:
                 value=value,
                 index=index,
                 label=label,
+                timeout=timeout,
+                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
