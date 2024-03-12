@@ -202,19 +202,18 @@
             timeout = timeout || this.config.timeout;
             timeoutMax = timeoutMax || this.config.timeoutMax;
 
-            // await element
-            const element = this.getElement({
-                elementOrSelector: elementOrSelector,
-                iframe: iframe,
-                timeout: timeout,
-                timeoutMax: timeoutMax,
-            });
-
-            // await text
+            let element = undefined;
             let timeSlept = 0;
 
             while (timeSlept < timeoutMax) {
-                if (element.innerHTML.includes(text)) {
+                element = this.getElement({
+                    elementOrSelector: elementOrSelector,
+                    iframe: iframe,
+                    timeout: timeout,
+                    timeoutMax: timeoutMax,
+                });
+
+                if (element && element.innerHTML.includes(text)) {
                     return;
                 }
 
