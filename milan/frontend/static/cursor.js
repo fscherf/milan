@@ -175,6 +175,8 @@
                 element = this.getElement({
                     elementOrSelector: elementOrSelector,
                     iframe: iframe,
+                    timeout: timeout,
+                    timeoutMax: timeoutMax,
                 });
 
                 if (element) {
