@@ -14,10 +14,5 @@ services:
     volumes:
       - ./:/app
 
-    ports:
-        - "127.0.0.1:8080:8080"
-        - "127.0.0.1:9222:9222"
-        - "127.0.0.1:9223:9223"
-
     working_dir: "/app"
     command: "bash"
