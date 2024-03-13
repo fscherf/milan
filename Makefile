@@ -58,20 +58,19 @@ playwright-browser: | $(PYTHON_ENV)
 	$(PYTHON) scripts/run-playwright.py
 
 # milan #######################################################################
-browser: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/run-browser.py $(args)
-
 demos: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	rm $(DOC_ROOT)/*.gif && \
-	$(PYTHON) scripts/run-browser.py \
-		--browser=chromium \
+	rm -rf $(DOC_ROOT)/*.gif && \
+	milan \
+		run demos/forms.py::main \
+		--run-app="python demos/demo-app.py --port=8080" \
+		--await-app-port=8080 \
 		--headless \
-		--run-form-demo \
-		--output-path=$(DOC_ROOT)/form-demo.gif && \
-	$(PYTHON) scripts/run-browser.py \
-		--browser=chromium \
+		--capture=$(DOC_ROOT)/form-demo.gif && \
+	milan \
+		run demos/multi-window.py::main \
+		--run-app="python demos/demo-app.py --port=8080" \
+		--await-app-port=8080 \
 		--headless \
-		--run-multi-window-demo \
-		--output-path=$(DOC_ROOT)/multi-window-demo.gif
+		--windows=2 \
+		--capture=$(DOC_ROOT)/multi-window-demo.gif

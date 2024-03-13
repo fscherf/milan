@@ -45,3 +45,6 @@ include-package-data = true
 script-files = [
   "bin/milan",
 ]
+
+[tool.setuptools.packages.find]
+include = ['milan*']
