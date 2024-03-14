@@ -51,7 +51,43 @@ window.addEventListener('load', () => {
         });
     });
 
-    // animations
+    // animations: moving button
+    const movingButtonContainerElement = document.querySelector(
+        '#moving-button-container',
+    );
+
+    const movingButtonElement = document.querySelector('#moving-button');
+
+    const animateMovingButton = async () => {
+        if (!animationRunning) {
+            return;
+        }
+
+        let start = parseInt(movingButtonElement.style.left);
+        let stop;
+
+        if (start > 0) {
+            stop = 0;
+        } else {
+            stop = 100;
+        }
+
+        await movingButtonElement.animate(
+            {
+                left: [`${start}px`, `${stop}px`],
+            },
+            {
+                easing: 'ease',
+                duration: 200,
+            },
+        ).finished;
+
+        movingButtonElement.style.left = `${stop}px`;
+
+        setTimeout(animateMovingButton, 1000);
+    }
+
+    // animations: rotating container
     const animationFramesElement = document.querySelector('#animation-frames');
     const rotatingContainerElement = document.querySelector('#rotating-container');
     const animationStartElement = document.querySelector('#animation-start');
@@ -80,11 +116,14 @@ window.addEventListener('load', () => {
         }
     }
 
+    // animation: controls
     animationStartElement.addEventListener('click', event => {
         animationStartElement.disabled = true;
         animationStopElement.disabled = false;
         animationRunning = true;
+
         animate();
+        animateMovingButton();
     });
 
     animationStopElement.addEventListener('click', event => {

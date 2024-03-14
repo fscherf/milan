@@ -36,6 +36,14 @@ h1 {
     height: 100px;
 }
 
+#moving-button-container {
+    margin-top: 1em;
+}
+
+#moving-button {
+    position: relative;
+}
+
 /* form inputs ------------------------------------------------------------- */
 table#form-inputs {
     border: 0;

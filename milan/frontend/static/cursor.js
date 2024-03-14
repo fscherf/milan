@@ -81,6 +81,7 @@
             this.config = {
                 timeout: 200,
                 timeoutMax: 3000,
+                maxRetries: 3,
             };
 
             // setup cursor element
@@ -269,6 +270,7 @@
         // animations ---------------------------------------------------------
         _playClickAnimation = async ({
             elementOrSelector=required('elementOrSelector'),
+            maxRetries=undefined,
             iframe=undefined,
         }={}) => {
 
@@ -292,30 +294,57 @@
             }
 
             // place cursor
-            const coordinates = this.getElementCoordinates({
-                element: element,
-                iframe: iframe,
-            });
+            const max_retries = maxRetries || this.config.maxRetries;
 
-            await this.moveTo({
-                x: coordinates.x,
-                y: coordinates.y,
-                animation: true,
-            });
+            let coordinates_before_cursor_move;
+            let coordinates_after_cursor_move;
+            let tries = 0;
 
-            await this.sleep(250);
+            while (tries < max_retries) {
+                coordinates_before_cursor_move = this.getElementCoordinates({
+                    element: element,
+                    iframe: iframe,
+                });
 
-            // click animation
-            await this.cursorElement.animate(
-                {
-                    width: [`${CURSOR_WIDTH}px`, `${CURSOR_WIDTH-8}px`],
-                    height: [`${CURSOR_HEIGHT}px`, `${CURSOR_HEIGHT-8}px`],
-                },
-                {
-                    easing: 'ease',
-                    duration: 200,
-                },
-            ).finished;
+                await this.moveTo({
+                    x: coordinates_before_cursor_move.x,
+                    y: coordinates_before_cursor_move.y,
+                    animation: true,
+                });
+
+                await this.sleep(250);
+
+                coordinates_after_cursor_move = this.getElementCoordinates({
+                    element: element,
+                    iframe: iframe,
+                });
+
+                // element moved; retrying
+                if (Object.entries(coordinates_before_cursor_move).toString() !==
+                    Object.entries(coordinates_after_cursor_move).toString()) {
+
+                    tries += 1;
+
+                    continue;
+                }
+
+                // click animation
+                await this.cursorElement.animate(
+                    {
+                        width: [`${CURSOR_WIDTH}px`, `${CURSOR_WIDTH-8}px`],
+                        height: [`${CURSOR_HEIGHT}px`, `${CURSOR_HEIGHT-8}px`],
+                    },
+                    {
+                        easing: 'ease',
+                        duration: 200,
+                    },
+                ).finished;
+
+                // finish
+                return;
+            }
+
+            throw `Element with selector moved to much under the cursor`;
         }
 
         // actions ------------------------------------------------------------
