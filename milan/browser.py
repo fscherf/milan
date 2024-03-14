@@ -560,6 +560,7 @@ class Browser:
 
     # navigation ##############################################################
     @browser_function
+    @frontend_function
     def navigate(self, url, window=0, animation=None):
         # TODO: add support for external sites besides 'localhost'
         # TODO: add support for cursor bootstrapping
@@ -573,7 +574,7 @@ class Browser:
 
         self.logger.info('navigating frontend to %s', url)
 
-        self.evaluate(
+        return self.evaluate(
             expression=commands.gen_window_navigate_command(
                 window_index=window,
                 url=str(url),
@@ -581,7 +582,6 @@ class Browser:
             ),
         )
 
-    @browser_function
     def navigate_to_test_application(self, *args, **kwargs):
         return self.navigate(
             url=self._frontend_server.get_test_application_url(),
