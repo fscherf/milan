@@ -228,18 +228,28 @@
 
         elementIsVisible = ({
             element=required('element'),
+            iframe=undefined,
         }={}) => {
 
             const clientRect = element.getBoundingClientRect();
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+
+            if (typeof(iframe) != 'undefined') {
+                const iframeClientRect = iframe.getBoundingClientRect();
+
+                width = iframeClientRect.wdith;
+                height = iframeClientRect.height;
+            }
 
             return (
                 clientRect.top >= 0 &&
                 clientRect.left >= 0 &&
                 clientRect.bottom <= (
-                    window.innerHeight ||
+                    height ||
                     document.documentElement.clientHeight) &&
                 clientRect.right <= (
-                    window.innerWidth ||
+                    width ||
                     document.documentElement.clientWidth)
             );
         }
@@ -283,7 +293,7 @@
 
             // scroll element into view if needed
             // FIXME: move cursor onto iframe if needed
-            if (!this.elementIsVisible({element: element})) {
+            if (!this.elementIsVisible({element: element, iframe: iframe})) {
                 element.scrollIntoView({
                     behavior: 'smooth',
                     block: 'end',
