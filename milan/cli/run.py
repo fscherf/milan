@@ -70,6 +70,7 @@ def run(cli_args):
         browser_args = {
             'executable': cli_args['executable'],
             'headless': cli_args['headless'],
+            'user_data_dir': cli_args['user-data-dir'],
             'animations': not cli_args['disable-animations'],
         }
 

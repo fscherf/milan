@@ -30,7 +30,7 @@ class Chromium(CdpWebsocketBrowser):
         return [
             self.executable,
             '--headless=new' if self.headless else '',
-            f'--user-data-dir={self.user_data_dir.name}',
+            f'--user-data-dir={self.user_data_dir}',
 
             # browser extensions
             f'--load-extension={CHROMIUM_EXTENSIONS.MILAN}',

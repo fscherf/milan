@@ -1,3 +1,4 @@
+from tempfile import TemporaryDirectory
 import queue
 import os
 
@@ -70,12 +71,24 @@ class TargetJsonRpcTransport(JsonRpcTransport):
 
 
 class Webkit(Browser):
-    def __init__(self, animations=True, headless=True, executable=None):
+    def __init__(
+            self,
+            *args,
+            animations=True,
+            headless=True,
+            executable=None,
+            user_data_dir='',
+            **kwargs,
+    ):
+
         super().__init__(animations=animations)
 
         self.executable = executable
         self.headless = headless
+        self.user_data_dir = user_data_dir
+        self.kwargs = kwargs
 
+        self._user_data_dir_temp_dir = None
         self._background_loop = None
         self._browser_process = None
         self._frontend_server = None
@@ -186,6 +199,11 @@ class Webkit(Browser):
             logger=self._get_sub_logger('background-loop'),
         )
 
+        # setup user-data-dir
+        if not self.user_data_dir:
+            self._user_data_dir_temp_dir = TemporaryDirectory()
+            self.user_data_dir = self._user_data_dir_temp_dir.name
+
         # start browser process
         if not self.executable:
             self.executable = get_executable('webkit')
@@ -195,6 +213,7 @@ class Webkit(Browser):
             '--headless' if self.headless else '',
             '--inspector-pipe',
             '--no-startup-window',
+            f'--user-data-dir={self.user_data_dir}',
         ]
 
         self.logger.debug('starting browser process')

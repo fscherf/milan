@@ -66,6 +66,11 @@ def parse_command_line_args(argv):
     )
 
     run_parser.add_argument(
+        '--user-data-dir',
+        default='',
+    )
+
+    run_parser.add_argument(
         '--headless',
         action='store_true',
     )
