@@ -17,7 +17,7 @@ def _gen_frontend_run_command(func, args=None):
 
     return f"""
         (async () => {{
-            const args = JSON.parse('{args_string}');
+            const args = JSON.parse(`{args_string}`);
 
             const returnValue = await milan.run({{
                 func: {func},
