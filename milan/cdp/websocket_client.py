@@ -254,6 +254,41 @@ class CdpWebsocketClient:
 
         return response.result
 
+    def emulation_set_emulated_media(
+            self,
+            media='',
+            prefers_color_scheme='light',
+            prefers_reduced_motion='no-preference',
+            forced_colors='none',
+    ):
+
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setEmulatedMedia
+        """
+
+        response = self.json_rpc_client.send_request(
+            method='Emulation.setEmulatedMedia',
+            params={
+                'media': media,
+                'features': [
+                    {
+                        'name': 'prefers-color-scheme',
+                        'value': prefers_color_scheme,
+                    },
+                    {
+                        'name': 'prefers-reduced-motion',
+                        'value': prefers_reduced_motion,
+                    },
+                    {
+                        'name': 'forced-colors',
+                        'value': forced_colors,
+                    },
+                ],
+            },
+        )
+
+        return response.result
+
     # page
     def page_enable(self):
         """

@@ -599,6 +599,9 @@ class Browser:
     def stop(self):
         raise NotImplementedError()
 
+    def set_color_scheme(self, color_scheme):
+        raise NotImplementedError()
+
     @browser_function
     def _navigate_browser(self, url):
         raise NotImplementedError()

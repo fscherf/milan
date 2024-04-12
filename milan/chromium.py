@@ -58,3 +58,9 @@ class Chromium(CdpWebsocketBrowser):
 
     def open_inspector(self):
         webbrowser.open_new_tab(self.get_inspector_url())
+
+    # hooks
+    def set_color_scheme(self, color_scheme):
+        return self.cdp_websocket_client.emulation_set_emulated_media(
+            prefers_color_scheme=color_scheme,
+        )

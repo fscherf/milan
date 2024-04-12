@@ -71,6 +71,11 @@ def parse_command_line_args(argv):
     )
 
     run_parser.add_argument(
+        '--color-scheme',
+        default='',
+    )
+
+    run_parser.add_argument(
         '--headless',
         action='store_true',
     )

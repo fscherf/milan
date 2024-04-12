@@ -99,6 +99,14 @@ def run(cli_args):
             # reset browser
             browser.animations = not cli_args['disable-animations']
 
+        # color scheme
+        if cli_args['color-scheme']:
+            logger.info('setting color-scheme to %s', cli_args['color-scheme'])
+
+            browser.set_color_scheme(
+                color_scheme=cli_args['color-scheme'],
+            )
+
         # hide cursor
         if cli_args['hide-cursor']:
             logger.info('hiding cursor')
