@@ -120,11 +120,15 @@ class Browser:
     def __init__(
             self,
             animations=True,
+            short_selector_timeout=0.2,
+            short_selector_timeout_max=1,
             selector_timeout=0.2,
             selector_timeout_max=3,
     ):
 
         self.animations = animations
+        self.short_selector_timeout = short_selector_timeout
+        self.short_selector_timeout_max = short_selector_timeout_max
         self.selector_timeout = selector_timeout
         self.selector_timeout_max = selector_timeout_max
 
@@ -148,6 +152,18 @@ class Browser:
             return local_override
 
         return self.animations
+
+    def _get_short_selector_timeout(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.short_selector_timeout
+
+    def _get_short_selector_timeout_max(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.short_selector_timeout_max
 
     def _get_selector_timeout(self, local_override):
         if local_override is not None:
@@ -348,6 +364,44 @@ class Browser:
     @browser_function
     def await_load(self, window=0, url=''):
         raise NotImplementedError()
+
+    @frontend_function
+    @browser_function
+    def element_exists(
+            self,
+            selector,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_short_selector_timeout(timeout)
+        timeout_max = self._get_short_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "checking if element with selector '%s' in window %s exists with a timeout of %ss",  # NOQA
+            selector,
+            window,
+            timeout_max,
+        )
+
+        _element_exists = self.evaluate(
+            expression=commands.gen_window_element_exists_command(
+                window_index=window,
+                selector=selector,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+        self.logger.info(
+            "element with selector '%s' %s in window %s",
+            selector,
+            'exists' if _element_exists else 'does not exist',
+            window,
+        )
+
+        return _element_exists
 
     @frontend_function
     @browser_function

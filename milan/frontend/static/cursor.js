@@ -79,6 +79,8 @@
 
             // setup config
             this.config = {
+                shortTimeout: 200,
+                shortTimeoutMax: 1000,
                 timeout: 200,
                 timeoutMax: 3000,
                 maxRetries: 3,
@@ -157,6 +159,39 @@
             }
 
             return element;
+        }
+
+        elementExists = async ({
+            elementOrSelector=required('elementOrSelector'),
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            let element = undefined;
+            let timeSlept = 0;
+
+            timeout = timeout || this.config.shortTimeout;
+            timeoutMax = timeoutMax || this.config.shortTimeoutMax;
+
+            while (timeSlept < timeoutMax) {
+                element = this.getElement({
+                    elementOrSelector: elementOrSelector,
+                    iframe: iframe,
+                    timeout: timeout,
+                    timeoutMax: timeoutMax,
+                });
+
+                if (element) {
+                    return true;
+                }
+
+                await this.sleep(timeout);
+
+                timeSlept += timeout;
+            }
+
+            return false;
         }
 
         awaitElement = async ({

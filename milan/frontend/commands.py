@@ -233,6 +233,26 @@ def gen_window_set_fullscreen_command(window_index, fullscreen):
 
 
 # window: selectors
+def gen_window_element_exists_command(
+        window_index,
+        selector,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='elementExists',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
 def gen_window_await_element_command(
         window_index,
         selector,
