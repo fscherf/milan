@@ -1,30 +1,41 @@
-FROM mcr.microsoft.com/playwright:v1.38.1-jammy
+FROM ubuntu:focal
 
-ARG UID=1000 GID=1000
+ARG DEBIAN_FRONTEND=noninteractive
+ARG PYTHON_VERSIONS="3.7 3.8 3.9 3.10 3.11 3.12"
+ARG PYTHON_VERSION="3.11"
 
-# install pyenv dependencies
-RUN apt update && apt upgrade -y && \
-	# tzdata (required by pyenv dependencies) \
-	DEBIAN_FRONTEND=noninteractive TZ=Gmt/UTC apt install -y tzdata && \
-	# https://github.com/pyenv/pyenv/wiki#suggested-build-environment \
-	apt install -y git build-essential libssl-dev zlib1g-dev libbz2-dev \
-		libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils \
-		tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev && \
-	# milan dependencies \
-	apt install -y socat
+# setup /milan
+RUN mkdir /milan
 
-# setup pyenv
-RUN git clone https://github.com/yyuu/pyenv.git .pyenv
-ENV PYENV_ROOT $HOME/.pyenv
-ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+COPY ./milan /milan/milan
+COPY ./bin /milan/bin
+COPY ./pyproject.toml /milan/pyproject.toml
 
-RUN pyenv install 3.8:latest
-RUN pyenv install 3.9:latest
-RUN pyenv install 3.10:latest
-RUN pyenv install 3.11:latest
+# Ubuntu dependencies
+RUN apt update && \
+	apt-get install -y software-properties-common && \
+	add-apt-repository ppa:deadsnakes/ppa && \
+	apt update && \
+	for version in ${PYTHON_VERSIONS}; do \
+		apt install -y \
+			python${version} \
+			python${version}-dev \
+			python${version}-venv && \
+		python${version} -m ensurepip --upgrade \
+	; done
 
-RUN pyenv global `pyenv versions --bare`
+# python dependencies
+RUN python${PYTHON_VERSION} -m pip install /milan[docker]
 
-# setup commandline tools
-RUN pip3.8 install --upgrade pip tox
-RUN pyenv rehash
+# setup playwright
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+RUN python${PYTHON_VERSION} -m playwright install-deps
+RUN python${PYTHON_VERSION} -m playwright install
+
+RUN chmod -R 777 /ms-playwright
+
+# setup user
+RUN adduser milan
+
+USER milan
