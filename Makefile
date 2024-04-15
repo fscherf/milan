@@ -3,8 +3,9 @@ PYTHON=python3.11
 PYTHON_ENV=env
 DOC_ROOT=doc
 
-.PHONY: milan build clean fullclean \
-	test ci-test frontend2\
+.PHONY: milan build clean fullclean shell \
+	dist _release \
+	test ci-test frontend2 \
 	playwright-install playwright-browser \
 	browser demos
 
@@ -34,6 +35,16 @@ $(PYTHON_ENV): pyproject.toml
 shell: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	rlpython $(args)
+
+# packaging ###################################################################
+dist: | $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && \
+	rm -rf dist *.egg-info && \
+	$(PYTHON) -m build
+
+_release: dist
+	. $(PYTHON_ENV)/bin/activate && \
+	twine upload --config-file ~/.pypirc.fscherf dist/*
 
 # tests #######################################################################
 test: | $(PYTHON_ENV)
