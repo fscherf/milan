@@ -5,10 +5,15 @@ services:
     build:
       context: .
 
+    shm_size: 1gb
     user: milan
     working_dir: /app
 
     volumes:
       - ./:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
+
+    environment:
+        - DISPLAY=${DISPLAY}
 
     command: /bin/bash
