@@ -47,13 +47,11 @@ _release: dist
 	twine upload --config-file ~/.pypirc.fscherf dist/*
 
 # tests #######################################################################
-test: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	tox $(args)
+test:
+	docker compose run milan tox $(args)
 
-ci-test: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	MILAN_CI_TEST=1 tox -e py38,py39,py310,py311 $(args)
+ci-test:
+	docker compose run milan MILAN_CI_TEST=1 tox -e py38,py39,py310,py311 $(args)
 
 frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
