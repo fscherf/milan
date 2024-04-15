@@ -63,8 +63,11 @@ async with Chromium.start(headless=True) as browser:
 
 ## Demos
 
-**Single Window**
+**Single Window** ([demos/forms.py](demos/forms.py))
 ![form-demo.gif](doc/form-demo.gif)
 
-**Multi Window**
+**Multi Window** ([demos/multi-window.py](demos/multi-window.py))
 ![multi-window-demo.gif](doc/multi-window-demo.gif)
+
+**YouTube** ([demos/youtube.py](demos/youtube.py))
+![youtube-demo.gif](doc/youtube-demo.gif)

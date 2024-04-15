@@ -3,8 +3,9 @@ PYTHON=python3.11
 PYTHON_ENV=env
 DOC_ROOT=doc
 
-.PHONY: milan build clean fullclean \
-	test ci-test frontend2\
+.PHONY: milan build clean fullclean shell \
+	dist _release \
+	test ci-test frontend2 \
 	playwright-install playwright-browser \
 	browser demos
 
@@ -35,14 +36,22 @@ shell: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	rlpython $(args)
 
-# tests #######################################################################
-test: | $(PYTHON_ENV)
+# packaging ###################################################################
+dist: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	tox $(args)
+	rm -rf dist *.egg-info && \
+	$(PYTHON) -m build
 
-ci-test: | $(PYTHON_ENV)
+_release: dist
 	. $(PYTHON_ENV)/bin/activate && \
-	MILAN_CI_TEST=1 tox -e py38,py39,py310,py311 $(args)
+	twine upload --config-file ~/.pypirc.fscherf dist/*
+
+# tests #######################################################################
+test:
+	docker compose run milan tox $(args)
+
+ci-test:
+	docker compose run milan MILAN_CI_TEST=1 tox -e py38,py39,py310,py311 $(args)
 
 frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
@@ -58,20 +67,23 @@ playwright-browser: | $(PYTHON_ENV)
 	$(PYTHON) scripts/run-playwright.py
 
 # milan #######################################################################
-browser: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	$(PYTHON) scripts/run-browser.py $(args)
-
 demos: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	rm $(DOC_ROOT)/*.gif && \
-	$(PYTHON) scripts/run-browser.py \
-		--browser=chromium \
+	rm -rf $(DOC_ROOT)/*.gif && \
+	milan \
+		run demos/forms.py::main \
+		--run-app="python demos/demo-app.py --port=8080" \
+		--await-app-port=8080 \
 		--headless \
-		--run-form-demo \
 		--capture=$(DOC_ROOT)/form-demo.gif && \
-	$(PYTHON) scripts/run-browser.py \
-		--browser=chromium \
+	milan \
+		run demos/multi-window.py::main \
+		--run-app="python demos/demo-app.py --port=8080" \
+		--await-app-port=8080 \
 		--headless \
-		--run-multi-window-demo \
-		--capture=$(DOC_ROOT)/multi-window-demo.gif
+		--windows=2 \
+		--capture=$(DOC_ROOT)/multi-window-demo.gif && \
+	milan \
+		run demos/youtube.py::open_trending_movies \
+		--headless \
+		--capture=$(DOC_ROOT)/youtube-demo.gif

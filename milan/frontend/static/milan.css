@@ -18,6 +18,18 @@
     --default-border-radius: 5px;
 }
 
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-black:  #E3E3E3;
+        --color-white:  #3C3C3C;
+        --color-grey-1: #282828;
+        --color-grey-2: #1F2020;
+        --color-grey-3: #1F2020;
+        --color-grey-4: #E3E3E3;
+        --color-blue:   #88BBFF;
+    }
+}
+
 /* fonts ------------------------------------------------------------------- */
 /* Google Material Icons */
 /* source: https://developers.google.com/fonts/docs/material_icons */
@@ -226,12 +238,14 @@ main > .grid {
 
 .tab .material-icon {
     font-size: 16px;
+    color: var(--color-black);
 }
 
 .tab-title {
     display: block;
     flex-grow: 1;
 
+    color: var(--color-black);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

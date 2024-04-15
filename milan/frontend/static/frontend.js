@@ -295,6 +295,20 @@ class BrowserWindow {
     }
 
     // cursor shortcuts -------------------------------------------------------
+    elementExists = ({
+        elementOrSelector=required('elementOrSelector'),
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.elementExists({
+            elementOrSelector: elementOrSelector,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
     awaitElement = ({
         elementOrSelector=required('elementOrSelector'),
         timeout=undefined,

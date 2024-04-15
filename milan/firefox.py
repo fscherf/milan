@@ -25,7 +25,7 @@ class Firefox(CdpWebsocketBrowser):
             '--headless' if self.headless else '',
             f'--remote-debugging-port={self.debug_port}',
             '--remote-allow-origins=*',
-            f'--profile={self.profile_id}',
+            f'--user-data-dir={self.user_data_dir}',
             '--no-sandbox',
             'about:blank',
         ]

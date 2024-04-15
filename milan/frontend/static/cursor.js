@@ -79,8 +79,11 @@
 
             // setup config
             this.config = {
+                shortTimeout: 200,
+                shortTimeoutMax: 1000,
                 timeout: 200,
                 timeoutMax: 3000,
+                maxRetries: 3,
             };
 
             // setup cursor element
@@ -158,6 +161,39 @@
             return element;
         }
 
+        elementExists = async ({
+            elementOrSelector=required('elementOrSelector'),
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            let element = undefined;
+            let timeSlept = 0;
+
+            timeout = timeout || this.config.shortTimeout;
+            timeoutMax = timeoutMax || this.config.shortTimeoutMax;
+
+            while (timeSlept < timeoutMax) {
+                element = this.getElement({
+                    elementOrSelector: elementOrSelector,
+                    iframe: iframe,
+                    timeout: timeout,
+                    timeoutMax: timeoutMax,
+                });
+
+                if (element) {
+                    return true;
+                }
+
+                await this.sleep(timeout);
+
+                timeSlept += timeout;
+            }
+
+            return false;
+        }
+
         awaitElement = async ({
             elementOrSelector=required('elementOrSelector'),
             iframe=undefined,
@@ -175,6 +211,8 @@
                 element = this.getElement({
                     elementOrSelector: elementOrSelector,
                     iframe: iframe,
+                    timeout: timeout,
+                    timeoutMax: timeoutMax,
                 });
 
                 if (element) {
@@ -200,19 +238,18 @@
             timeout = timeout || this.config.timeout;
             timeoutMax = timeoutMax || this.config.timeoutMax;
 
-            // await element
-            const element = this.getElement({
-                elementOrSelector: elementOrSelector,
-                iframe: iframe,
-                timeout: timeout,
-                timeoutMax: timeoutMax,
-            });
-
-            // await text
+            let element = undefined;
             let timeSlept = 0;
 
             while (timeSlept < timeoutMax) {
-                if (element.innerHTML.includes(text)) {
+                element = this.getElement({
+                    elementOrSelector: elementOrSelector,
+                    iframe: iframe,
+                    timeout: timeout,
+                    timeoutMax: timeoutMax,
+                });
+
+                if (element && element.innerHTML.includes(text)) {
                     return;
                 }
 
@@ -226,18 +263,28 @@
 
         elementIsVisible = ({
             element=required('element'),
+            iframe=undefined,
         }={}) => {
 
             const clientRect = element.getBoundingClientRect();
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+
+            if (typeof(iframe) != 'undefined') {
+                const iframeClientRect = iframe.getBoundingClientRect();
+
+                width = iframeClientRect.wdith;
+                height = iframeClientRect.height;
+            }
 
             return (
                 clientRect.top >= 0 &&
                 clientRect.left >= 0 &&
                 clientRect.bottom <= (
-                    window.innerHeight ||
+                    height ||
                     document.documentElement.clientHeight) &&
                 clientRect.right <= (
-                    window.innerWidth ||
+                    width ||
                     document.documentElement.clientWidth)
             );
         }
@@ -268,6 +315,7 @@
         // animations ---------------------------------------------------------
         _playClickAnimation = async ({
             elementOrSelector=required('elementOrSelector'),
+            maxRetries=undefined,
             iframe=undefined,
         }={}) => {
 
@@ -280,7 +328,7 @@
 
             // scroll element into view if needed
             // FIXME: move cursor onto iframe if needed
-            if (!this.elementIsVisible({element: element})) {
+            if (!this.elementIsVisible({element: element, iframe: iframe})) {
                 element.scrollIntoView({
                     behavior: 'smooth',
                     block: 'end',
@@ -291,30 +339,57 @@
             }
 
             // place cursor
-            const coordinates = this.getElementCoordinates({
-                element: element,
-                iframe: iframe,
-            });
+            const max_retries = maxRetries || this.config.maxRetries;
 
-            await this.moveTo({
-                x: coordinates.x,
-                y: coordinates.y,
-                animation: true,
-            });
+            let coordinates_before_cursor_move;
+            let coordinates_after_cursor_move;
+            let tries = 0;
 
-            await this.sleep(250);
+            while (tries < max_retries) {
+                coordinates_before_cursor_move = this.getElementCoordinates({
+                    element: element,
+                    iframe: iframe,
+                });
 
-            // click animation
-            await this.cursorElement.animate(
-                {
-                    width: [`${CURSOR_WIDTH}px`, `${CURSOR_WIDTH-8}px`],
-                    height: [`${CURSOR_HEIGHT}px`, `${CURSOR_HEIGHT-8}px`],
-                },
-                {
-                    easing: 'ease',
-                    duration: 200,
-                },
-            ).finished;
+                await this.moveTo({
+                    x: coordinates_before_cursor_move.x,
+                    y: coordinates_before_cursor_move.y,
+                    animation: true,
+                });
+
+                await this.sleep(250);
+
+                coordinates_after_cursor_move = this.getElementCoordinates({
+                    element: element,
+                    iframe: iframe,
+                });
+
+                // element moved; retrying
+                if (Object.entries(coordinates_before_cursor_move).toString() !==
+                    Object.entries(coordinates_after_cursor_move).toString()) {
+
+                    tries += 1;
+
+                    continue;
+                }
+
+                // click animation
+                await this.cursorElement.animate(
+                    {
+                        width: [`${CURSOR_WIDTH}px`, `${CURSOR_WIDTH-8}px`],
+                        height: [`${CURSOR_HEIGHT}px`, `${CURSOR_HEIGHT-8}px`],
+                    },
+                    {
+                        easing: 'ease',
+                        duration: 200,
+                    },
+                ).finished;
+
+                // finish
+                return;
+            }
+
+            throw `Element with selector moved to much under the cursor`;
         }
 
         // actions ------------------------------------------------------------

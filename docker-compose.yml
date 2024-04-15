@@ -2,22 +2,18 @@ version: "3"
 
 services:
   milan:
-    hostname: milan
-    user: 1000:1000
-
     build:
-      context: ./
-      args:
-        - UID=${UID:-1000}
-        - GID=${GID:-1000}
+      context: .
+
+    shm_size: 1gb
+    user: milan
+    working_dir: /app
 
     volumes:
       - ./:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
 
-    ports:
-        - "127.0.0.1:8080:8080"
-        - "127.0.0.1:9222:9222"
-        - "127.0.0.1:9223:9223"
+    environment:
+        - DISPLAY=${DISPLAY}
 
-    working_dir: "/app"
-    command: "bash"
+    command: /bin/bash

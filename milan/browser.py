@@ -117,8 +117,20 @@ class Browser:
     def start(cls, *args, **kwargs):
         return BrowserContext(cls, *args, **kwargs)
 
-    def __init__(self, animations=True):
+    def __init__(
+            self,
+            animations=True,
+            short_selector_timeout=0.2,
+            short_selector_timeout_max=1,
+            selector_timeout=0.2,
+            selector_timeout_max=3,
+    ):
+
         self.animations = animations
+        self.short_selector_timeout = short_selector_timeout
+        self.short_selector_timeout_max = short_selector_timeout_max
+        self.selector_timeout = selector_timeout
+        self.selector_timeout_max = selector_timeout_max
 
         self.id = unique_id()
 
@@ -136,10 +148,34 @@ class Browser:
         return logging.getLogger(f'{self.logger.name}.{name}')
 
     def _get_animations(self, local_override):
-        if local_override:
+        if local_override is not None:
             return local_override
 
         return self.animations
+
+    def _get_short_selector_timeout(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.short_selector_timeout
+
+    def _get_short_selector_timeout_max(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.short_selector_timeout_max
+
+    def _get_selector_timeout(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.selector_timeout
+
+    def _get_selector_timeout_max(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.selector_timeout_max
 
     # events ##################################################################
     @browser_function
@@ -191,6 +227,8 @@ class Browser:
     @frontend_function
     @browser_function
     def split(self):
+        self.logger.info('splitting window')
+
         return self.evaluate(
             expression=commands.gen_window_manager_split_command(),
         )
@@ -199,6 +237,8 @@ class Browser:
     @frontend_function
     @browser_function
     def show_cursor(self):
+        self.logger.info('showing cursor')
+
         return self.evaluate(
             expression=commands.gen_cursor_show_command(),
         )
@@ -206,6 +246,8 @@ class Browser:
     @frontend_function
     @browser_function
     def hide_cursor(self):
+        self.logger.info('hiding cursor')
+
         return self.evaluate(
             expression=commands.gen_cursor_hide_command(),
         )
@@ -226,6 +268,8 @@ class Browser:
             animation=None,
     ):
 
+        self.logger.info('moving cursor to x=%s y=%s', x, y)
+
         return self.evaluate(
             expression=commands.gen_cursor_move_to_command(
                 x=float(x),
@@ -237,6 +281,8 @@ class Browser:
     @frontend_function
     @browser_function
     def move_cursor_to_home(self, animation=None):
+        self.logger.info('moving cursor to home')
+
         return self.evaluate(
             expression=commands.gen_cursor_move_to_home_command(
                 animation=self._get_animations(animation),
@@ -254,6 +300,8 @@ class Browser:
     @frontend_function
     @browser_function
     def reload(self, window=0, animation=None):
+        self.logger.info('reloading window %s', window)
+
         return self.evaluate(
             expression=commands.gen_window_reload_command(
                 window_index=window,
@@ -265,6 +313,8 @@ class Browser:
     @frontend_function
     @browser_function
     def navigate_back(self, window=0, animation=None):
+        self.logger.info('navigating window %s back', window)
+
         return self.evaluate(
             expression=commands.gen_window_navigate_back_command(
                 window_index=window,
@@ -275,6 +325,8 @@ class Browser:
     @frontend_function
     @browser_function
     def navigate_forward(self, window=0, animation=None):
+        self.logger.info('navigating window %s forward', window)
+
         return self.evaluate(
             expression=commands.gen_window_navigate_forward_command(
                 window_index=window,
@@ -294,6 +346,12 @@ class Browser:
     @frontend_function
     @browser_function
     def set_fullscreen(self, window=0, fullscreen=True):
+        self.logger.info(
+            '%s fullscreen for window %s',
+            'enabling' if fullscreen else 'disabling',
+            window,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_set_fullscreen_command(
                 window_index=window,
@@ -309,57 +367,199 @@ class Browser:
 
     @frontend_function
     @browser_function
-    def await_element(self, selector, window=0):
+    def element_exists(
+            self,
+            selector,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_short_selector_timeout(timeout)
+        timeout_max = self._get_short_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "checking if element with selector '%s' in window %s exists with a timeout of %ss",  # NOQA
+            selector,
+            window,
+            timeout_max,
+        )
+
+        _element_exists = self.evaluate(
+            expression=commands.gen_window_element_exists_command(
+                window_index=window,
+                selector=selector,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+        self.logger.info(
+            "element with selector '%s' %s in window %s",
+            selector,
+            'exists' if _element_exists else 'does not exist',
+            window,
+        )
+
+        return _element_exists
+
+    @frontend_function
+    @browser_function
+    def await_element(
+            self,
+            selector,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "waiting for element with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            selector,
+            window,
+            timeout_max,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_await_element_command(
                 window_index=window,
                 selector=selector,
+                timeout=timeout,
+                timeout_max=timeout_max,
             ),
         )
 
     @frontend_function
     @browser_function
-    def await_text(self, selector, text, window=0):
+    def await_text(
+            self,
+            selector,
+            text,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "waiting for element with selector '%s' to contain '%s' in window %s with a timeout of %ss",  # NOQA
+            selector,
+            text,
+            window,
+            timeout_max,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_await_text_command(
                 window_index=window,
                 selector=selector,
                 text=text,
+                timeout=timeout,
+                timeout_max=timeout_max,
             ),
         )
 
     # window: user input
     @frontend_function
     @browser_function
-    def click(self, selector, window=0, animation=None):
+    def click(
+            self,
+            selector,
+            timeout=None,
+            timeout_max=None,
+            animation=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "clicking on element with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            selector,
+            window,
+            timeout_max,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_click_command(
                 window_index=window,
                 selector=selector,
+                timeout=timeout,
+                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
 
     @frontend_function
     @browser_function
-    def fill(self, selector, value, window=0, animation=None):
+    def fill(
+            self,
+            selector,
+            value,
+            timeout=None,
+            timeout_max=None,
+            animation=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "filling value '%s' into an element with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            value,
+            selector,
+            window,
+            timeout_max,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_fill_command(
                 window_index=window,
                 selector=selector,
                 value=value,
+                timeout=timeout,
+                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
 
     @frontend_function
     @browser_function
-    def check(self, selector, value=True, window=0, animation=None):
+    def check(
+            self,
+            selector,
+            value=True,
+            timeout=None,
+            timeout_max=None,
+            animation=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "%s checkbox with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            'checking' if value else 'unchecking',
+            selector,
+            window,
+            timeout_max,
+        )
+
         return self.evaluate(
             expression=commands.gen_window_check_command(
                 window_index=window,
                 selector=selector,
                 value=value,
+                timeout=timeout,
+                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
@@ -372,9 +572,32 @@ class Browser:
             value=None,
             index=None,
             label=None,
+            timeout=None,
+            timeout_max=None,
             window=0,
             animation=None,
     ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+        identifier = ''
+
+        if value:
+            identifier = f"value '{value}'"
+
+        elif value:
+            identifier = f"index '{index}'"
+
+        elif label:
+            identifier = f"label '{label}'"
+
+        self.logger.info(
+            "selecting option with %s in select with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            identifier,
+            selector,
+            window,
+            timeout_max
+        )
 
         return self.evaluate(
             expression=commands.gen_window_select_command(
@@ -383,12 +606,15 @@ class Browser:
                 value=value,
                 index=index,
                 label=label,
+                timeout=timeout,
+                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
 
     # navigation ##############################################################
     @browser_function
+    @frontend_function
     def navigate(self, url, window=0, animation=None):
         # TODO: add support for external sites besides 'localhost'
         # TODO: add support for cursor bootstrapping
@@ -400,9 +626,9 @@ class Browser:
         if url.host == 'localhost':
             url.host = '127.0.0.1'
 
-        self.logger.debug('navigating frontend to %s', url)
+        self.logger.info('navigating frontend to %s', url)
 
-        self.evaluate(
+        return self.evaluate(
             expression=commands.gen_window_navigate_command(
                 window_index=window,
                 url=str(url),
@@ -410,7 +636,6 @@ class Browser:
             ),
         )
 
-    @browser_function
     def navigate_to_test_application(self, *args, **kwargs):
         return self.navigate(
             url=self._frontend_server.get_test_application_url(),
@@ -420,10 +645,15 @@ class Browser:
 
     @browser_function
     def reload_frontend(self):
+        self.logger.info('loading frontend')
+
         self._navigate_browser(url=self._frontend_server.get_frontend_url())
 
     # hooks ###################################################################
     def stop(self):
+        raise NotImplementedError()
+
+    def set_color_scheme(self, color_scheme):
         raise NotImplementedError()
 
     @browser_function

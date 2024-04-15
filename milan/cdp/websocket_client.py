@@ -138,7 +138,6 @@ class CdpWebsocketClient:
         self.video_recorder.stop()
 
         if self.http_client:
-            print('>> stop')
             self.http_client.stop()
 
         if self.json_rpc_client:
@@ -151,10 +150,18 @@ class CdpWebsocketClient:
     # REST API ################################################################
     def get_browser_info(self, refresh=False):
         if (not self._browser_info) or refresh:
-            self._browser_info = self.http_client.get(
+            response_status, json_data = self.http_client.get(
                 url=f'http://{self.host}:{self.port}/json/list',
                 json_response=True,
-            )[1][0]
+            )
+
+            for target_info in json_data:
+                if target_info['type'] != 'page':
+                    continue
+
+                self._browser_info = target_info
+
+                break
 
         return self._browser_info
 
@@ -244,6 +251,41 @@ class CdpWebsocketClient:
         )
 
         time.sleep(1)  # FIXME: wait for resize
+
+        return response.result
+
+    def emulation_set_emulated_media(
+            self,
+            media='',
+            prefers_color_scheme='light',
+            prefers_reduced_motion='no-preference',
+            forced_colors='none',
+    ):
+
+        """
+        https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setEmulatedMedia
+        """
+
+        response = self.json_rpc_client.send_request(
+            method='Emulation.setEmulatedMedia',
+            params={
+                'media': media,
+                'features': [
+                    {
+                        'name': 'prefers-color-scheme',
+                        'value': prefers_color_scheme,
+                    },
+                    {
+                        'name': 'prefers-reduced-motion',
+                        'value': prefers_reduced_motion,
+                    },
+                    {
+                        'name': 'forced-colors',
+                        'value': forced_colors,
+                    },
+                ],
+            },
+        )
 
         return response.result
 
@@ -394,13 +436,17 @@ class CdpWebsocketClient:
 
     # video capturing #########################################################
     def _handle_screen_cast_frame(self, json_rpc_message):
+        timestamp = json_rpc_message.params['metadata']['timestamp']
         image_data = decode_base64(json_rpc_message.params['data'])
 
         self.page_screen_cast_frame_ack(
             session_id=json_rpc_message.params['sessionId'],
         )
 
-        self.video_recorder.write_frame(image_data=image_data)
+        self.video_recorder.write_frame(
+            timestamp=timestamp,
+            image_data=image_data,
+        )
 
     def start_video_capturing(
             self,
@@ -408,6 +454,7 @@ class CdpWebsocketClient:
             width=0,
             height=0,
             fps=0,
+            frame_dir=None,
             image_format='png',
             image_quality=100,
     ):
@@ -419,6 +466,7 @@ class CdpWebsocketClient:
             width=width,
             height=height,
             fps=fps,
+            frame_dir=frame_dir,
         )
 
         self.page_start_screen_cast(

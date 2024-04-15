@@ -8,10 +8,10 @@ from milan.utils.json_rpc import JsonRpcStoppedError
 from milan.browser import Browser, browser_function
 from milan.utils.event_router import EventRouter
 from milan.frontend.server import FrontendServer
-from milan.utils.misc import retry, unique_id
 from milan.errors import BrowserStoppedError
 from milan.utils.media import image_convert
 from milan.utils.process import Process
+from milan.utils.misc import retry
 from milan.utils.url import URL
 
 
@@ -24,18 +24,19 @@ class CdpWebsocketBrowser(Browser):
             self,
             *args,
             debug_port=0,
+            user_data_dir='',
             **kwargs,
     ):
 
         super().__init__(*args, **kwargs)
 
         self.debug_port = debug_port
-
-        self.user_data_dir = TemporaryDirectory()
-        self.profile_id = unique_id()
+        self.user_data_dir = user_data_dir
+        self.kwargs = kwargs
 
         self._background_loop = None
-        self.browser_command = self._get_browser_command(kwargs)
+        self._user_data_dir_temp_dir = None
+        self.browser_command = []
         self.browser_process = None
         self.cdp_websocket_client = None
         self._frontend_server = None
@@ -103,8 +104,15 @@ class CdpWebsocketBrowser(Browser):
             logger=self._get_sub_logger('background-loop'),
         )
 
+        # setup user-data-dir
+        if not self.user_data_dir:
+            self._user_data_dir_temp_dir = TemporaryDirectory()
+            self.user_data_dir = self._user_data_dir_temp_dir.name
+
         # start browser process
         self.logger.debug('starting browser process')
+
+        self.browser_command = self._get_browser_command(self.kwargs)
 
         self.browser_process = Process(
             command=self.browser_command,
@@ -125,7 +133,7 @@ class CdpWebsocketBrowser(Browser):
             wait_for_devtools_debug_port()
 
         # HACK: prevent race conditions between non-headless chrome and X11
-        if self.is_chrome() and '--headless' not in self.browser_command:
+        if self.is_chrome() and not self.headless:
             self.logger.warning(
                 'HACK: sleeping 1s before connecting to the debug port to prevent race conditions with X11',
             )
@@ -250,6 +258,7 @@ class CdpWebsocketBrowser(Browser):
             width=0,
             height=0,
             fps=0,
+            frame_dir=None,
             image_format='png',
             image_quality=100,
     ):
@@ -264,6 +273,7 @@ class CdpWebsocketBrowser(Browser):
             width=width,
             height=height,
             fps=fps,
+            frame_dir=frame_dir,
             image_format=image_format,
             image_quality=image_quality,
         )
