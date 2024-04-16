@@ -5,9 +5,8 @@ DOC_ROOT=doc
 
 .PHONY: milan build clean fullclean shell \
 	dist _release \
-	test ci-test frontend2 \
-	playwright-install playwright-browser \
-	browser demos
+	test ci-test frontend demos \
+	playwright-install playwright-browser
 
 all: browser
 
@@ -53,6 +52,9 @@ test:
 ci-test:
 	docker compose run milan MILAN_CI_TEST=1 tox -e py38,py39,py310,py311 $(args)
 
+demos:
+	$(MAKE) test args="-- -k demos"
+
 frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	python -m milan.frontend.server --port=8080
@@ -65,25 +67,3 @@ playwright-install: | $(PYTHON_ENV)
 playwright-browser: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	$(PYTHON) scripts/run-playwright.py
-
-# milan #######################################################################
-demos: | $(PYTHON_ENV)
-	. $(PYTHON_ENV)/bin/activate && \
-	rm -rf $(DOC_ROOT)/*.gif && \
-	milan \
-		run demos/forms.py::main \
-		--run-app="python demos/demo-app.py --port=8080" \
-		--await-app-port=8080 \
-		--headless \
-		--capture=$(DOC_ROOT)/form-demo.gif && \
-	milan \
-		run demos/multi-window.py::main \
-		--run-app="python demos/demo-app.py --port=8080" \
-		--await-app-port=8080 \
-		--headless \
-		--windows=2 \
-		--capture=$(DOC_ROOT)/multi-window-demo.gif && \
-	milan \
-		run demos/youtube.py::open_trending_movies \
-		--headless \
-		--capture=$(DOC_ROOT)/youtube-demo.gif

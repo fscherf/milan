@@ -1,7 +1,11 @@
 import shutil
 import os
 
+import urllib3
 import pytest
+
+from milan.utils.process import Process
+from milan.utils.misc import retry
 
 DEBUG = False
 
@@ -37,6 +41,39 @@ def milan_artifacts_directory(_setup_milan_artifacts_directory):
     yield TEST_ARTIFACTS_DIRECTORY
 
     os.chdir(old_cwd)
+
+
+@pytest.fixture
+def start_web_app():
+    processes = []
+
+    def _start_web_app(command, await_port=None):
+        process = Process(
+            command=command,
+            capture_stdout=False,
+        )
+
+        processes.append(process)
+
+        if await_port:
+            app_url = f'http://127.0.0.1:{await_port}'
+
+            @retry
+            def _await_app_port():
+                urllib3.request(method='get', url=app_url)
+
+            try:
+                _await_app_port()
+
+            except Exception:
+                raise RuntimeError(f'{app_url} did not open')
+
+        return process
+
+    yield _start_web_app
+
+    for process in processes:
+        process.stop()
 
 
 @pytest.fixture(autouse=True, scope='session')
