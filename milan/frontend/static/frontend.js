@@ -406,18 +406,33 @@ class WindowManager {
     constructor() {
         this.windows = new Array();
 
+        this._background_load_promises = new Array();
+
         // find elements
         this.markerElement = document.querySelector('#marker');
         this.rootElement = document.querySelector('main');
         this.backgroundElement = this.rootElement.querySelector('#background');
         this.gridElement = this.rootElement.querySelector('.grid');
 
-        // setup background
-        this.backgroundElement.src = (
-            `${BACKGROUND_URL}?version=${VERSION_STRING}`);
+        // setup background iframe
+        this.backgroundElement.onload = () => {
+            let resolve;
+
+            while (this._background_load_promises.length > 0) {
+                resolve = this._background_load_promises.pop();
+
+                resolve();
+            }
+        };
 
         // setup first window
         this.split();
+    }
+
+    _getBackgroundLoadPromise = () => {
+        return new Promise(resolve => {
+            this._background_load_promises.push(resolve);
+        });
     }
 
     getSize = () => {
@@ -465,6 +480,23 @@ class WindowManager {
 
     getWindowCount = () => {
         return this.windows.length;
+    }
+
+    setBackgroundUrl = async ({
+        url=required('url'),
+    }={}) => {
+
+        const promise = this._getBackgroundLoadPromise();
+
+        this.backgroundElement.src = url;
+
+        await promise;
+    }
+
+    setWatermark = ({
+        text=required('text'),
+    }={}) => {
+        this.backgroundElement.contentWindow.setWatermark(text);
     }
 }
 

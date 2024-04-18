@@ -78,6 +78,8 @@ class Webkit(Browser):
             headless=True,
             executable=None,
             user_data_dir='',
+            background_url='background/index.html',
+            watermark='',
             **kwargs,
     ):
 
@@ -96,7 +98,10 @@ class Webkit(Browser):
         self._target_json_rpc_client = None
 
         try:
-            self._start()
+            self._start(
+                background_url=background_url,
+                watermark=watermark,
+            )
 
         except Exception:
             self.logger.exception('exception raised while starting up')
@@ -189,7 +194,12 @@ class Webkit(Browser):
         # finish
         self.logger.debug('playwright webkit CDP setup done')
 
-    def _start(self):
+    def _start(self, background_url, watermark=''):
+        from milan import VERSION_STRING  # avoid circular imports
+
+        if not watermark:
+            watermark = f'Milan v{VERSION_STRING}'
+
         self.logger.debug('starting')
 
         # start background loop
@@ -258,6 +268,16 @@ class Webkit(Browser):
 
         # navigate to frontend
         self.reload_frontend()
+
+        # set background
+        self.logger.debug('setting background URL')
+
+        self.set_background_url(background_url)
+
+        # set watermark
+        self.logger.debug('setting watermark')
+
+        self.set_watermark(watermark)
 
         # finish
         self.logger.debug('successfully started')

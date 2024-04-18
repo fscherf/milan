@@ -161,6 +161,24 @@ def gen_window_manager_get_window_count_command():
     )
 
 
+def gen_window_manager_set_background_url_command(url):
+    return _gen_frontend_run_command(
+        func=_gen_window_manager_function_name(name='setBackgroundUrl'),
+        args={
+            'url': url,
+        },
+    )
+
+
+def gen_window_manager_set_watermark_command(text):
+    return _gen_frontend_run_command(
+        func=_gen_window_manager_function_name(name='setWatermark'),
+        args={
+            'text': text,
+        },
+    )
+
+
 # window
 def gen_window_navigate_command(window_index, url, animation):
     return _gen_frontend_run_command(

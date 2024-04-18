@@ -233,6 +233,24 @@ class Browser:
             expression=commands.gen_window_manager_split_command(),
         )
 
+    @frontend_function
+    @browser_function
+    def set_background_url(self, url):
+        return self.evaluate(
+            expression=commands.gen_window_manager_set_background_url_command(
+                url=url,
+            ),
+        )
+
+    @frontend_function
+    @browser_function
+    def set_watermark(self, text):
+        return self.evaluate(
+            expression=commands.gen_window_manager_set_watermark_command(
+                text=text,
+            ),
+        )
+
     # cursor
     @frontend_function
     @browser_function

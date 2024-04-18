@@ -1,8 +1,5 @@
-window.addEventListener('load', (event) => {
+window['setWatermark'] = (text) => {
+    const watermarkElement = document.querySelector('#watermark');
 
-    // setup version string
-    const get_parameters = new URLSearchParams(window.location.search);
-    const versionElement = document.querySelector('#version');
-
-    versionElement.innerHTML = get_parameters.get('version');
-});
+    watermarkElement.innerHTML = text;
+};

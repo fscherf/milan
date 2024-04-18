@@ -25,6 +25,8 @@ class CdpWebsocketBrowser(Browser):
             *args,
             debug_port=0,
             user_data_dir='',
+            background_url='background/index.html',
+            watermark='',
             **kwargs,
     ):
 
@@ -43,7 +45,10 @@ class CdpWebsocketBrowser(Browser):
         self._event_router = EventRouter()
 
         try:
-            self._start()
+            self._start(
+                background_url=background_url,
+                watermark=watermark,
+            )
 
         except Exception:
             self.logger.exception('exception raised while starting up')
@@ -95,7 +100,11 @@ class CdpWebsocketBrowser(Browser):
 
             self._error = BrowserStoppedError
 
-    def _start(self):
+    def _start(self, background_url, watermark=''):
+        from milan import VERSION_STRING  # avoid circular imports
+
+        if not watermark:
+            watermark = f'Milan v{VERSION_STRING}'
 
         # start background loop
         self.logger.debug('starting background loop')
@@ -163,6 +172,16 @@ class CdpWebsocketBrowser(Browser):
 
         # navigate to frontend
         self.reload_frontend()
+
+        # set background
+        self.logger.debug('setting background URL')
+
+        self.set_background_url(background_url)
+
+        # set watermark
+        self.logger.debug('setting watermark')
+
+        self.set_watermark(watermark)
 
         # finish
         self.logger.debug('browser started')
