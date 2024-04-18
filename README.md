@@ -8,7 +8,7 @@ end-to-end testing and for creating beautiful screenshots and video clips of
 web applications. To do so, milan visually emultates one or more browser
 windows and a cursor, in HTML and JavaScript.
 
-![form-demo.gif](doc/form-demo.gif)
+![form-demo.gif](doc/demos/form.gif)
 
 ## Usage
 ```python
@@ -64,10 +64,10 @@ async with Chromium.start(headless=True) as browser:
 ## Demos
 
 **Single Window** ([demos/forms.py](demos/forms.py))
-![form-demo.gif](doc/form-demo.gif)
+![form.gif](doc/demos/form.gif)
 
 **Multi Window** ([demos/multi-window.py](demos/multi-window.py))
-![multi-window-demo.gif](doc/multi-window-demo.gif)
+![multi-window.gif](doc/demos/multi-window.gif)
 
 **YouTube** ([demos/youtube.py](demos/youtube.py))
-![youtube-demo.gif](doc/youtube-demo.gif)
+![youtube.gif](doc/demos/youtube.gif)
