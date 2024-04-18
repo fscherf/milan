@@ -95,7 +95,7 @@ def test_video_capturing(
 
     fps = int(fps[:-3])
     width, height = (int(i) for i in video_dimensions.split('x'))
-    video_path = f'{browser_name}-{width}x{height}-{fps}fps.{video_format}'
+    video_path = f'videos/{browser_name}-{width}x{height}-{fps}fps.{video_format}'  # NOQA
 
     with browser_class.start() as browser:
         browser.navigate_to_test_application()
@@ -184,7 +184,7 @@ def test_invalid_video_dimensions(
     }[browser_name]
 
     width, height = (int(i) for i in video_dimensions.split('x'))
-    video_path = f'{browser_name}-{width}x{height}.{video_format}'
+    video_path = f'videos/{browser_name}-{width}x{height}.{video_format}'
 
     with browser_class.start() as browser:
 

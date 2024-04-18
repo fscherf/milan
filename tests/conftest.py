@@ -12,11 +12,21 @@ DEBUG = False
 TEST_ARTIFACTS_DIRECTORY = os.path.join(
     os.path.dirname(__file__),
     '../artifacts',
+    os.environ.get('TOX_ENV_NAME', 'python'),
 )
 
 
 @pytest.fixture(scope='session')
-def _setup_milan_artifacts_directory():
+def _milan_artifacts_sub_directories():
+    return [
+        'screenshots',
+        'videos',
+        'demos',
+    ]
+
+
+@pytest.fixture(scope='session')
+def _setup_milan_artifacts_directory(_milan_artifacts_sub_directories):
     if not os.path.exists(TEST_ARTIFACTS_DIRECTORY):
         os.makedirs(TEST_ARTIFACTS_DIRECTORY)
 
@@ -28,6 +38,11 @@ def _setup_milan_artifacts_directory():
 
         else:
             os.unlink(abs_path)
+
+    for rel_path in _milan_artifacts_sub_directories:
+        abs_path = os.path.join(TEST_ARTIFACTS_DIRECTORY, rel_path)
+
+        os.makedirs(abs_path)
 
 
 @pytest.fixture

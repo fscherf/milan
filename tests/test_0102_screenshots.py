@@ -29,7 +29,7 @@ def test_screenshots(
     }[browser_name]
 
     width, height = (int(i) for i in image_size.split('x'))
-    image_path = f'{browser_name}-{width}x{height}.{image_format}'
+    image_path = f'screenshots/{browser_name}-{width}x{height}.{image_format}'
 
     with browser_class.start() as browser:
         browser.navigate_to_test_application()

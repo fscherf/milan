@@ -27,7 +27,7 @@ def test_form_demo(milan_artifacts_directory, start_web_app):
         browser.move_cursor_to_home()
 
         # start video capturing
-        browser.start_video_capturing('form-demo.gif')
+        browser.start_video_capturing('demos/form.gif')
         time.sleep(1)
 
         # navigate to view
@@ -72,7 +72,7 @@ def test_multi_window_demo(milan_artifacts_directory, start_web_app):
         browser.move_cursor_to_home()
 
         # start video capturing
-        browser.start_video_capturing('multi-window-demo.gif')
+        browser.start_video_capturing('demos/multi-window.gif')
         time.sleep(1)
 
         # open first popup
@@ -104,7 +104,7 @@ def test_youtube_trending_movies(milan_artifacts_directory):
         browser.resize(*BROWSER_SIZE)
         browser.move_cursor_to_home()
 
-        browser.start_video_capturing('youtube-demo.gif')
+        browser.start_video_capturing('demos/youtube.gif')
         time.sleep(1)
 
         browser.navigate('youtube.com')
