@@ -11,7 +11,7 @@ DEBUG = False
 
 TEST_ARTIFACTS_DIRECTORY = os.path.join(
     os.path.dirname(__file__),
-    'artifacts',
+    '../artifacts',
 )
 
 
