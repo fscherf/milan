@@ -2,8 +2,15 @@ import argparse
 
 import simple_logging_setup
 
+from milan.cli.background_init import background_init
 from milan import VERSION_STRING
 from milan.cli.run import run
+
+COMMANDS = {
+    'version': lambda cli_args: print(VERSION_STRING),
+    'background-init': background_init,
+    'run': run,
+}
 
 
 def add_common_args(parser):
@@ -38,6 +45,21 @@ def parse_command_line_args(argv):
     version_parser = sub_parser.add_parser('version')
 
     add_common_args(version_parser)
+
+    # background-init #########################################################
+    background_init_parser = sub_parser.add_parser('background-init')
+
+    add_common_args(background_init_parser)
+
+    background_init_parser.add_argument(
+        'directory',
+        nargs='?',
+    )
+
+    background_init_parser.add_argument(
+        '--dry-run',
+        action='store_true',
+    )
 
     # run #####################################################################
     run_parser = sub_parser.add_parser('run')
@@ -197,17 +219,10 @@ def cli(argv, setup_logging=False):
             ],
         )
 
-    # command: version
-    if args['command'] == 'version':
-        print(VERSION_STRING)
+    # run command
+    command = COMMANDS[args['command']]
+    exception = command(cli_args=args)
 
-        return 0
-
-    # command: run
-    elif args['command'] == 'run':
-        exception = run(cli_args=args)
-
-    # exit code / traceback
     if not exception:
         return 0
 
