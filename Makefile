@@ -57,7 +57,7 @@ demos:
 
 frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
-	python -m milan.frontend.server --port=8080
+	python -m milan.frontend.server --port=8080 $(args)
 
 # playwright ##################################################################
 playwright-install: | $(PYTHON_ENV)
