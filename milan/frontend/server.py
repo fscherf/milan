@@ -1,3 +1,4 @@
+import tempfile
 import logging
 import asyncio
 import os
@@ -38,11 +39,30 @@ class FrontendServer:
             port=0,
             logger=default_logger,
             access_logger=default_access_logger,
+            extra_static_dirs=None,
+            background_dir=None,
     ):
 
         self.loop = loop
         self.logger = logger
         self.access_logger = access_logger
+
+        self.temp_dir = None
+
+        self.static_dirs = [
+            *(extra_static_dirs or []),
+            FRONTEND_STATIC_ROOT,
+        ]
+
+        if background_dir:
+            self.temp_dir = tempfile.TemporaryDirectory()
+
+            os.symlink(
+                os.path.abspath(background_dir),
+                os.path.join(self.temp_dir.name, 'background'),
+            )
+
+            self.static_dirs.insert(0, self.temp_dir.name)
 
         # setup aiohttp
         self.app = Application()
@@ -51,7 +71,7 @@ class FrontendServer:
         self.app.router.add_route(
             '*',
             '/_milan/frontend/{path:.*}',
-            self._handle_static_frontend_request,
+            self._handle_static_request,
         )
 
         self.app.router.add_route(
@@ -115,23 +135,33 @@ class FrontendServer:
         return f'{self.get_url()}/_milan/frontend/test-application/'
 
     # static files ############################################################
-    async def _handle_static_request(self, request, static_root):
-        rel_path = request.match_info['path']
-
+    def get_static_abs_path(self, rel_path):
         if rel_path.startswith('/'):
             rel_path = rel_path[1:]
 
-        abs_path = os.path.join(static_root, rel_path)
+        for static_dir in self.static_dirs:
+            abs_path = os.path.join(static_dir, rel_path)
 
-        if not os.path.exists(abs_path):
-            raise HTTPNotFound()
+            if not os.path.exists(abs_path):
+                continue
 
-        if os.path.isdir(abs_path):
-            index_path = os.path.join(abs_path, 'index.html')
+            if os.path.isdir(abs_path):
+                index_path = os.path.join(abs_path, 'index.html')
 
-            if os.path.exists(index_path):
-                return FileResponse(path=index_path)
+                if os.path.exists(index_path):
+                    return index_path
 
+                continue
+
+            return abs_path
+
+        return None
+
+    async def _handle_static_request(self, request):
+        rel_path = request.match_info['path']
+        abs_path = self.get_static_abs_path(rel_path)
+
+        if not abs_path:
             raise HTTPNotFound()
 
         return FileResponse(
@@ -141,12 +171,6 @@ class FrontendServer:
                 'Pragma': 'no-cache',
                 'Expires': '0',
             },
-        )
-
-    async def _handle_static_frontend_request(self, request):
-        return await self._handle_static_request(
-            request=request,
-            static_root=FRONTEND_STATIC_ROOT,
         )
 
 
@@ -163,6 +187,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--host', type=str, default='localhost')
     parser.add_argument('--port', type=int, default=8080)
+    parser.add_argument('--static-dirs', nargs='+')
+    parser.add_argument('--background-dir', default='')
 
     args = parser.parse_args()
 
@@ -179,6 +205,8 @@ if __name__ == '__main__':
         loop=background_loop.loop,
         host=args.host,
         port=args.port,
+        extra_static_dirs=(args.static_dirs or []),
+        background_dir=args.background_dir,
     )
 
     print(f'running on {frontend_server.get_frontend_url()}')
