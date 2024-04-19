@@ -25,6 +25,7 @@ class CdpWebsocketBrowser(Browser):
             *args,
             debug_port=0,
             user_data_dir='',
+            background_dir='',
             background_url='background/index.html',
             watermark='',
             **kwargs,
@@ -46,6 +47,7 @@ class CdpWebsocketBrowser(Browser):
 
         try:
             self._start(
+                background_dir=background_dir,
                 background_url=background_url,
                 watermark=watermark,
             )
@@ -100,7 +102,7 @@ class CdpWebsocketBrowser(Browser):
 
             self._error = BrowserStoppedError
 
-    def _start(self, background_url, watermark=''):
+    def _start(self, background_dir, background_url, watermark=''):
         from milan import VERSION_STRING  # avoid circular imports
 
         if not watermark:
@@ -168,6 +170,7 @@ class CdpWebsocketBrowser(Browser):
             port=0,
             logger=self._get_sub_logger('frontend.server'),
             access_logger=self._get_sub_logger('frontend.server.access'),
+            background_dir=background_dir,
         )
 
         # navigate to frontend
