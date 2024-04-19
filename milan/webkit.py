@@ -78,6 +78,7 @@ class Webkit(Browser):
             headless=True,
             executable=None,
             user_data_dir='',
+            background_dir='',
             background_url='background/index.html',
             watermark='',
             **kwargs,
@@ -99,6 +100,7 @@ class Webkit(Browser):
 
         try:
             self._start(
+                background_dir=background_dir,
                 background_url=background_url,
                 watermark=watermark,
             )
@@ -194,7 +196,7 @@ class Webkit(Browser):
         # finish
         self.logger.debug('playwright webkit CDP setup done')
 
-    def _start(self, background_url, watermark=''):
+    def _start(self, background_dir, background_url, watermark=''):
         from milan import VERSION_STRING  # avoid circular imports
 
         if not watermark:
@@ -264,6 +266,7 @@ class Webkit(Browser):
             port=0,
             logger=self._get_sub_logger('frontend.server'),
             access_logger=self._get_sub_logger('frontend.server.access'),
+            background_dir=background_dir,
         )
 
         # navigate to frontend
