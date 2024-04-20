@@ -6,6 +6,7 @@ DOC_ROOT=doc
 .PHONY: milan build clean fullclean shell \
 	dist _release \
 	test ci-test frontend demos \
+	doc _doc-release \
 	playwright-install playwright-browser
 
 all: browser
@@ -58,6 +59,19 @@ demos:
 frontend: | $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && \
 	python -m milan.frontend.server --port=8080 $(args)
+
+# documentation ###############################################################
+doc: | $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && \
+	cd doc && \
+	mkdocs serve $(args)
+
+_doc-release: | $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && \
+	cd doc && \
+	mkdocs build && \
+	rsync -avh --recursive --delete \
+		site/* pages.fscherf.de:/var/www/virtual/fscherf/pages.fscherf.de/milan
 
 # playwright ##################################################################
 playwright-install: | $(PYTHON_ENV)
