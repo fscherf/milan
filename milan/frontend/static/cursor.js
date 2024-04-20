@@ -32,6 +32,11 @@
     }
 
 
+    const sleep = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+
     const run = async ({
         func=required('func'),
         args=required('args'),
@@ -117,10 +122,6 @@
                 .documentElement;
         }
 
-        sleep = (ms) => {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
         // cursor element helper ----------------------------------------------
         hide = () => {
             this.cursorElement.style.display = 'none';
@@ -186,7 +187,7 @@
                     return true;
                 }
 
-                await this.sleep(timeout);
+                await sleep(timeout);
 
                 timeSlept += timeout;
             }
@@ -219,7 +220,7 @@
                     return element;
                 }
 
-                await this.sleep(timeout);
+                await sleep(timeout);
 
                 timeSlept += timeout;
             }
@@ -253,7 +254,7 @@
                     return;
                 }
 
-                await this.sleep(timeout);
+                await sleep(timeout);
 
                 timeSlept += timeout;
             }
@@ -335,7 +336,7 @@
                     inline: 'nearest',
                 });
 
-                await this.sleep(500);
+                await sleep(500);
             }
 
             // place cursor
@@ -357,7 +358,7 @@
                     animation: true,
                 });
 
-                await this.sleep(250);
+                await sleep(250);
 
                 coordinates_after_cursor_move = this.getElementCoordinates({
                     element: element,
@@ -451,7 +452,7 @@
             element.click();
 
             if (animation) {
-                await this.sleep(500);
+                await sleep(500);
             }
         }
 
@@ -476,7 +477,7 @@
             element.focus();
 
             if (animation) {
-                await this.sleep(300);
+                await sleep(300);
             }
         }
 
@@ -504,7 +505,7 @@
             element.value = value;
 
             if (animation) {
-                await this.sleep(200);
+                await sleep(200);
             }
 
             // issue change event
@@ -585,7 +586,7 @@
             }
 
             if (animation) {
-                await this.sleep(200);
+                await sleep(200);
             }
 
             // issue change event
