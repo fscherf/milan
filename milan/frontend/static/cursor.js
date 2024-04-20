@@ -493,6 +493,8 @@
                 iframe: iframe,
             });
 
+            const lastValue = element.value;
+
             if (animation) {
                 await this.focus({
                     elementOrSelector: element,
@@ -508,9 +510,36 @@
                 await sleep(200);
             }
 
-            // issue change event
-            element.dispatchEvent(new Event('input'));
-            element.dispatchEvent(new Event('change'));
+            // fire input change
+            const inputEvent = new Event(
+                'input',
+                {
+                    target: element,
+                    bubbles: true,
+                },
+            );
+
+            // React: https://github.com/facebook/react/issues/11488
+            // React 15
+            inputEvent.simulated = true;
+
+            // React 16
+            if (element._valueTracker) {
+                element._valueTracker.setValue(lastValue);
+            }
+
+            element.dispatchEvent(inputEvent);
+
+            // fire change event
+            const changeEvent = new Event(
+                'change',
+                {
+                    target: element,
+                    bubbles: true,
+                },
+            );
+
+            element.dispatchEvent(changeEvent);
         }
 
         check = async ({
