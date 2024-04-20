@@ -93,6 +93,16 @@ def parse_command_line_args(argv):
     )
 
     run_parser.add_argument(
+        '--background-dir',
+        default='',
+    )
+
+    run_parser.add_argument(
+        '--watermark',
+        default='',
+    )
+
+    run_parser.add_argument(
         '--color-scheme',
         default='',
     )

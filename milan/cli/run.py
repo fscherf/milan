@@ -72,6 +72,8 @@ def run(cli_args):
             'headless': cli_args['headless'],
             'user_data_dir': cli_args['user-data-dir'],
             'animations': not cli_args['disable-animations'],
+            'background_dir': cli_args['background-dir'],
+            'watermark': cli_args['watermark'],
         }
 
         browser_class = get_browser_by_name(cli_args['browser'])
