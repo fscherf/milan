@@ -37,5 +37,6 @@ RUN chmod -R 777 /ms-playwright
 
 # setup user
 RUN adduser milan
+RUN chown -R milan:milan /milan
 
 USER milan
