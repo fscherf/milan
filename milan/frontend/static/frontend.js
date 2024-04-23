@@ -311,12 +311,14 @@ class BrowserWindow {
 
     awaitElement = ({
         elementOrSelector=required('elementOrSelector'),
+        returnElement=true,
         timeout=undefined,
         timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.awaitElement({
             elementOrSelector: elementOrSelector,
+            returnElement: returnElement,
             iframe: this.iframeElement,
             timeout: timeout,
             timeoutMax: timeoutMax,

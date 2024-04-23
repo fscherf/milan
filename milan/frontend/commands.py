@@ -285,6 +285,7 @@ def gen_window_await_element_command(
         ),
         args={
             'elementOrSelector': selector,
+            'returnElement': False,
             'timeout': timeout * 1000,
             'timeoutMax': timeout_max * 1000,
         },

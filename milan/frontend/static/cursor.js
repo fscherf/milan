@@ -197,6 +197,7 @@
 
         awaitElement = async ({
             elementOrSelector=required('elementOrSelector'),
+            returnElement=true,
             iframe=undefined,
             timeout=undefined,
             timeoutMax=undefined,
@@ -217,7 +218,11 @@
                 });
 
                 if (element) {
-                    return element;
+                    if (returnElement) {
+                        return element;
+                    }
+
+                    return;
                 }
 
                 await sleep(timeout);
