@@ -297,12 +297,14 @@ class BrowserWindow {
     // cursor shortcuts -------------------------------------------------------
     elementExists = ({
         elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
         timeout=undefined,
         timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.elementExists({
             elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
             iframe: this.iframeElement,
             timeout: timeout,
             timeoutMax: timeoutMax,
@@ -311,6 +313,7 @@ class BrowserWindow {
 
     awaitElement = ({
         elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
         returnElement=true,
         timeout=undefined,
         timeoutMax=undefined,
@@ -318,6 +321,7 @@ class BrowserWindow {
 
         return this.cursor.awaitElement({
             elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
             returnElement: returnElement,
             iframe: this.iframeElement,
             timeout: timeout,
@@ -327,6 +331,7 @@ class BrowserWindow {
 
     awaitText = ({
         elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
         timeout=undefined,
         timeoutMax=undefined,
         text=required('text'),
@@ -334,6 +339,7 @@ class BrowserWindow {
 
         return this.cursor.awaitText({
             elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
             iframe: this.iframeElement,
             timeout: timeout,
             timeoutMax: timeoutMax,
@@ -343,11 +349,13 @@ class BrowserWindow {
 
     click = ({
         elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
         animation=true,
     }={}) => {
 
         return this.cursor.click({
             elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
             iframe: this.iframeElement,
             animation: animation,
         });
@@ -355,12 +363,14 @@ class BrowserWindow {
 
     fill = ({
         elementOrSelector=required('value'),
+        elementIndex=0,
         value=required('value'),
         animation=true,
     }={}) => {
 
         return this.cursor.fill({
             elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
             value: value,
             iframe: this.iframeElement,
             animation: animation,
@@ -369,6 +379,7 @@ class BrowserWindow {
 
     select = ({
         elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
         value=undefined,
         index=undefined,
         label=undefined,
@@ -377,6 +388,7 @@ class BrowserWindow {
 
         return this.cursor.select({
             elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
             iframe: this.iframeElement,
             value: value,
             index: index,
@@ -387,6 +399,7 @@ class BrowserWindow {
 
     check = ({
         elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
         value=undefined,
         label=undefined,
         animation=true,
@@ -394,6 +407,7 @@ class BrowserWindow {
 
         return this.cursor.check({
             elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
             iframe: this.iframeElement,
             value: value,
             label: label,

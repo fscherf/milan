@@ -388,6 +388,7 @@ class Browser:
     def element_exists(
             self,
             selector,
+            element_index=0,
             timeout=None,
             timeout_max=None,
             window=0,
@@ -397,8 +398,9 @@ class Browser:
         timeout_max = self._get_short_selector_timeout_max(timeout_max)
 
         self.logger.info(
-            "checking if element with selector '%s' in window %s exists with a timeout of %ss",  # NOQA
+            "checking if element with selector '%s' #%s in window %s exists with a timeout of %ss",  # NOQA
             selector,
+            element_index,
             window,
             timeout_max,
         )
@@ -407,14 +409,16 @@ class Browser:
             expression=commands.gen_window_element_exists_command(
                 window_index=window,
                 selector=selector,
+                element_index=element_index,
                 timeout=timeout,
                 timeout_max=timeout_max,
             ),
         )
 
         self.logger.info(
-            "element with selector '%s' %s in window %s",
+            "element with selector '%s' #%s %s in window %s",
             selector,
+            element_index,
             'exists' if _element_exists else 'does not exist',
             window,
         )
@@ -426,6 +430,7 @@ class Browser:
     def await_element(
             self,
             selector,
+            element_index=0,
             timeout=None,
             timeout_max=None,
             window=0,
@@ -435,8 +440,9 @@ class Browser:
         timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
-            "waiting for element with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            "waiting for element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
+            element_index,
             window,
             timeout_max,
         )
@@ -445,6 +451,7 @@ class Browser:
             expression=commands.gen_window_await_element_command(
                 window_index=window,
                 selector=selector,
+                element_index=element_index,
                 timeout=timeout,
                 timeout_max=timeout_max,
             ),
@@ -456,6 +463,7 @@ class Browser:
             self,
             selector,
             text,
+            element_index=0,
             timeout=None,
             timeout_max=None,
             window=0,
@@ -465,8 +473,9 @@ class Browser:
         timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
-            "waiting for element with selector '%s' to contain '%s' in window %s with a timeout of %ss",  # NOQA
+            "waiting for element with selector '%s' #%s to contain '%s' in window %s with a timeout of %ss",  # NOQA
             selector,
+            element_index,
             text,
             window,
             timeout_max,
@@ -476,6 +485,7 @@ class Browser:
             expression=commands.gen_window_await_text_command(
                 window_index=window,
                 selector=selector,
+                element_index=element_index,
                 text=text,
                 timeout=timeout,
                 timeout_max=timeout_max,
@@ -488,6 +498,7 @@ class Browser:
     def click(
             self,
             selector,
+            element_index=0,
             timeout=None,
             timeout_max=None,
             animation=None,
@@ -498,8 +509,9 @@ class Browser:
         timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
-            "clicking on element with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            "clicking on element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
+            element_index,
             window,
             timeout_max,
         )
@@ -508,6 +520,7 @@ class Browser:
             expression=commands.gen_window_click_command(
                 window_index=window,
                 selector=selector,
+                element_index=element_index,
                 timeout=timeout,
                 timeout_max=timeout_max,
                 animation=self._get_animations(animation),
@@ -520,6 +533,7 @@ class Browser:
             self,
             selector,
             value,
+            element_index=0,
             timeout=None,
             timeout_max=None,
             animation=None,
@@ -530,9 +544,10 @@ class Browser:
         timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
-            "filling value '%s' into an element with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            "filling value '%s' #%s into an element with selector '%s' in window %s with a timeout of %ss",  # NOQA
             value,
             selector,
+            element_index,
             window,
             timeout_max,
         )
@@ -541,6 +556,7 @@ class Browser:
             expression=commands.gen_window_fill_command(
                 window_index=window,
                 selector=selector,
+                element_index=element_index,
                 value=value,
                 timeout=timeout,
                 timeout_max=timeout_max,
@@ -554,6 +570,7 @@ class Browser:
             self,
             selector,
             value=True,
+            element_index=0,
             timeout=None,
             timeout_max=None,
             animation=None,
@@ -564,9 +581,10 @@ class Browser:
         timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
-            "%s checkbox with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            "%s checkbox with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             'checking' if value else 'unchecking',
             selector,
+            element_index,
             window,
             timeout_max,
         )
@@ -575,6 +593,7 @@ class Browser:
             expression=commands.gen_window_check_command(
                 window_index=window,
                 selector=selector,
+                element_index=element_index,
                 value=value,
                 timeout=timeout,
                 timeout_max=timeout_max,
@@ -587,6 +606,7 @@ class Browser:
     def select(
             self,
             selector,
+            element_index=0,
             value=None,
             index=None,
             label=None,
@@ -610,9 +630,10 @@ class Browser:
             identifier = f"label '{label}'"
 
         self.logger.info(
-            "selecting option with %s in select with selector '%s' in window %s with a timeout of %ss",  # NOQA
+            "selecting option with %s in select with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             identifier,
             selector,
+            element_index,
             window,
             timeout_max
         )
@@ -621,6 +642,7 @@ class Browser:
             expression=commands.gen_window_select_command(
                 window_index=window,
                 selector=selector,
+                element_index=element_index,
                 value=value,
                 index=index,
                 label=label,

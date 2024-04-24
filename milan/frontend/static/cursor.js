@@ -145,6 +145,7 @@
         // element helper -----------------------------------------------------
         getElement = ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             iframe=undefined,
         }={}) => {
 
@@ -156,7 +157,9 @@
             }
 
             if (typeof(element) == 'string') {
-                element = _document.querySelector(elementOrSelector);
+                element = _document.querySelectorAll(
+                    elementOrSelector,
+                )[elementIndex];
             }
 
             return element;
@@ -164,6 +167,7 @@
 
         elementExists = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             iframe=undefined,
             timeout=undefined,
             timeoutMax=undefined,
@@ -178,6 +182,7 @@
             while (timeSlept < timeoutMax) {
                 element = this.getElement({
                     elementOrSelector: elementOrSelector,
+                    elementIndex: elementIndex,
                     iframe: iframe,
                     timeout: timeout,
                     timeoutMax: timeoutMax,
@@ -197,6 +202,7 @@
 
         awaitElement = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             returnElement=true,
             iframe=undefined,
             timeout=undefined,
@@ -212,6 +218,7 @@
             while (timeSlept < timeoutMax) {
                 element = this.getElement({
                     elementOrSelector: elementOrSelector,
+                    elementIndex: elementIndex,
                     iframe: iframe,
                     timeout: timeout,
                     timeoutMax: timeoutMax,
@@ -235,6 +242,7 @@
 
         awaitText = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             iframe=undefined,
             timeout=undefined,
             timeoutMax=undefined,
@@ -250,6 +258,7 @@
             while (timeSlept < timeoutMax) {
                 element = this.getElement({
                     elementOrSelector: elementOrSelector,
+                    elementIndex: elementIndex,
                     iframe: iframe,
                     timeout: timeout,
                     timeoutMax: timeoutMax,
@@ -321,6 +330,7 @@
         // animations ---------------------------------------------------------
         _playClickAnimation = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             maxRetries=undefined,
             iframe=undefined,
         }={}) => {
@@ -329,6 +339,7 @@
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
                 iframe: iframe,
             });
 
@@ -438,12 +449,14 @@
 
         click = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             iframe=undefined,
             animation=true,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
                 iframe: iframe,
             });
 
@@ -463,12 +476,14 @@
 
         focus = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             iframe=undefined,
             animation=true,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
                 iframe: iframe,
             });
 
@@ -488,6 +503,7 @@
 
         fill = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             iframe=undefined,
             value=required('value'),
             animation=true,
@@ -495,6 +511,7 @@
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
                 iframe: iframe,
             });
 
@@ -549,6 +566,7 @@
 
         check = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             iframe=undefined,
             value=true,
             animation=true,
@@ -556,6 +574,7 @@
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
                 iframe: iframe,
             });
 
@@ -567,6 +586,7 @@
 
             await this.click({
                 elementOrSelector: element,
+                elementIndex: elementIndex,
                 iframe: iframe,
                 animation: animation,
             });
@@ -574,6 +594,7 @@
 
         select = async ({
             elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
             iframe=undefined,
             value=undefined,
             index=undefined,
@@ -590,12 +611,14 @@
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
                 iframe: iframe,
             });
 
             // focus element
             await this.focus({
                 elementOrSelector: element,
+                elementIndex: elementIndex,
                 iframe: iframe,
                 animation: animation,
             });

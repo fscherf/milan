@@ -254,6 +254,7 @@ def gen_window_set_fullscreen_command(window_index, fullscreen):
 def gen_window_element_exists_command(
         window_index,
         selector,
+        element_index,
         timeout,
         timeout_max,
 ):
@@ -265,6 +266,7 @@ def gen_window_element_exists_command(
         ),
         args={
             'elementOrSelector': selector,
+            'elementIndex': element_index,
             'timeout': timeout * 1000,
             'timeoutMax': timeout_max * 1000,
         },
@@ -274,6 +276,7 @@ def gen_window_element_exists_command(
 def gen_window_await_element_command(
         window_index,
         selector,
+        element_index,
         timeout,
         timeout_max,
 ):
@@ -285,6 +288,7 @@ def gen_window_await_element_command(
         ),
         args={
             'elementOrSelector': selector,
+            'elementIndex': element_index,
             'returnElement': False,
             'timeout': timeout * 1000,
             'timeoutMax': timeout_max * 1000,
@@ -295,6 +299,7 @@ def gen_window_await_element_command(
 def gen_window_await_text_command(
         window_index,
         selector,
+        element_index,
         text,
         timeout,
         timeout_max,
@@ -307,6 +312,7 @@ def gen_window_await_text_command(
         ),
         args={
             'elementOrSelector': selector,
+            'elementIndex': element_index,
             'text': text,
             'timeout': timeout * 1000,
             'timeoutMax': timeout_max * 1000,
@@ -318,6 +324,7 @@ def gen_window_await_text_command(
 def gen_window_click_command(
         window_index,
         selector,
+        element_index,
         animation,
         timeout,
         timeout_max,
@@ -330,6 +337,7 @@ def gen_window_click_command(
         ),
         args={
             'elementOrSelector': selector,
+            'elementIndex': element_index,
             'animation': animation,
             'timeout': timeout * 1000,
             'timeoutMax': timeout_max * 1000,
@@ -340,6 +348,7 @@ def gen_window_click_command(
 def gen_window_fill_command(
         window_index,
         selector,
+        element_index,
         value,
         animation,
         timeout,
@@ -353,6 +362,7 @@ def gen_window_fill_command(
         ),
         args={
             'elementOrSelector': selector,
+            'elementIndex': element_index,
             'value': value,
             'animation': animation,
             'timeout': timeout * 1000,
@@ -364,6 +374,7 @@ def gen_window_fill_command(
 def gen_window_check_command(
         window_index,
         selector,
+        element_index,
         value,
         animation,
         timeout,
@@ -377,6 +388,7 @@ def gen_window_check_command(
         ),
         args={
             'elementOrSelector': selector,
+            'elementIndex': element_index,
             'value': value,
             'animation': animation,
             'timeout': timeout * 1000,
@@ -388,6 +400,7 @@ def gen_window_check_command(
 def gen_window_select_command(
         window_index,
         selector,
+        element_index,
         value,
         index,
         label,
@@ -403,6 +416,7 @@ def gen_window_select_command(
         ),
         args={
             'elementOrSelector': selector,
+            'elementIndex': element_index,
             'value': value,
             'index': index,
             'label': label,
