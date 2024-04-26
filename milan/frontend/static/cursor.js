@@ -143,6 +143,20 @@
         }
 
         // element helper -----------------------------------------------------
+        getElementCount = ({
+            selector=required('selector'),
+            iframe=undefined,
+        }={}) => {
+
+            let _document = document;
+
+            if (typeof(iframe) != 'undefined') {
+                _document = iframe.contentDocument;
+            }
+
+            return _document.querySelectorAll(selector).length;
+        }
+
         getElement = ({
             elementOrSelector=required('elementOrSelector'),
             elementIndex=0,
@@ -324,6 +338,199 @@
             return {
                 x: x,
                 y: y,
+            }
+        }
+
+        getText = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            return element.textContent;
+        }
+
+        getHtml = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            return element.innerHTML;
+        }
+
+        setHtml = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            html=required('html'),
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            element.innerHTML = html;
+        }
+
+        getAttribute = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            name=required('name'),
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            return element.getAttribute(name);
+        }
+
+        getAttributes = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            let attributes = {};
+
+            for (let index = 0; index < element.attributes.length; index++) {
+                let attribute = element.attributes[index];
+
+                attributes[attribute.nodeName] = attribute.nodeValue;
+            }
+
+            return attributes;
+        }
+
+        setAttributes = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            attributes=required('attributes'),
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            for (let [name, value] of Object.entries(attributes)) {
+                element.setAttribute(name, value);
+            }
+        }
+
+        removeAttributes = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            names=required('names'),
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            for (let name of Array.from(names)) {
+                element.removeAttribute(name);
+            }
+        }
+
+        classListAdd = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            names=required('names'),
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            for (let name of Array.from(names)) {
+                element.classList.add(name);
+            }
+        }
+
+        classListRemove = async ({
+            elementOrSelector=required('elementOrSelector'),
+            elementIndex=0,
+            names=required('names'),
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            const element = await this.awaitElement({
+                elementOrSelector: elementOrSelector,
+                elementIndex: elementIndex,
+                iframe: iframe,
+                timeout: timeout,
+                timeoutMax: timeoutMax,
+            });
+
+            for (let name of Array.from(names)) {
+                element.classList.remove(name);
             }
         }
 

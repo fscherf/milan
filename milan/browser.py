@@ -492,6 +492,456 @@ class Browser:
             ),
         )
 
+    @frontend_function
+    @browser_function
+    def get_element_count(
+            self,
+            selector,
+            window=0,
+    ):
+
+        self.logger.info(
+            "counting elements with selector '%s' in window %s",
+            selector,
+            window,
+        )
+
+        element_count = self.evaluate(
+            expression=commands.gen_window_get_element_count_command(
+                window_index=window,
+                selector=selector,
+            ),
+        )
+
+        return element_count
+
+    @frontend_function
+    @browser_function
+    def get_html(
+            self,
+            selector,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "getting HTML from element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_get_html_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    @frontend_function
+    @browser_function
+    def set_html(
+            self,
+            selector,
+            html,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "setting HTML in element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_set_html_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                html=html,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    @frontend_function
+    @browser_function
+    def get_text(
+            self,
+            selector,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "getting text from element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_get_text_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    def set_text(
+            self,
+            selector,
+            text,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        return self.set_html(
+            selector=selector,
+            html=text,
+            element_index=element_index,
+            timeout=timeout,
+            timeout_max=timeout_max,
+            window=window,
+        )
+
+    @frontend_function
+    @browser_function
+    def get_attribute(
+            self,
+            selector,
+            name,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "getting attribute '%s' from element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            name,
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_get_attribute_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                name=name,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    @frontend_function
+    @browser_function
+    def get_attributes(
+            self,
+            selector,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "getting attributes of element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_get_attributes_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    @frontend_function
+    @browser_function
+    def set_attributes(
+            self,
+            selector,
+            attributes,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "setting attributes of element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_set_attributes_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                attributes=attributes,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    def set_attribute(
+            self,
+            selector,
+            name,
+            value,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        return self.set_attributes(
+            selector=selector,
+            element_index=element_index,
+            attributes={name: value},
+            timeout=timeout,
+            timeout_max=timeout_max,
+            window=window,
+        )
+
+    @frontend_function
+    @browser_function
+    def remove_attributes(
+            self,
+            selector,
+            names,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        self.logger.info(
+            "removing attributes '%s' of element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            names,
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_remove_attributes_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                names=names,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    def remove_attribute(
+            self,
+            selector,
+            name,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        return self.remove_attributes(
+            selector=selector,
+            names=[name],
+            element_index=element_index,
+            timeout=timeout,
+            timeout_max=timeout_max,
+            window=window,
+        )
+
+    def get_class_list(
+            self,
+            selector,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        class_list = self.get_attribute(
+            selector=selector,
+            element_index=element_index,
+            name='class',
+            timeout=timeout,
+            timeout_max=timeout_max,
+            window=window,
+        ).split(' ')
+
+        return [i for i in class_list if i]
+
+    def set_class_list(
+            self,
+            selector,
+            names,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        return self.set_attribute(
+            selector=selector,
+            name='class',
+            value=' '.join(names),
+            element_index=element_index,
+            timeout=timeout,
+            timeout_max=timeout_max,
+            window=window,
+        )
+
+    def clear_class_list(
+            self,
+            selector,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        return self.set_attribute(
+            selector=selector,
+            name='class',
+            value='',
+            element_index=element_index,
+            timeout=timeout,
+            timeout_max=timeout_max,
+            window=window,
+        )
+
+    @frontend_function
+    @browser_function
+    def class_list_add(
+            self,
+            selector,
+            names,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        if not isinstance(names, (list, tuple)):
+            names = [names]
+
+        self.logger.info(
+            "adding classs '%s' to element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            repr(names),
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_class_list_add_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                names=names,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    @frontend_function
+    @browser_function
+    def class_list_remove(
+            self,
+            selector,
+            names,
+            element_index=0,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        if not isinstance(names, (list, tuple)):
+            names = [names]
+
+        self.logger.info(
+            "removing classes '%s' from element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
+            repr(names),
+            selector,
+            element_index,
+            window,
+            timeout_max,
+        )
+
+        return self.evaluate(
+            expression=commands.gen_window_class_list_remove_command(
+                window_index=window,
+                selector=selector,
+                element_index=element_index,
+                names=names,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
     # window: user input
     @frontend_function
     @browser_function

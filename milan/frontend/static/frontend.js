@@ -295,6 +295,16 @@ class BrowserWindow {
     }
 
     // cursor shortcuts -------------------------------------------------------
+    getElementCount = ({
+        selector=required('selector'),
+    }={}) => {
+
+        return this.cursor.getElementCount({
+            selector:  selector,
+            iframe: this.iframeElement,
+        });
+    }
+
     elementExists = ({
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
@@ -412,6 +422,162 @@ class BrowserWindow {
             value: value,
             label: label,
             animation: animation,
+        });
+    }
+
+    getText = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.getText({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
+    getHtml = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.getHtml({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
+    setHtml = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        html=required('html'),
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.setHtml({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            html: html,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
+    getAttribute = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        name=required('name'),
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.getAttribute({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            name: name,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
+    getAttributes = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.getAttributes({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
+    setAttributes = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        attributes=required('attributes'),
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.setAttributes({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            attributes: attributes,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
+    removeAttributes = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        names=required('names'),
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.removeAttributes({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            names: names,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
+    classListAdd = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        names=required('names'),
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.classListAdd({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            names: names,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
+    classListRemove = ({
+        elementOrSelector=required('elementOrSelector'),
+        elementIndex=0,
+        names=required('names'),
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.classListRemove({
+            elementOrSelector: elementOrSelector,
+            elementIndex: elementIndex,
+            names: names,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
         });
     }
 }

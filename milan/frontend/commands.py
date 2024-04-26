@@ -251,6 +251,22 @@ def gen_window_set_fullscreen_command(window_index, fullscreen):
 
 
 # window: selectors
+def gen_window_get_element_count_command(
+        window_index,
+        selector,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='getElementCount',
+        ),
+        args={
+            'selector': selector,
+        },
+    )
+
+
 def gen_window_element_exists_command(
         window_index,
         selector,
@@ -314,6 +330,216 @@ def gen_window_await_text_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'text': text,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_get_text_command(
+        window_index,
+        selector,
+        element_index,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='getText',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_get_html_command(
+        window_index,
+        selector,
+        element_index,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='getHtml',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_set_html_command(
+        window_index,
+        selector,
+        element_index,
+        html,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='setHtml',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'html': html,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_get_attribute_command(
+        window_index,
+        selector,
+        element_index,
+        name,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='getAttribute',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'name': name,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_get_attributes_command(
+        window_index,
+        selector,
+        element_index,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='getAttributes',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_set_attributes_command(
+        window_index,
+        selector,
+        element_index,
+        attributes,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='setAttributes',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'attributes': attributes,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_remove_attributes_command(
+        window_index,
+        selector,
+        element_index,
+        names,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='removeAttributes',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'names': names,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_class_list_add_command(
+        window_index,
+        selector,
+        element_index,
+        names,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='classListAdd',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'names': names,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
+def gen_window_class_list_remove_command(
+        window_index,
+        selector,
+        element_index,
+        names,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='classListRemove',
+        ),
+        args={
+            'elementOrSelector': selector,
+            'elementIndex': element_index,
+            'names': names,
             'timeout': timeout * 1000,
             'timeoutMax': timeout_max * 1000,
         },
