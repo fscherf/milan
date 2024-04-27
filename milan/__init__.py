@@ -1,5 +1,6 @@
 import logging
 
+from milan.frontend.commands import FrontendError  # NOQA
 from milan.chromium import Chromium  # NOQA
 from milan.firefox import Firefox  # NOQA
 from milan.webkit import Webkit  # NOQA
