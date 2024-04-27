@@ -187,23 +187,32 @@
             timeoutMax=undefined,
         }={}) => {
 
+            let elementOrSelectorList = undefined;
             let element = undefined;
             let timeSlept = 0;
 
             timeout = timeout || this.config.shortTimeout;
             timeoutMax = timeoutMax || this.config.shortTimeoutMax;
 
-            while (timeSlept < timeoutMax) {
-                element = this.getElement({
-                    elementOrSelector: elementOrSelector,
-                    elementIndex: elementIndex,
-                    iframe: iframe,
-                    timeout: timeout,
-                    timeoutMax: timeoutMax,
-                });
+            if (Array.isArray(elementOrSelector)) {
+                elementOrSelectorList = elementOrSelector;
+            } else {
+                elementOrSelectorList = [elementOrSelector];
+            }
 
-                if (element) {
-                    return true;
+            while (timeSlept < timeoutMax) {
+                for (let elementOrSelector of elementOrSelectorList) {
+                    element = this.getElement({
+                        elementOrSelector: elementOrSelector,
+                        elementIndex: elementIndex,
+                        iframe: iframe,
+                        timeout: timeout,
+                        timeoutMax: timeoutMax,
+                    });
+
+                    if (element) {
+                        return elementOrSelector;
+                    }
                 }
 
                 await sleep(timeout);
@@ -211,7 +220,7 @@
                 timeSlept += timeout;
             }
 
-            return false;
+            return '';
         }
 
         awaitElement = async ({
