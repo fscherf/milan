@@ -641,19 +641,13 @@
             animation=true,
         }={}) => {
 
-            // FIXME: when animations are switched off position queries come
-            // back incorrect after movement
-
             const absoluteX = x + CURSOR_OFFSET_LEFT;
             const absoluteY = y + CURSOR_OFFSET_TOP;
 
-            if(!animation) {
-                this.cursorX = x;
-                this.cursorY = y;
-                this.cursorElement.style.left = `${absoluteX}px`;
-                this.cursorElement.style.top = `${absoluteY}px`;
+            let animationDuration = 300;
 
-                return;
+            if (!animation) {
+                animationDuration = 0;
             }
 
             await this.cursorElement.animate(
@@ -663,7 +657,7 @@
                 },
                 {
                     easing: 'ease',
-                    duration: 300,
+                    duration: animationDuration,
                     fill: 'forwards',
                 },
             ).finished;
