@@ -10,6 +10,9 @@ from milan.utils.misc import unique_id
 from milan.frontend import commands
 from milan.utils.url import URL
 
+DEFAULT_VIDEO_CAPTURING_START_DELAY = 1
+DEFAULT_VIDEO_CAPTURING_STOP_DELAY = 2
+
 
 def browser_function(func):
     @functools.wraps(func)
@@ -1163,9 +1166,18 @@ class Browser:
         raise NotImplementedError()
 
     @browser_function
-    def start_video_capturing(self, path):
+    def start_video_capturing(
+            self,
+            path,
+            delay=DEFAULT_VIDEO_CAPTURING_START_DELAY,
+    ):
+
         raise NotImplementedError()
 
     @browser_function
-    def stop_video_capturing(self):
+    def stop_video_capturing(
+            self,
+            delay=DEFAULT_VIDEO_CAPTURING_STOP_DELAY,
+    ):
+
         raise NotImplementedError()

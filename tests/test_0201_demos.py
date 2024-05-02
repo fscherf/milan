@@ -8,7 +8,6 @@ DEMO_ROOT = os.path.join(os.path.dirname(os.path.join(__file__)), '../demos')
 
 @pytest.mark.demo
 def test_form_demo(milan_artifacts_directory, start_web_app):
-    import time
     import sys
 
     from milan import Chromium
@@ -28,7 +27,6 @@ def test_form_demo(milan_artifacts_directory, start_web_app):
 
         # start video capturing
         browser.start_video_capturing('demos/form.gif')
-        time.sleep(1)
 
         # navigate to view
         browser.navigate('localhost:8080')
@@ -46,13 +44,11 @@ def test_form_demo(milan_artifacts_directory, start_web_app):
         browser.click('#close')
 
         # stop video capturing
-        time.sleep(2)
         browser.stop_video_capturing()
 
 
 @pytest.mark.demo
 def test_multi_window_demo(milan_artifacts_directory, start_web_app):
-    import time
     import sys
 
     from milan import Chromium
@@ -73,7 +69,6 @@ def test_multi_window_demo(milan_artifacts_directory, start_web_app):
 
         # start video capturing
         browser.start_video_capturing('demos/multi-window.gif')
-        time.sleep(1)
 
         # open first popup
         browser.navigate('localhost:8080', window=0)
@@ -86,7 +81,6 @@ def test_multi_window_demo(milan_artifacts_directory, start_web_app):
         browser.fill('#text-input-2', 'bar', window=1)
 
         # stop video capturing
-        time.sleep(2)
         browser.stop_video_capturing()
 
 
@@ -98,19 +92,15 @@ def test_youtube_trending_movies(milan_artifacts_directory):
 
     from milan import Chromium
 
-    import time
-
     with Chromium.start() as browser:
         browser.resize(*BROWSER_SIZE)
         browser.move_cursor_to_home()
 
         browser.start_video_capturing('demos/youtube.gif')
-        time.sleep(1)
 
         browser.navigate('youtube.com')
         browser.click('#guide-button')
         browser.click('[title=Trending]')
         browser.click('[tab-title=Movies]')
 
-        time.sleep(2)
         browser.stop_video_capturing()

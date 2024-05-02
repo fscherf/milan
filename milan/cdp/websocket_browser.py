@@ -5,7 +5,6 @@ import os
 from milan.cdp.websocket_client import CdpWebsocketClient
 from milan.utils.background_loop import BackgroundLoop
 from milan.utils.json_rpc import JsonRpcStoppedError
-from milan.browser import Browser, browser_function
 from milan.utils.event_router import EventRouter
 from milan.frontend.server import FrontendServer
 from milan.errors import BrowserStoppedError
@@ -13,6 +12,13 @@ from milan.utils.media import image_convert
 from milan.utils.process import Process
 from milan.utils.misc import retry
 from milan.utils.url import URL
+
+from milan.browser import (
+    DEFAULT_VIDEO_CAPTURING_START_DELAY,
+    DEFAULT_VIDEO_CAPTURING_STOP_DELAY,
+    browser_function,
+    Browser,
+)
 
 
 class CdpWebsocketBrowser(Browser):
@@ -277,6 +283,7 @@ class CdpWebsocketBrowser(Browser):
     def start_video_capturing(
             self,
             output_path,
+            delay=DEFAULT_VIDEO_CAPTURING_START_DELAY,
             width=0,
             height=0,
             fps=0,
@@ -290,7 +297,7 @@ class CdpWebsocketBrowser(Browser):
                 'CDP based video recording is not supported in firefox',
             )
 
-        return self.cdp_websocket_client.start_video_capturing(
+        return_value = self.cdp_websocket_client.start_video_capturing(
             output_path=output_path,
             width=width,
             height=height,
@@ -300,11 +307,25 @@ class CdpWebsocketBrowser(Browser):
             image_quality=image_quality,
         )
 
+        if delay:
+            time.sleep(delay)
+
+        return return_value
+
     @browser_function
-    def stop_video_capturing(self):
+    def stop_video_capturing(
+            self,
+            delay=DEFAULT_VIDEO_CAPTURING_STOP_DELAY,
+    ):
+
         if self.is_firefox():
             raise NotImplementedError(
                 'CDP based video recording is not supported in firefox',
             )
 
-        return self.cdp_websocket_client.stop_video_capturing()
+        return_value = self.cdp_websocket_client.stop_video_capturing()
+
+        if delay:
+            time.sleep(delay)
+
+        return return_value
