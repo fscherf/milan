@@ -380,6 +380,20 @@ class Browser:
             ),
         )
 
+    @frontend_function
+    @browser_function
+    def _get_url(self, window=0):
+        return self.evaluate(
+            expression=commands.gen_window_get_url_command(
+                window_index=window,
+            ),
+        )
+
+    def get_url(self, window=0):
+        raw_url = self._get_url(window=window)
+
+        return URL(raw_url)
+
     # window: selectors
     @frontend_function
     @browser_function

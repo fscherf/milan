@@ -250,6 +250,15 @@ def gen_window_set_fullscreen_command(window_index, fullscreen):
     )
 
 
+def gen_window_get_url_command(window_index):
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='getUrl',
+        ),
+    )
+
+
 # window: selectors
 def gen_window_get_element_count_command(
         window_index,

@@ -294,6 +294,10 @@ class BrowserWindow {
         }
     }
 
+    getUrl = () => {
+        return this.iframeElement.contentDocument.location.href;
+    }
+
     // cursor shortcuts -------------------------------------------------------
     getElementCount = ({
         selector=required('selector'),
