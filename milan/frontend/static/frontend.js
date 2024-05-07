@@ -298,6 +298,19 @@ class BrowserWindow {
         return this.iframeElement.contentDocument.location.href;
     }
 
+    evaluate = async ({
+        expression=required('expression'),
+    }={}) => {
+
+        let returnValue = this.iframeElement.contentWindow.eval(expression);
+
+        if (returnValue instanceof Promise) {
+            returnValue = await returnValue;
+        }
+
+        return returnValue;
+    }
+
     // cursor shortcuts -------------------------------------------------------
     getElementCount = ({
         selector=required('selector'),

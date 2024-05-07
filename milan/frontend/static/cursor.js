@@ -79,6 +79,13 @@
     }
 
 
+    const evaluate = async ({
+        expression=required('expression'),
+    }={}) => {
+        return eval(expression);
+    }
+
+
     class Cursor {
         constructor() {
 
@@ -886,6 +893,7 @@
     window.addEventListener('load', () => {
         window['milan'] = {
             run: run,
+            evaluate: evaluate,
             cursor: new Cursor(),
         };
     });

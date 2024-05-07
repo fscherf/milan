@@ -212,6 +212,26 @@ class Browser:
         )
 
     # frontend methods ########################################################
+    @browser_function
+    @frontend_function
+    def evaluate(self, expression, window=0):
+
+        # evaluate in the real browser
+        if window is None:
+            return self._browser_evaluate(
+                expression=commands.gen_evaluate_command(
+                    expression=expression,
+                ),
+            )
+
+        # evaluate in one of the windows
+        return self._browser_evaluate(
+            expression=commands.gen_window_evaluate_command(
+                window_index=window,
+                expression=expression,
+            ),
+        )
+
     # window manager
     @frontend_function
     @browser_function

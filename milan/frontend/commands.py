@@ -85,6 +85,15 @@ def get_cursor_source():
 
 
 # commands ####################################################################
+def gen_evaluate_command(expression):
+    return _gen_frontend_run_command(
+        func='milan.evaluate',
+        args={
+            'expression': expression,
+        },
+    )
+
+
 # cursor
 def gen_cursor_show_command():
     return _gen_frontend_run_command(
@@ -256,6 +265,18 @@ def gen_window_get_url_command(window_index):
             window_index=window_index,
             name='getUrl',
         ),
+    )
+
+
+def gen_window_evaluate_command(window_index, expression):
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='evaluate',
+        ),
+        args={
+            'expression': expression,
+        },
     )
 
 
