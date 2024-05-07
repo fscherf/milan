@@ -216,14 +216,14 @@ class Browser:
     @frontend_function
     @browser_function
     def get_size(self):
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_manager_get_size_command(),
         )
 
     @frontend_function
     @browser_function
     def get_window_count(self):
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_manager_get_window_count_command(),
         )
 
@@ -232,14 +232,14 @@ class Browser:
     def split(self):
         self.logger.info('splitting window')
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_manager_split_command(),
         )
 
     @frontend_function
     @browser_function
     def set_background_url(self, url):
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_manager_set_background_url_command(
                 url=url,
             ),
@@ -248,7 +248,7 @@ class Browser:
     @frontend_function
     @browser_function
     def set_watermark(self, text):
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_manager_set_watermark_command(
                 text=text,
             ),
@@ -260,7 +260,7 @@ class Browser:
     def show_cursor(self):
         self.logger.info('showing cursor')
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_cursor_show_command(),
         )
 
@@ -269,14 +269,14 @@ class Browser:
     def hide_cursor(self):
         self.logger.info('hiding cursor')
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_cursor_hide_command(),
         )
 
     @frontend_function
     @browser_function
     def cursor_is_visible(self):
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_cursor_is_visible_command(),
         )
 
@@ -291,7 +291,7 @@ class Browser:
 
         self.logger.info('moving cursor to x=%s y=%s', x, y)
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_cursor_move_to_command(
                 x=float(x),
                 y=float(y),
@@ -304,7 +304,7 @@ class Browser:
     def move_cursor_to_home(self, animation=None):
         self.logger.info('moving cursor to home')
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_cursor_move_to_home_command(
                 animation=self._get_animations(animation),
             ),
@@ -313,7 +313,7 @@ class Browser:
     @frontend_function
     @browser_function
     def get_cursor_position(self):
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_cursor_get_position_command(),
         )
 
@@ -323,7 +323,7 @@ class Browser:
     def reload(self, window=0, animation=None):
         self.logger.info('reloading window %s', window)
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_reload_command(
                 window_index=window,
                 animation=self._get_animations(animation),
@@ -336,7 +336,7 @@ class Browser:
     def navigate_back(self, window=0, animation=None):
         self.logger.info('navigating window %s back', window)
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_navigate_back_command(
                 window_index=window,
                 animation=self._get_animations(animation),
@@ -348,7 +348,7 @@ class Browser:
     def navigate_forward(self, window=0, animation=None):
         self.logger.info('navigating window %s forward', window)
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_navigate_forward_command(
                 window_index=window,
                 animation=self._get_animations(animation),
@@ -358,7 +358,7 @@ class Browser:
     @frontend_function
     @browser_function
     def get_fullscreen(self, window=0):
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_get_fullscreen_command(
                 window_index=window,
             ),
@@ -373,7 +373,7 @@ class Browser:
             window,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_set_fullscreen_command(
                 window_index=window,
                 fullscreen=fullscreen,
@@ -383,7 +383,7 @@ class Browser:
     @frontend_function
     @browser_function
     def _get_url(self, window=0):
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_get_url_command(
                 window_index=window,
             ),
@@ -422,7 +422,7 @@ class Browser:
             timeout_max,
         )
 
-        _element_exists = self.evaluate(
+        _element_exists = self._browser_evaluate(
             expression=commands.gen_window_element_exists_command(
                 window_index=window,
                 selector=selector,
@@ -464,7 +464,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_await_element_command(
                 window_index=window,
                 selector=selector,
@@ -498,7 +498,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_await_text_command(
                 window_index=window,
                 selector=selector,
@@ -523,7 +523,7 @@ class Browser:
             window,
         )
 
-        element_count = self.evaluate(
+        element_count = self._browser_evaluate(
             expression=commands.gen_window_get_element_count_command(
                 window_index=window,
                 selector=selector,
@@ -554,7 +554,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_get_html_command(
                 window_index=window,
                 selector=selector,
@@ -587,7 +587,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_set_html_command(
                 window_index=window,
                 selector=selector,
@@ -620,7 +620,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_get_text_command(
                 window_index=window,
                 selector=selector,
@@ -673,7 +673,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_get_attribute_command(
                 window_index=window,
                 selector=selector,
@@ -706,7 +706,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_get_attributes_command(
                 window_index=window,
                 selector=selector,
@@ -739,7 +739,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_set_attributes_command(
                 window_index=window,
                 selector=selector,
@@ -794,7 +794,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_remove_attributes_command(
                 window_index=window,
                 selector=selector,
@@ -910,7 +910,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_class_list_add_command(
                 window_index=window,
                 selector=selector,
@@ -948,7 +948,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_class_list_remove_command(
                 window_index=window,
                 selector=selector,
@@ -983,7 +983,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_click_command(
                 window_index=window,
                 selector=selector,
@@ -1019,7 +1019,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_fill_command(
                 window_index=window,
                 selector=selector,
@@ -1056,7 +1056,7 @@ class Browser:
             timeout_max,
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_check_command(
                 window_index=window,
                 selector=selector,
@@ -1105,7 +1105,7 @@ class Browser:
             timeout_max
         )
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_select_command(
                 window_index=window,
                 selector=selector,
@@ -1135,7 +1135,7 @@ class Browser:
 
         self.logger.info('navigating frontend to %s', url)
 
-        return self.evaluate(
+        return self._browser_evaluate(
             expression=commands.gen_window_navigate_command(
                 window_index=window,
                 url=str(url),
@@ -1154,9 +1154,17 @@ class Browser:
     def reload_frontend(self):
         self.logger.info('loading frontend')
 
-        self._navigate_browser(url=self._frontend_server.get_frontend_url())
+        self._browser_navigate(url=self._frontend_server.get_frontend_url())
 
     # hooks ###################################################################
+    @browser_function
+    def _browser_navigate(self, url):
+        raise NotImplementedError()
+
+    @browser_function
+    def _browser_evaluate(self, expression):
+        raise NotImplementedError()
+
     def stop(self):
         raise NotImplementedError()
 
@@ -1164,15 +1172,7 @@ class Browser:
         raise NotImplementedError()
 
     @browser_function
-    def _navigate_browser(self, url):
-        raise NotImplementedError()
-
-    @browser_function
     def resize(self, width=0, height=0):
-        raise NotImplementedError()
-
-    @browser_function
-    def evaluate(self, expression):
         raise NotImplementedError()
 
     @browser_function

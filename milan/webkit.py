@@ -349,7 +349,7 @@ class Webkit(Browser):
 
     # browser hooks ###########################################################
     @browser_function
-    def _navigate_browser(self, url):
+    def _browser_navigate(self, url):
         future = self.await_browser_load(await_future=False)
 
         self._json_rpc_client.send_request(
@@ -364,7 +364,7 @@ class Webkit(Browser):
         future.result()
 
     @browser_function
-    def evaluate(self, expression):
+    def _browser_evaluate(self, expression):
 
         # get objectId
         @retry

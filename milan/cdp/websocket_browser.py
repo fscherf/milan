@@ -222,7 +222,7 @@ class CdpWebsocketBrowser(Browser):
 
     # browser hooks ###########################################################
     @browser_function
-    def _navigate_browser(self, url):
+    def _browser_navigate(self, url):
         future = self.await_browser_load(await_future=False)
 
         self.cdp_websocket_client.page_navigate(url=URL.normalize(url))
@@ -230,7 +230,7 @@ class CdpWebsocketBrowser(Browser):
         future.result()
 
     @browser_function
-    def evaluate(self, expression):
+    def _browser_evaluate(self, expression):
         return self.cdp_websocket_client.runtime_evaluate(
             expression=expression,
             await_promise=True,
