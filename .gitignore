@@ -314,3 +314,4 @@ tags
 /artifacts/
 /playwright-video/*
 /playwright.log
+/user-data/

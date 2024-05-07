@@ -7,6 +7,7 @@ services:
 
     shm_size: 1gb
     user: milan
+    hostname: milan
     working_dir: /app
 
     volumes:

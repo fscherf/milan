@@ -5,7 +5,7 @@ DOC_ROOT=doc
 
 .PHONY: milan build clean fullclean shell \
 	dist _release \
-	test ci-test frontend demos \
+	test ci-test frontend demos browser \
 	doc _doc-release \
 	playwright-install playwright-browser
 
@@ -52,6 +52,9 @@ test:
 
 ci-test:
 	docker compose run milan MILAN_CI_TEST=1 tox -e py38,py39,py310,py311 $(args)
+
+browser:
+	docker compose run milan milan run shell --user-data-dir=user-data $(args)
 
 demos:
 	$(MAKE) test args="-- -k demos"
