@@ -15,6 +15,11 @@ class FrontendError(Exception):
 def _gen_frontend_run_command(func, args=None):
     args_string = json.dumps(args or {})
 
+    # fix quoting for JavaScript
+    # json.dumps quotes double quotes with only one backslash (\") but
+    # JavaScript needs two backslashes (\\")
+    args_string = repr(args_string)[1:-1]
+
     return f"""
         (async () => {{
             const args = JSON.parse(`{args_string}`);
