@@ -225,6 +225,18 @@ class VideoRecorder:
         self.logger.debug('stopping recording to %s', self._output_path)
 
         # render images to video
+        logger = self._get_sub_logger('ffmpeg.rendering')
+
+        stdout_lines = []
+
+        command = [
+            get_executable('ffmpeg'),
+            *self._get_ffmpeg_global_args(),
+            *self._get_ffmpeg_input_args(),
+            *self._output_args,
+            self._output_path,
+        ]
+
         self.logger.debug(
             'rendering %s frames from %s to %s',
             self._frame_counter.value,
@@ -234,16 +246,25 @@ class VideoRecorder:
 
         self._state = 'rendering'
 
-        Process(
-            command=[
-                get_executable('ffmpeg'),
-                *self._get_ffmpeg_global_args(),
-                *self._get_ffmpeg_input_args(),
-                *self._output_args,
-                self._output_path,
-            ],
-            logger=self._get_sub_logger('ffmpeg.rendering'),
+        exit_code = Process(
+            command=command,
+            on_stdout_line=lambda line: stdout_lines.append(line),
+            logger=logger,
         ).wait()
+
+        if exit_code != 0:
+            self._state = 'crashed'
+
+            logger.error(
+                'ffmpeg returned %s\n'
+                'command: %s \n'
+                'stdout/stderr:\n%s',
+                exit_code,
+                command,
+                '\n'.join(stdout_lines),
+            )
+
+            raise RuntimeError(f'ffmpeg returned {exit_code}')
 
         # cleanup
         if self._frame_temp_dir:
