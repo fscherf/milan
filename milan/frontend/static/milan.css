@@ -105,6 +105,16 @@ main > .grid {
     grid-column: 1;
 }
 
+#pixel {
+    position: absolute;
+    z-index: 1000001;
+    left: 0px;
+    bottom: 0px;
+    width: 1px;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
 /* marker ------------------------------------------------------------------ */
 #marker {
     display: none;

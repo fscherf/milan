@@ -610,6 +610,7 @@ class WindowManager {
         // find elements
         this.markerElement = document.querySelector('#marker');
         this.rootElement = document.querySelector('main');
+        this.pixelElement = document.querySelector('#pixel');
         this.backgroundElement = this.rootElement.querySelector('#background');
         this.gridElement = this.rootElement.querySelector('.grid');
 
@@ -696,6 +697,15 @@ class WindowManager {
         text=required('text'),
     }={}) => {
         this.backgroundElement.contentWindow.setWatermark(text);
+    }
+
+    forceRerender = async () => {
+        const clone = this.pixelElement.cloneNode();
+
+        this.pixelElement.replaceWith(clone);
+        this.pixelElement = clone;
+
+        await sleep(0);
     }
 }
 
