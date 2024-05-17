@@ -353,6 +353,35 @@ def gen_window_await_element_command(
     )
 
 
+def gen_window_await_elements_command(
+        window_index,
+        selectors,
+        text,
+        present,
+        match_all,
+        count,
+        timeout,
+        timeout_max,
+):
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='awaitElements',
+        ),
+        args={
+            'selectors': selectors,
+            'text': text,
+            'present': present,
+            'matchAll': match_all,
+            'count': count,
+            'returnElements': False,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+        },
+    )
+
+
 def gen_window_await_text_command(
         window_index,
         selector,

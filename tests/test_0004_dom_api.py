@@ -16,6 +16,99 @@ def test_dom_api(browser_name, window):
 
         # selectors: await elements
         # existing element
+        browser.await_elements('#selectors .class-1', window=window)
+
+        # non existing element
+        assert browser.await_elements(
+            '#selectors .not-existing-class',
+            present=False,
+            window=window,
+        ) == []
+
+        with pytest.raises(FrontendError) as excinfo:
+            browser.await_elements(
+                '#selectors .not-existing-class',
+                window=window,
+            )
+
+        assert str(excinfo.value) == 'No matching elements found'
+
+        # multiple elements
+        assert browser.await_elements(
+            [
+                '#selectors .class-1',
+                '#selectors .class-2',
+            ],
+            window=window,
+        ) == [
+            '#selectors .class-1',
+            '#selectors .class-2',
+        ]
+
+        assert browser.await_elements(
+            [
+                '#selectors .class-2',
+                '#selectors .class-1',
+            ],
+            window=window,
+        ) == [
+            '#selectors .class-2',
+            '#selectors .class-1',
+        ]
+
+        assert browser.await_elements(
+            [
+                '#selectors .class-1',
+                '#selectors .not-existing-class',
+            ],
+            match_all=False,
+            window=window,
+        ) == [
+            '#selectors .class-1',
+        ]
+
+        # element text
+        assert browser.await_elements(
+            '#selectors .class-1',
+            text='class-1',
+            window=window,
+        ) == [
+            '#selectors .class-1',
+        ]
+
+        with pytest.raises(FrontendError) as excinfo:
+            assert browser.await_elements(
+                '#selectors .class-1',
+                text='non existing text',
+                window=window,
+            ) == [
+                '#selectors .class-1',
+            ]
+
+        assert str(excinfo.value) == 'No matching elements found'
+
+        # element count
+        assert browser.await_elements(
+            '#selectors .class-1',
+            count=2,
+            window=window,
+        ) == [
+            '#selectors .class-1',
+        ]
+
+        with pytest.raises(FrontendError) as excinfo:
+            assert browser.await_elements(
+                '#selectors .class-1',
+                count=3,
+                window=window,
+            ) == [
+                '#selectors .class-1',
+            ]
+
+        assert str(excinfo.value) == 'No matching elements found'
+
+        # selectors: await elements (legacy)
+        # existing element
         browser.await_element('#selectors .class-1', window=window)
 
         # non existing element

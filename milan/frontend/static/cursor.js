@@ -279,6 +279,102 @@
             throw `No element with selector '${elementOrSelector}' found`;
         }
 
+        awaitElements = async ({
+            selectors=required('selectors'),
+            text='',
+            present=true,
+            matchAll=true,
+            count=undefined,
+            returnElements=true,
+            iframe=undefined,
+            timeout=undefined,
+            timeoutMax=undefined,
+        }={}) => {
+
+            timeout = timeout || this.config.timeout;
+            timeoutMax = timeoutMax || this.config.timeoutMax;
+
+            const matchingElements = new Array();
+            const matchingSelectors = new Array();
+
+            let _document = document;
+            let timeSlept = 0;
+
+            const _checkRequirementsPresent = () => {
+                if (matchAll && matchingSelectors.length < selectors) {
+                    return false;
+                }
+
+                if (count && matchingElements.length != count) {
+                    return false;
+                }
+
+                return matchingElements.length > 0;
+            }
+
+            const _checkRequirementsNonPresent = () => {
+                if (matchAll && matchingSelectors.length > 0) {
+                    return false;
+                }
+
+                return matchingElements.length < selectors.length;
+            }
+
+            const _checkRequirements = () => {
+                if (present) {
+                    return _checkRequirementsPresent();
+                }
+
+                return _checkRequirementsNonPresent();
+            }
+
+            // find document
+            if (typeof(iframe) != 'undefined') {
+                _document = iframe.contentDocument;
+            }
+
+            // main loop
+            while (timeSlept < timeoutMax) {
+
+                // reset
+                matchingElements.length = 0;
+                matchingSelectors.length = 0;
+
+                // search for elements
+                for (let selector of selectors) {
+                    for (let element of _document.querySelectorAll(selector)) {
+                        if (text && !element.innerHTML.includes(text)) {
+                            continue;
+                        }
+
+                        if (matchingSelectors.indexOf(selector) == -1) {
+                            matchingSelectors.push(selector);
+                        }
+
+                        if (matchingElements.indexOf(element) == -1) {
+                            matchingElements.push(element);
+                        }
+                    }
+                }
+
+                // check requirements
+                if (_checkRequirements()) {
+                    if (returnElements) {
+                        return matchingElements;
+                    }
+
+                    return matchingSelectors;
+                }
+
+                // sleep
+                await sleep(timeout);
+
+                timeSlept += timeout;
+            }
+
+            throw 'No matching elements found';
+        }
+
         awaitText = async ({
             elementOrSelector=required('elementOrSelector'),
             elementIndex=0,

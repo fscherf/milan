@@ -503,6 +503,50 @@ class Browser:
 
     @frontend_function
     @browser_function
+    def await_elements(
+            self,
+            selectors,
+            text='',
+            present=True,
+            match_all=True,
+            count=None,
+            timeout=None,
+            timeout_max=None,
+            window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        if not isinstance(selectors, (list, tuple)):
+            selectors = [selectors]
+
+        self.logger.info(
+            "waiting for %s with selectors '%s'%s in window %s to be %s [match_all=%s,timeout=%ss]",  # NOQA
+            f'{count} element(s)' if count else 'element(s)',
+            ','.join(selectors),
+            f"and text '{text}'" if text else '',
+            window,
+            'present' if present else 'not present',
+            match_all,
+            timeout_max,
+        )
+
+        return self._browser_evaluate(
+            expression=commands.gen_window_await_elements_command(
+                window_index=window,
+                selectors=selectors,
+                text=text,
+                present=present,
+                match_all=match_all,
+                count=count,
+                timeout=timeout,
+                timeout_max=timeout_max,
+            ),
+        )
+
+    @frontend_function
+    @browser_function
     def await_text(
             self,
             selector,

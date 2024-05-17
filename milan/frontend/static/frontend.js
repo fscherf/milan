@@ -356,6 +356,31 @@ class BrowserWindow {
         });
     }
 
+    awaitElements = ({
+        selectors=required('selectors'),
+        text='',
+        present=true,
+        matchAll=true,
+        count=undefined,
+        returnElements=true,
+        iframe=undefined,
+        timeout=undefined,
+        timeoutMax=undefined,
+    }={}) => {
+
+        return this.cursor.awaitElements({
+            selectors: selectors,
+            text: text,
+            present: present,
+            matchAll: matchAll,
+            count: count,
+            returnElements: returnElements,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+    }
+
     awaitText = ({
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
