@@ -267,7 +267,7 @@ def gen_window_get_fullscreen_command(window_index):
     )
 
 
-def gen_window_set_fullscreen_command(window_index, fullscreen):
+def gen_window_set_fullscreen_command(window_index, fullscreen, decorations):
     return _gen_frontend_run_command(
         func=_gen_window_function_name(
             window_index=window_index,
@@ -275,6 +275,7 @@ def gen_window_set_fullscreen_command(window_index, fullscreen):
         ),
         args={
             'fullscreen': fullscreen,
+            'decorations': decorations,
         },
     )
 

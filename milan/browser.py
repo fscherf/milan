@@ -402,17 +402,19 @@ class Browser:
 
     @frontend_function
     @browser_function
-    def set_fullscreen(self, window=0, fullscreen=True):
+    def set_fullscreen(self, window=0, fullscreen=True, decorations=True):
         self.logger.info(
-            '%s fullscreen for window %s',
+            '%s fullscreen for window %s %s decorations',
             'enabling' if fullscreen else 'disabling',
             window,
+            'with' if decorations else 'without',
         )
 
         return self._browser_evaluate(
             expression=commands.gen_window_set_fullscreen_command(
                 window_index=window,
                 fullscreen=fullscreen,
+                decorations=decorations,
             ),
         )
 

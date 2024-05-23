@@ -47,6 +47,7 @@ class BrowserWindow {
 
         this.iframeElement = this.rootElement.querySelector('iframe');
         this.tabTitleElement = this.rootElement.querySelector('.tab-title');
+        this.tabPaneElement = this.rootElement.querySelector('.tab-pane');
         this.backElement = this.rootElement.querySelector('.back');
         this.forwardElement = this.rootElement.querySelector('.forward');
         this.reloadElement = this.rootElement.querySelector('.reload');
@@ -165,18 +166,33 @@ class BrowserWindow {
     // browser functions ------------------------------------------------------
     // fullscreen
     getFullscreen = () => {
-        return this.rootElement.classList.contains('fullscreen');
+        return (
+            this.rootElement.classList.contains('fullscreen') ||
+            this.tabPaneElement.classList.contains('fullscreen')
+        )
     }
 
-    setFullscreen = ({
+    setFullscreen = async ({
         fullscreen=true,
+        decorations=true,
     }={}) => {
 
+
+        // reset full screen
+        this.rootElement.classList.remove('fullscreen');
+        this.tabPaneElement.classList.remove('fullscreen');
+
+        // set fullscreen
         if (fullscreen) {
-            this.rootElement.classList.add('fullscreen');
-        } else {
-            this.rootElement.classList.remove('fullscreen');
+            if (decorations) {
+                this.rootElement.classList.add('fullscreen');
+            } else {
+                this.tabPaneElement.classList.add('fullscreen');
+            }
         }
+
+        // give the browser time to rerender
+        await sleep(0);
     }
 
     // navigation
