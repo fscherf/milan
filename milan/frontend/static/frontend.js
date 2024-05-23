@@ -724,6 +724,12 @@ class WindowManager {
         this.backgroundElement.contentWindow.setWatermark(text);
     }
 
+    setBackground = ({
+        background=required('background'),
+    }={}) => {
+        this.backgroundElement.contentWindow.setBackground(background);
+    }
+
     forceRerender = async () => {
         const clone = this.pixelElement.cloneNode();
 

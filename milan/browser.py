@@ -276,6 +276,15 @@ class Browser:
 
     @frontend_function
     @browser_function
+    def set_background(self, background):
+        return self._browser_evaluate(
+            expression=commands.gen_window_manager_set_background_command(
+                background=background,
+            ),
+        )
+
+    @frontend_function
+    @browser_function
     def force_rerender(self):
         return self._browser_evaluate(
             expression=commands.gen_window_manager_force_rerender_command(),

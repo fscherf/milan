@@ -3,3 +3,8 @@ window['setWatermark'] = (text) => {
 
     watermarkElement.innerHTML = text;
 };
+
+
+window['setBackground'] = (background) => {
+    document.body.style.background = background;
+};

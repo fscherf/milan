@@ -193,6 +193,15 @@ def gen_window_manager_set_watermark_command(text):
     )
 
 
+def gen_window_manager_set_background_command(background):
+    return _gen_frontend_run_command(
+        func=_gen_window_manager_function_name(name='setBackground'),
+        args={
+            'background': background,
+        },
+    )
+
+
 def gen_window_manager_force_rerender_command():
     return _gen_frontend_run_command(
         func=_gen_window_manager_function_name(name='forceRerender'),
