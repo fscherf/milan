@@ -209,6 +209,15 @@ def gen_window_manager_force_rerender_command():
 
 
 # window
+def gen_window_get_size_command(window_index):
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='getSize',
+        ),
+    )
+
+
 def gen_window_navigate_command(window_index, url, animation):
     return _gen_frontend_run_command(
         func=_gen_window_function_name(

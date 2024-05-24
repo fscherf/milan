@@ -154,6 +154,13 @@ class BrowserWindow {
         this.tabTitleElement.innerHTML = title;
     }
 
+    getSize = () => {
+        return {
+            width: this.iframeElement.clientWidth,
+            height: this.iframeElement.clientHeight,
+        };
+    }
+
     // events -----------------------------------------------------------------
     awaitLoad = () => {
         const promise = new Promise(resolve => {

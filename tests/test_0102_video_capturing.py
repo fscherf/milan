@@ -100,7 +100,7 @@ def test_video_capturing(
     with browser_class.start() as browser:
         browser.navigate_to_test_application()
         browser.animation = True
-        browser.resize(1280, 720)
+        browser.set_size(1280, 720)
 
         browser.start_video_capturing(
             output_path=video_path,

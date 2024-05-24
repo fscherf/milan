@@ -22,7 +22,7 @@ def test_form_demo(milan_artifacts_directory, start_web_app):
     )
 
     with Chromium.start() as browser:
-        browser.resize(*BROWSER_SIZE)
+        browser.set_size(*BROWSER_SIZE)
         browser.move_cursor_to_home()
 
         # start video capturing
@@ -63,7 +63,7 @@ def test_multi_window_demo(milan_artifacts_directory, start_web_app):
     )
 
     with Chromium.start() as browser:
-        browser.resize(*BROWSER_SIZE)
+        browser.set_size(*BROWSER_SIZE)
         browser.split()
         browser.move_cursor_to_home()
 
@@ -93,7 +93,7 @@ def test_youtube_trending_movies(milan_artifacts_directory):
     from milan import Chromium
 
     with Chromium.start() as browser:
-        browser.resize(*BROWSER_SIZE)
+        browser.set_size(*BROWSER_SIZE)
         browser.move_cursor_to_home()
 
         browser.start_video_capturing('demos/youtube.gif')

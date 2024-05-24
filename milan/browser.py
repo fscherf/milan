@@ -240,6 +240,17 @@ class Browser:
             expression=commands.gen_window_manager_get_size_command(),
         )
 
+    @browser_function
+    def set_size(self, width=0, height=0, even_values=True):
+        if even_values:
+            width = width + (width % 2)
+            height = height + (height % 2)
+
+        return self._browser_set_size(
+            width=width,
+            height=height,
+        )
+
     @frontend_function
     @browser_function
     def get_window_count(self):
@@ -431,6 +442,32 @@ class Browser:
         raw_url = self._get_url(window=window)
 
         return URL(raw_url)
+
+    # window
+    @frontend_function
+    @browser_function
+    def get_window_size(self, window=0):
+        return self._browser_evaluate(
+            expression=commands.gen_window_get_size_command(
+                window_index=window,
+            ),
+        )
+
+    def set_window_size(self, width, height, window=0, even_values=True):
+        current_browser_size = self.get_size()
+        current_window_size = self.get_window_size()
+
+        width = width + (
+            current_browser_size['width'] - current_window_size['width'])
+
+        height = height + (
+            current_browser_size['height'] - current_window_size['height'])
+
+        return self.set_size(
+            width=width,
+            height=height,
+            even_values=even_values,
+        )
 
     # window: selectors
     @frontend_function
@@ -1247,14 +1284,14 @@ class Browser:
     def _browser_evaluate(self, expression):
         raise NotImplementedError()
 
+    @browser_function
+    def _browser_set_size(self, width, height):
+        raise NotImplementedError()
+
     def stop(self):
         raise NotImplementedError()
 
     def set_color_scheme(self, color_scheme):
-        raise NotImplementedError()
-
-    @browser_function
-    def resize(self, width=0, height=0):
         raise NotImplementedError()
 
     @browser_function

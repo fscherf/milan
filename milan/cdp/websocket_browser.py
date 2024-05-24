@@ -238,7 +238,7 @@ class CdpWebsocketBrowser(Browser):
         )
 
     @browser_function
-    def resize(self, width, height):
+    def _browser_set_size(self, width, height):
         return self.cdp_websocket_client.emulation_set_device_metrics_override(
             width=width,
             height=height,

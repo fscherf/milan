@@ -34,7 +34,7 @@ def test_screenshots(
     with browser_class.start() as browser:
         browser.navigate_to_test_application()
         browser.animation = True
-        browser.resize(1280, 720)
+        browser.set_size(1280, 720)
 
         browser.screenshot(
             output_path=image_path,

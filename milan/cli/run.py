@@ -125,7 +125,7 @@ def run(cli_args):
                 cli_args['height'],
             )
 
-            browser.resize(
+            browser.set_size(
                 width=cli_args['width'],
                 height=cli_args['height'],
             )

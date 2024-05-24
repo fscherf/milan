@@ -401,7 +401,7 @@ class Webkit(Browser):
         ).result
 
     @browser_function
-    def resize(self, width, height):
+    def _browser_set_size(self, width, height):
         self._json_rpc_client.send_request(
             method='Emulation.setDeviceMetricsOverride',
             params={
