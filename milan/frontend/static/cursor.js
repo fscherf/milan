@@ -86,6 +86,23 @@
     }
 
 
+    const addStyleSheet = async({
+        text=required('text'),
+        iframe=undefined,
+    }={}) => {
+        const styleSheet = document.createElement('style');
+
+        let _document = document;
+
+        if (typeof(iframe) != 'undefined') {
+            _document = iframe.contentDocument;
+        }
+
+        styleSheet.innerHTML = text;
+        _document.body.appendChild(styleSheet);
+    }
+
+
     class Cursor {
         constructor() {
 
@@ -990,6 +1007,7 @@
         window['milan'] = {
             run: run,
             evaluate: evaluate,
+            addStyleSheet: addStyleSheet,
             cursor: new Cursor(),
         };
     });

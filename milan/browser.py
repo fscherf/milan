@@ -232,6 +232,26 @@ class Browser:
             ),
         )
 
+    @browser_function
+    @frontend_function
+    def add_style_sheet(self, text, window=0):
+
+        # add to browser
+        if window is None:
+            return self._browser_evaluate(
+                expression=commands.gen_add_style_sheet_command(
+                    text=text,
+                ),
+            )
+
+        # add to window
+        return self._browser_evaluate(
+            expression=commands.gen_window_add_style_sheet_command(
+                window_index=window,
+                text=text,
+            ),
+        )
+
     # window manager
     @frontend_function
     @browser_function

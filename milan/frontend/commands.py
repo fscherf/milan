@@ -99,6 +99,15 @@ def gen_evaluate_command(expression):
     )
 
 
+def gen_add_style_sheet_command(text):
+    return _gen_frontend_run_command(
+        func='milan.addStyleSheet',
+        args={
+            'text': text,
+        },
+    )
+
+
 # cursor
 def gen_cursor_show_command():
     return _gen_frontend_run_command(
@@ -306,6 +315,18 @@ def gen_window_evaluate_command(window_index, expression):
         ),
         args={
             'expression': expression,
+        },
+    )
+
+
+def gen_window_add_style_sheet_command(window_index, text):
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='addStyleSheet',
+        ),
+        args={
+            'text': text,
         },
     )
 

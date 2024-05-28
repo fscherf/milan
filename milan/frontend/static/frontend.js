@@ -171,6 +171,15 @@ class BrowserWindow {
     }
 
     // browser functions ------------------------------------------------------
+    addStyleSheet = ({
+        text=required('text'),
+    }={}) => {
+        return window.milan.addStyleSheet({
+            text: text,
+            iframe: this.iframeElement,
+        });
+    }
+
     // fullscreen
     getFullscreen = () => {
         return (
