@@ -318,7 +318,7 @@
             let timeSlept = 0;
 
             const _checkRequirementsPresent = () => {
-                if (matchAll && matchingSelectors.length < selectors) {
+                if (matchAll && matchingSelectors.length < selectors.length) {
                     return false;
                 }
 
