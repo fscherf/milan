@@ -315,3 +315,4 @@ tags
 /playwright-video/*
 /playwright.log
 /user-data/
+/.rlpython.history
