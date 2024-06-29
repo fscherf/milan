@@ -400,6 +400,7 @@ def gen_window_await_elements_command(
         present,
         match_all,
         count,
+        index,
         timeout,
         timeout_max,
 ):
@@ -415,6 +416,7 @@ def gen_window_await_elements_command(
             'present': present,
             'matchAll': match_all,
             'count': count,
+            'index': index,
             'returnElements': False,
             'timeout': timeout * 1000,
             'timeoutMax': timeout_max * 1000,

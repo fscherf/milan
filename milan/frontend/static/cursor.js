@@ -302,6 +302,7 @@
             present=true,
             matchAll=true,
             count=undefined,
+            index=undefined,
             returnElements=true,
             iframe=undefined,
             timeout=undefined,
@@ -324,6 +325,10 @@
 
                 if (count && matchingElements.length != count) {
                     return false;
+                }
+
+                if (Number.isInteger(index)) {
+                    return matchingElements.length > index;
                 }
 
                 return matchingElements.length > 0;
@@ -377,6 +382,10 @@
                 // check requirements
                 if (_checkRequirements()) {
                     if (returnElements) {
+                        if (Number.isInteger(index)) {
+                            return [matchingElements[index]];
+                        }
+
                         return matchingElements;
                     }
 
