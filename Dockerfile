@@ -26,6 +26,7 @@ RUN apt update && \
 
 # python dependencies
 RUN python${PYTHON_VERSION} -m pip install /milan[docker]
+ENV PYTHONPATH "/milan:${PYTHONPATH}"
 
 # setup playwright
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright

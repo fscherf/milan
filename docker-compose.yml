@@ -12,6 +12,7 @@ services:
 
     volumes:
       - ./:/app
+      - ./milan:/milan/milan
       - /tmp/.X11-unix:/tmp/.X11-unix
 
     environment:
