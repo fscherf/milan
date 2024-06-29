@@ -345,17 +345,17 @@
                 return _checkRequirementsNonPresent();
             }
 
-            // find document
-            if (typeof(iframe) != 'undefined') {
-                _document = iframe.contentDocument;
-            }
-
             // main loop
             while (timeSlept < timeoutMax) {
 
                 // reset
                 matchingElements.length = 0;
                 matchingSelectors.length = 0;
+
+                // find document
+                if (typeof(iframe) != 'undefined') {
+                    _document = iframe.contentDocument;
+                }
 
                 // search for elements
                 for (let selector of selectors) {
