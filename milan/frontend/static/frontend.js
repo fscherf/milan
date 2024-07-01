@@ -123,6 +123,8 @@ class BrowserWindow {
 
         this.iframeElement = this.rootElement.querySelector('iframe');
         this.tabTitleElement = this.rootElement.querySelector('.tab-title');
+        this.tabIconImageElement = this.rootElement.querySelector('.tab-icon img');
+        this.tabIconFallbackElement = this.rootElement.querySelector('.tab-icon span');
         this.tabPaneElement = this.rootElement.querySelector('.tab-pane');
         this.backElement = this.rootElement.querySelector('.back');
         this.forwardElement = this.rootElement.querySelector('.forward');
@@ -209,7 +211,76 @@ class BrowserWindow {
         this.iframeElement.contentDocument.location.reload();
     }
 
-    _updateIframeData = () => {
+    _getIframeFaviconURL = async () => {
+        const _document = this.iframeElement.contentDocument;
+        const linkElements = _document.getElementsByTagName('link');
+        const urls = [];
+
+        let url = '';
+
+        // find URLs
+        for (const linkElement of linkElements) {
+            if ((linkElement.getAttribute('rel') === 'icon') ||
+                (linkElement.getAttribute('rel') === 'shortcut icon') ||
+                (linkElement.getAttribute('rel') === 'apple-touch-icon')) {
+
+                urls.push(linkElement.getAttribute('href'));
+            }
+        }
+
+        // find best quality URL
+        const findUrl = (extension) => {
+            for(const url of urls) {
+                if (url.endsWith(extension)) {
+                    return url;
+                }
+            }
+        }
+
+        url = findUrl('.ico');
+
+        if (!url) {
+            url = findUrl('.svg');
+        }
+
+        url = urls.at(-1);
+
+        // URL fallback
+        if (!url) {
+            url = '/favicon.ico';
+        }
+
+        // resolve URL
+        if (url) {
+            // URLs can be
+            //   - https://example.org/favicon.ico
+            //   - /favicon.ico
+            //   - ./favicon.ico
+            
+            try {
+                url = (new URL(url, new URL(this.getUrl()))).toString();
+            } catch {
+                url = '';
+            }
+        }
+
+        // check if url is actually loadable
+        if (url) {
+            const response = await fetch(
+                url,
+            ).then(response => {
+                if (!response.ok) {
+                    url = '';
+                }
+            }).catch(error => {
+                url = '';
+            });
+        }
+
+        return url;
+    }
+
+    _updateIframeData = async () => {
         // updates the iframes title and location to the BrowserWindow object
         // tab title and address-bar
 
@@ -228,6 +299,18 @@ class BrowserWindow {
         }
 
         this.tabTitleElement.innerHTML = title;
+
+        // favicon
+        const faviconURL = await this._getIframeFaviconURL();
+
+        if (faviconURL) {
+            this.tabIconImageElement.src = faviconURL;
+            this.tabIconImageElement.style.display = 'block';
+            this.tabIconFallbackElement.style.display = 'none';
+        } else {
+            this.tabIconImageElement.style.display = 'none';
+            this.tabIconFallbackElement.style.display = 'block';
+        }
     }
 
     getSize = () => {

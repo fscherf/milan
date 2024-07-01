@@ -260,6 +260,11 @@ main > .grid {
     text-overflow: ellipsis;
 }
 
+.tab-icon img {
+  width: 16px;
+  height: 16px;
+}
+
 /* browser-window / toolbar ------------------------------------------------ */
 .toolbars {
     background-color: var(--color-white);
