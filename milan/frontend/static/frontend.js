@@ -1,5 +1,7 @@
 'use strict';
 
+import { AddressBar } from './address-bar.js';
+
 const BACKGROUND_URL = 'background/index.html';
 const VERSION_STRING = 'Milan v0.0.0';
 const IFRAME_UPDATE_INTERVAL = 1000;
@@ -130,8 +132,11 @@ class BrowserWindow {
         this.forwardElement = this.rootElement.querySelector('.forward');
         this.reloadElement = this.rootElement.querySelector('.reload');
 
-        this.addressBarElement = (
-            this.rootElement.querySelector('.search-bar input'));
+        // setup address bar
+        this.addressBar = new AddressBar({
+            browserWindow: this,
+            rootElement: this.rootElement.querySelector('.address-bar'),
+        });
 
         // setup back
         this.backElement.onclick = () => {
@@ -146,16 +151,6 @@ class BrowserWindow {
         // setup reload
         this.reloadElement.onclick = () => {
             this._iframeReload();
-        };
-
-        // setup address-bar
-        this.addressBarElement.onfocus = () => {
-            this.addressBarElement.select();
-        };
-
-        this.addressBarElement.onchange = () => {
-            this._iframeNavigate({url: this.addressBarElement.value});
-            this.addressBarElement.blur();
         };
 
         // setup iframe
@@ -284,17 +279,16 @@ class BrowserWindow {
         // updates the iframes title and location to the BrowserWindow object
         // tab title and address-bar
 
+        const url = this.iframeElement.contentDocument.location.href;
+
         let title = this.iframeElement.contentWindow.document.title;
-        let url = this.iframeElement.contentDocument.location.href;
 
-        if(url != this.addressBarElement.value &&
-           document.activeElement != this.addressBarElement) {
-
-            this.addressBarElement.value = url;
+        if(url != this.addressBar.getValue()) {
+            this.addressBar.setValue(url);
         }
 
         // when an iframes location is set to `about:blank`, its title is empty
-        if(url == 'about:blank') {
+        if(url.startsWith('about:blank')) {
             title = 'about:blank';
         }
 
@@ -388,10 +382,15 @@ class BrowserWindow {
             return;
         }
 
-        await this.cursor.fill({
-            elementOrSelector: this.addressBarElement,
-            value: url,
+        await this.cursor.click({
+            elementOrSelector: this.addressBar.rootElement,
             animation: animation,
+        });
+
+        await this.cursor.fill({
+            elementOrSelector: this.addressBar.inputElement,
+            value: url,
+            animation: false,
         });
 
         await loadPromise;

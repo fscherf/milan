@@ -2,8 +2,8 @@ import pytest
 
 
 @pytest.mark.parametrize('browser_name', ['chromium', 'firefox', 'webkit'])
-def test_dom_api(browser_name):
-    from milan import get_browser_by_name, FrontendError
+def test_evaluate(browser_name):
+    from milan import get_browser_by_name
 
     browser_class = get_browser_by_name(browser_name)
 
@@ -22,17 +22,9 @@ def test_dom_api(browser_name):
         assert browser.evaluate("'1' + \"1\"") == '11'
 
         # browser evaluate
-        assert browser.evaluate('milan', window=None)
-
-        with pytest.raises(FrontendError) as excinfo:
-            assert browser.evaluate('milan')
-
-        assert 'ReferenceError' in str(excinfo.value)
-
-        with pytest.raises(FrontendError) as excinfo:
-            assert not browser.evaluate('milan', window=0)
-
-        assert 'ReferenceError' in str(excinfo.value)
+        assert browser.evaluate('window["milan"] !== undefined', window=None)
+        assert not browser.evaluate('window["milan"] !== undefined')
+        assert not browser.evaluate('window["milan"] !== undefined', window=0)
 
         # test state
         assert not browser.evaluate('window.foo')
