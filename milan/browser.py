@@ -123,17 +123,17 @@ class Browser:
     def __init__(
             self,
             animations=True,
-            short_selector_timeout=0.2,
-            short_selector_timeout_max=1,
-            selector_timeout=0.2,
-            selector_timeout_max=3,
+            short_selector_retry_interval=0.2,
+            short_selector_timeout=1,
+            selector_retry_interval=0.2,
+            selector_timeout=3,
     ):
 
         self.animations = animations
+        self.short_selector_retry_interval = short_selector_retry_interval
         self.short_selector_timeout = short_selector_timeout
-        self.short_selector_timeout_max = short_selector_timeout_max
+        self.selector_retry_interval = selector_retry_interval
         self.selector_timeout = selector_timeout
-        self.selector_timeout_max = selector_timeout_max
 
         self.id = unique_id()
 
@@ -156,29 +156,29 @@ class Browser:
 
         return self.animations
 
+    def _get_short_selector_retry_interval(self, local_override):
+        if local_override is not None:
+            return local_override
+
+        return self.short_selector_retry_interval
+
     def _get_short_selector_timeout(self, local_override):
         if local_override is not None:
             return local_override
 
         return self.short_selector_timeout
 
-    def _get_short_selector_timeout_max(self, local_override):
+    def _get_selector_retry_interval(self, local_override):
         if local_override is not None:
             return local_override
 
-        return self.short_selector_timeout_max
+        return self.selector_retry_interval
 
     def _get_selector_timeout(self, local_override):
         if local_override is not None:
             return local_override
 
         return self.selector_timeout
-
-    def _get_selector_timeout_max(self, local_override):
-        if local_override is not None:
-            return local_override
-
-        return self.selector_timeout_max
 
     # events ##################################################################
     @browser_function
@@ -501,20 +501,23 @@ class Browser:
             self,
             selector,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_short_selector_retry_interval(
+            retry_interval,
+        )
+
         timeout = self._get_short_selector_timeout(timeout)
-        timeout_max = self._get_short_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "checking if element with selector '%s' #%s in window %s exists with a timeout of %ss",  # NOQA
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         _element_exists = self._browser_evaluate(
@@ -522,8 +525,8 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 element_index=element_index,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -543,20 +546,20 @@ class Browser:
             self,
             selector,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "waiting for element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -564,8 +567,8 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 element_index=element_index,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -579,13 +582,13 @@ class Browser:
             match_all=True,
             count=None,
             index=None,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         if not isinstance(selectors, (list, tuple)):
             selectors = [selectors]
@@ -598,7 +601,7 @@ class Browser:
             window,
             'present' if present else 'not present',
             match_all,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -610,8 +613,8 @@ class Browser:
                 match_all=match_all,
                 count=count,
                 index=index,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -622,13 +625,13 @@ class Browser:
             selector,
             text,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "waiting for element with selector '%s' #%s to contain '%s' in window %s with a timeout of %ss",  # NOQA
@@ -636,7 +639,7 @@ class Browser:
             element_index,
             text,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -645,8 +648,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 text=text,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -679,20 +682,20 @@ class Browser:
             self,
             selector,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "getting HTML from element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -700,8 +703,8 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 element_index=element_index,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -712,20 +715,20 @@ class Browser:
             selector,
             html,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "setting HTML in element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -734,8 +737,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 html=html,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -745,20 +748,20 @@ class Browser:
             self,
             selector,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "getting text from element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -766,8 +769,8 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 element_index=element_index,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -776,8 +779,8 @@ class Browser:
             selector,
             text,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
@@ -785,8 +788,8 @@ class Browser:
             selector=selector,
             html=text,
             element_index=element_index,
+            retry_interval=retry_interval,
             timeout=timeout,
-            timeout_max=timeout_max,
             window=window,
         )
 
@@ -797,13 +800,13 @@ class Browser:
             selector,
             name,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "getting attribute '%s' from element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
@@ -811,7 +814,7 @@ class Browser:
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -820,8 +823,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 name=name,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -831,20 +834,20 @@ class Browser:
             self,
             selector,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "getting attributes of element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -852,8 +855,8 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 element_index=element_index,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -864,20 +867,20 @@ class Browser:
             selector,
             attributes,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "setting attributes of element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -886,8 +889,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 attributes=attributes,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -897,8 +900,8 @@ class Browser:
             name,
             value,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
@@ -906,8 +909,8 @@ class Browser:
             selector=selector,
             element_index=element_index,
             attributes={name: value},
+            retry_interval=retry_interval,
             timeout=timeout,
-            timeout_max=timeout_max,
             window=window,
         )
 
@@ -918,13 +921,13 @@ class Browser:
             selector,
             names,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "removing attributes '%s' of element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
@@ -932,7 +935,7 @@ class Browser:
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -941,8 +944,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 names=names,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -951,8 +954,8 @@ class Browser:
             selector,
             name,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
@@ -960,8 +963,8 @@ class Browser:
             selector=selector,
             names=[name],
             element_index=element_index,
+            retry_interval=retry_interval,
             timeout=timeout,
-            timeout_max=timeout_max,
             window=window,
         )
 
@@ -969,8 +972,8 @@ class Browser:
             self,
             selector,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
@@ -978,8 +981,8 @@ class Browser:
             selector=selector,
             element_index=element_index,
             name='class',
+            retry_interval=retry_interval,
             timeout=timeout,
-            timeout_max=timeout_max,
             window=window,
         ).split(' ')
 
@@ -990,8 +993,8 @@ class Browser:
             selector,
             names,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
@@ -1000,8 +1003,8 @@ class Browser:
             name='class',
             value=' '.join(names),
             element_index=element_index,
+            retry_interval=retry_interval,
             timeout=timeout,
-            timeout_max=timeout_max,
             window=window,
         )
 
@@ -1009,8 +1012,8 @@ class Browser:
             self,
             selector,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
@@ -1019,8 +1022,8 @@ class Browser:
             name='class',
             value='',
             element_index=element_index,
+            retry_interval=retry_interval,
             timeout=timeout,
-            timeout_max=timeout_max,
             window=window,
         )
 
@@ -1031,13 +1034,13 @@ class Browser:
             selector,
             names,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         if not isinstance(names, (list, tuple)):
             names = [names]
@@ -1048,7 +1051,7 @@ class Browser:
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -1057,8 +1060,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 names=names,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -1069,13 +1072,13 @@ class Browser:
             selector,
             names,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         if not isinstance(names, (list, tuple)):
             names = [names]
@@ -1086,7 +1089,7 @@ class Browser:
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -1095,8 +1098,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 names=names,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
             ),
         )
 
@@ -1107,21 +1110,21 @@ class Browser:
             self,
             selector,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             animation=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "clicking on element with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -1129,8 +1132,8 @@ class Browser:
                 window_index=window,
                 selector=selector,
                 element_index=element_index,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
@@ -1142,14 +1145,14 @@ class Browser:
             selector,
             value,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             animation=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "filling value '%s' #%s into an element with selector '%s' in window %s with a timeout of %ss",  # NOQA
@@ -1157,7 +1160,7 @@ class Browser:
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -1166,8 +1169,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 value=value,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
@@ -1179,14 +1182,14 @@ class Browser:
             selector,
             value=True,
             element_index=0,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             animation=None,
             window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         self.logger.info(
             "%s checkbox with selector '%s' #%s in window %s with a timeout of %ss",  # NOQA
@@ -1194,7 +1197,7 @@ class Browser:
             selector,
             element_index,
             window,
-            timeout_max,
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -1203,8 +1206,8 @@ class Browser:
                 selector=selector,
                 element_index=element_index,
                 value=value,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
@@ -1218,14 +1221,15 @@ class Browser:
             value=None,
             index=None,
             label=None,
+            retry_interval=None,
             timeout=None,
-            timeout_max=None,
             window=0,
             animation=None,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
+
         identifier = ''
 
         if value:
@@ -1243,7 +1247,7 @@ class Browser:
             selector,
             element_index,
             window,
-            timeout_max
+            timeout,
         )
 
         return self._browser_evaluate(
@@ -1254,8 +1258,8 @@ class Browser:
                 value=value,
                 index=index,
                 label=label,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
                 animation=self._get_animations(animation),
             ),
         )
@@ -1304,8 +1308,8 @@ class Browser:
         selectors,
         index=None,
         count=None,
+        retry_interval=None,
         timeout=None,
-        timeout_max=None,
         border_width=2,
         border_style='solid',
         border_color='#FF0000',
@@ -1315,8 +1319,8 @@ class Browser:
         window=0,
     ):
 
+        retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
-        timeout_max = self._get_selector_timeout_max(timeout_max)
 
         if not isinstance(selectors, (list, tuple)):
             selectors = [selectors]
@@ -1327,8 +1331,8 @@ class Browser:
                 selectors=selectors,
                 index=index,
                 count=count,
+                retry_interval=retry_interval,
                 timeout=timeout,
-                timeout_max=timeout_max,
                 border_width=border_width,
                 border_style=border_style,
                 border_color=border_color,

@@ -108,10 +108,10 @@
 
             // setup config
             this.config = {
-                shortTimeout: 200,
-                shortTimeoutMax: 1000,
-                timeout: 200,
-                timeoutMax: 3000,
+                shortRetryInterval: 200,
+                shortTimeout: 1000,
+                retryInterval: 200,
+                timeout: 3000,
                 maxRetries: 3,
             };
 
@@ -207,16 +207,16 @@
             elementOrSelector=required('elementOrSelector'),
             elementIndex=0,
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             let elementOrSelectorList = undefined;
             let element = undefined;
             let timeSlept = 0;
 
+            retryInterval = retryInterval || this.config.shortRetryInterval;
             timeout = timeout || this.config.shortTimeout;
-            timeoutMax = timeoutMax || this.config.shortTimeoutMax;
 
             if (Array.isArray(elementOrSelector)) {
                 elementOrSelectorList = elementOrSelector;
@@ -224,14 +224,14 @@
                 elementOrSelectorList = [elementOrSelector];
             }
 
-            while (timeSlept < timeoutMax) {
+            while (timeSlept < timeout) {
                 for (let elementOrSelector of elementOrSelectorList) {
                     element = this.getElement({
                         elementOrSelector: elementOrSelector,
                         elementIndex: elementIndex,
                         iframe: iframe,
+                        retryInterval: retryInterval,
                         timeout: timeout,
-                        timeoutMax: timeoutMax,
                     });
 
                     if (element) {
@@ -239,9 +239,9 @@
                     }
                 }
 
-                await sleep(timeout);
+                await sleep(retryInterval);
 
-                timeSlept += timeout;
+                timeSlept += retryInterval;
             }
 
             return '';
@@ -252,16 +252,16 @@
             elementIndex=0,
             returnElement=true,
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             let elementOrSelectorList = undefined;
             let element = undefined;
             let timeSlept = 0;
 
+            retryInterval = retryInterval || this.config.retryInterval;
             timeout = timeout || this.config.timeout;
-            timeoutMax = timeoutMax || this.config.timeoutMax;
 
             if (Array.isArray(elementOrSelector)) {
                 elementOrSelectorList = elementOrSelector;
@@ -269,14 +269,14 @@
                 elementOrSelectorList = [elementOrSelector];
             }
 
-            while (timeSlept < timeoutMax) {
+            while (timeSlept < timeout) {
                 for (let elementOrSelector of elementOrSelectorList) {
                     element = this.getElement({
                         elementOrSelector: elementOrSelector,
                         elementIndex: elementIndex,
                         iframe: iframe,
+                        retryInterval: retryInterval,
                         timeout: timeout,
-                        timeoutMax: timeoutMax,
                     });
 
                     if (element) {
@@ -288,9 +288,9 @@
                     }
                 }
 
-                await sleep(timeout);
+                await sleep(retryInterval);
 
-                timeSlept += timeout;
+                timeSlept += retryInterval;
             }
 
             throw `No element with selector '${elementOrSelector}' found`;
@@ -305,12 +305,12 @@
             index=undefined,
             returnElements=true,
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
+            retryInterval = retryInterval || this.config.retryInterval;
             timeout = timeout || this.config.timeout;
-            timeoutMax = timeoutMax || this.config.timeoutMax;
 
             const matchingElements = new Array();
             const matchingSelectors = new Array();
@@ -351,7 +351,7 @@
             }
 
             // main loop
-            while (timeSlept < timeoutMax) {
+            while (timeSlept < timeout) {
 
                 // reset
                 matchingElements.length = 0;
@@ -393,9 +393,9 @@
                 }
 
                 // sleep
-                await sleep(timeout);
+                await sleep(retryInterval);
 
-                timeSlept += timeout;
+                timeSlept += retryInterval;
             }
 
             throw 'No matching elements found';
@@ -405,33 +405,33 @@
             elementOrSelector=required('elementOrSelector'),
             elementIndex=0,
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
             text=required('text'),
         }={}) => {
 
+            retryInterval = retryInterval || this.config.retryInterval;
             timeout = timeout || this.config.timeout;
-            timeoutMax = timeoutMax || this.config.timeoutMax;
 
             let element = undefined;
             let timeSlept = 0;
 
-            while (timeSlept < timeoutMax) {
+            while (timeSlept < timeout) {
                 element = this.getElement({
                     elementOrSelector: elementOrSelector,
                     elementIndex: elementIndex,
                     iframe: iframe,
+                    retryInterval: retryInterval,
                     timeout: timeout,
-                    timeoutMax: timeoutMax,
                 });
 
                 if (element && element.innerHTML.includes(text)) {
                     return;
                 }
 
-                await sleep(timeout);
+                await sleep(retryInterval);
 
-                timeSlept += timeout;
+                timeSlept += retryInterval;
             }
 
             throw `No element with selector '${elementOrSelector}' and text '${text}' found`;
@@ -492,16 +492,16 @@
             elementOrSelector=required('elementOrSelector'),
             elementIndex=0,
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             return element.textContent;
@@ -511,16 +511,16 @@
             elementOrSelector=required('elementOrSelector'),
             elementIndex=0,
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             return element.innerHTML;
@@ -531,16 +531,16 @@
             elementIndex=0,
             html=required('html'),
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             element.innerHTML = html;
@@ -551,16 +551,16 @@
             elementIndex=0,
             name=required('name'),
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             return element.getAttribute(name);
@@ -570,16 +570,16 @@
             elementOrSelector=required('elementOrSelector'),
             elementIndex=0,
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             let attributes = {};
@@ -598,16 +598,16 @@
             elementIndex=0,
             attributes=required('attributes'),
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             for (let [name, value] of Object.entries(attributes)) {
@@ -620,16 +620,16 @@
             elementIndex=0,
             names=required('names'),
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             for (let name of Array.from(names)) {
@@ -642,16 +642,16 @@
             elementIndex=0,
             names=required('names'),
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             for (let name of Array.from(names)) {
@@ -664,16 +664,16 @@
             elementIndex=0,
             names=required('names'),
             iframe=undefined,
+            retryInterval=undefined,
             timeout=undefined,
-            timeoutMax=undefined,
         }={}) => {
 
             const element = await this.awaitElement({
                 elementOrSelector: elementOrSelector,
                 elementIndex: elementIndex,
                 iframe: iframe,
+                retryInterval: retryInterval,
                 timeout: timeout,
-                timeoutMax: timeoutMax,
             });
 
             for (let name of Array.from(names)) {

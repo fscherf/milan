@@ -352,8 +352,8 @@ def gen_window_element_exists_command(
         window_index,
         selector,
         element_index,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -364,8 +364,8 @@ def gen_window_element_exists_command(
         args={
             'elementOrSelector': selector,
             'elementIndex': element_index,
-            'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
+            'retryInterval': retry_interval * 1000,
+            'timeot': timeout * 1000,
         },
     )
 
@@ -374,8 +374,8 @@ def gen_window_await_element_command(
         window_index,
         selector,
         element_index,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -387,8 +387,8 @@ def gen_window_await_element_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'returnElement': False,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -401,8 +401,8 @@ def gen_window_await_elements_command(
         match_all,
         count,
         index,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -418,8 +418,8 @@ def gen_window_await_elements_command(
             'count': count,
             'index': index,
             'returnElements': False,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -429,8 +429,8 @@ def gen_window_await_text_command(
         selector,
         element_index,
         text,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -442,8 +442,8 @@ def gen_window_await_text_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'text': text,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -452,8 +452,8 @@ def gen_window_get_text_command(
         window_index,
         selector,
         element_index,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -464,8 +464,8 @@ def gen_window_get_text_command(
         args={
             'elementOrSelector': selector,
             'elementIndex': element_index,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -474,8 +474,8 @@ def gen_window_get_html_command(
         window_index,
         selector,
         element_index,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -486,8 +486,8 @@ def gen_window_get_html_command(
         args={
             'elementOrSelector': selector,
             'elementIndex': element_index,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -497,8 +497,8 @@ def gen_window_set_html_command(
         selector,
         element_index,
         html,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -510,8 +510,8 @@ def gen_window_set_html_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'html': html,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -521,8 +521,8 @@ def gen_window_get_attribute_command(
         selector,
         element_index,
         name,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -534,8 +534,8 @@ def gen_window_get_attribute_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'name': name,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -544,8 +544,8 @@ def gen_window_get_attributes_command(
         window_index,
         selector,
         element_index,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -556,8 +556,8 @@ def gen_window_get_attributes_command(
         args={
             'elementOrSelector': selector,
             'elementIndex': element_index,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -567,8 +567,8 @@ def gen_window_set_attributes_command(
         selector,
         element_index,
         attributes,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -580,8 +580,8 @@ def gen_window_set_attributes_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'attributes': attributes,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -591,8 +591,8 @@ def gen_window_remove_attributes_command(
         selector,
         element_index,
         names,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -604,8 +604,8 @@ def gen_window_remove_attributes_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'names': names,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -615,8 +615,8 @@ def gen_window_class_list_add_command(
         selector,
         element_index,
         names,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -628,8 +628,8 @@ def gen_window_class_list_add_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'names': names,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -639,8 +639,8 @@ def gen_window_class_list_remove_command(
         selector,
         element_index,
         names,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -652,8 +652,8 @@ def gen_window_class_list_remove_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'names': names,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -664,8 +664,8 @@ def gen_window_click_command(
         selector,
         element_index,
         animation,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -677,8 +677,8 @@ def gen_window_click_command(
             'elementOrSelector': selector,
             'elementIndex': element_index,
             'animation': animation,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -689,8 +689,8 @@ def gen_window_fill_command(
         element_index,
         value,
         animation,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -703,8 +703,8 @@ def gen_window_fill_command(
             'elementIndex': element_index,
             'value': value,
             'animation': animation,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -715,8 +715,8 @@ def gen_window_check_command(
         element_index,
         value,
         animation,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -729,8 +729,8 @@ def gen_window_check_command(
             'elementIndex': element_index,
             'value': value,
             'animation': animation,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -743,8 +743,8 @@ def gen_window_select_command(
         index,
         label,
         animation,
+        retry_interval,
         timeout,
-        timeout_max,
 ):
 
     return _gen_frontend_run_command(
@@ -759,8 +759,8 @@ def gen_window_select_command(
             'index': index,
             'label': label,
             'animation': animation,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
         },
     )
 
@@ -771,8 +771,8 @@ def gen_window_highlight_elements_command(
         selectors,
         index,
         count,
+        retry_interval,
         timeout,
-        timeout_max,
         border_width,
         border_style,
         border_color,
@@ -793,8 +793,8 @@ def gen_window_highlight_elements_command(
             'selectors': selectors,
             'index': index,
             'count': count,
+            'retryInterval': retry_interval * 1000,
             'timeout': timeout * 1000,
-            'timeoutMax': timeout_max * 1000,
             'borderWidth': border_width,
             'borderStyle': border_style,
             'borderColor': border_color,

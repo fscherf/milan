@@ -508,8 +508,8 @@ class BrowserWindow {
         text=undefined,
         index=undefined,
         count=undefined,
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
         borderWidth=undefined,
         borderStyle=undefined,
         borderColor=undefined,
@@ -524,8 +524,8 @@ class BrowserWindow {
             count: count,
             index: index,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
 
         const highlights = [];
@@ -603,16 +603,16 @@ class BrowserWindow {
     elementExists = ({
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.elementExists({
             elementOrSelector: elementOrSelector,
             elementIndex: elementIndex,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
@@ -620,8 +620,8 @@ class BrowserWindow {
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
         returnElement=true,
+        retryInterval=retryInterval,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.awaitElement({
@@ -629,8 +629,8 @@ class BrowserWindow {
             elementIndex: elementIndex,
             returnElement: returnElement,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
@@ -643,8 +643,8 @@ class BrowserWindow {
         index=undefined,
         returnElements=true,
         iframe=undefined,
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.awaitElements({
@@ -656,16 +656,16 @@ class BrowserWindow {
             index: index,
             returnElements: returnElements,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
     awaitText = ({
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
         text=required('text'),
     }={}) => {
 
@@ -673,8 +673,8 @@ class BrowserWindow {
             elementOrSelector: elementOrSelector,
             elementIndex: elementIndex,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
             text: text,
         });
     }
@@ -750,32 +750,32 @@ class BrowserWindow {
     getText = ({
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
+        retryInterval: retryInterval,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.getText({
             elementOrSelector: elementOrSelector,
             elementIndex: elementIndex,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
     getHtml = ({
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.getHtml({
             elementOrSelector: elementOrSelector,
             elementIndex: elementIndex,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
@@ -783,8 +783,8 @@ class BrowserWindow {
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
         html=required('html'),
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.setHtml({
@@ -792,8 +792,8 @@ class BrowserWindow {
             elementIndex: elementIndex,
             html: html,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
@@ -801,8 +801,8 @@ class BrowserWindow {
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
         name=required('name'),
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.getAttribute({
@@ -810,24 +810,24 @@ class BrowserWindow {
             elementIndex: elementIndex,
             name: name,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
     getAttributes = ({
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.getAttributes({
             elementOrSelector: elementOrSelector,
             elementIndex: elementIndex,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
@@ -835,8 +835,8 @@ class BrowserWindow {
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
         attributes=required('attributes'),
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.setAttributes({
@@ -844,8 +844,8 @@ class BrowserWindow {
             elementIndex: elementIndex,
             attributes: attributes,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
@@ -853,8 +853,8 @@ class BrowserWindow {
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
         names=required('names'),
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.removeAttributes({
@@ -862,8 +862,8 @@ class BrowserWindow {
             elementIndex: elementIndex,
             names: names,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
@@ -871,8 +871,8 @@ class BrowserWindow {
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
         names=required('names'),
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.classListAdd({
@@ -880,8 +880,8 @@ class BrowserWindow {
             elementIndex: elementIndex,
             names: names,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 
@@ -889,8 +889,8 @@ class BrowserWindow {
         elementOrSelector=required('elementOrSelector'),
         elementIndex=0,
         names=required('names'),
+        retryInterval=undefined,
         timeout=undefined,
-        timeoutMax=undefined,
     }={}) => {
 
         return this.cursor.classListRemove({
@@ -898,8 +898,8 @@ class BrowserWindow {
             elementIndex: elementIndex,
             names: names,
             iframe: this.iframeElement,
+            retryInterval: retryInterval,
             timeout: timeout,
-            timeoutMax: timeoutMax,
         });
     }
 }
