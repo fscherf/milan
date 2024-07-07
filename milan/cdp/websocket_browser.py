@@ -323,12 +323,10 @@ class CdpWebsocketBrowser(Browser):
                 'CDP based video recording is not supported in firefox',
             )
 
-        # FIXME: add comment
-        self.force_rerender()
-
-        return_value = self.cdp_websocket_client.stop_video_capturing()
-
         if delay:
             time.sleep(delay)
 
-        return return_value
+        # FIXME: add comment
+        self.force_rerender()
+
+        return self.cdp_websocket_client.stop_video_capturing()
