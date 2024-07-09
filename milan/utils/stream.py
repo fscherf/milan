@@ -28,7 +28,26 @@ class Stream:
         return os.close(self.fd)
 
     def read(self, length):
-        return os.read(self.fd, length)
+        chunk = b''
+
+        # The os.read sometimes runs into an BlockingIOError or
+        # in an resource not available error, even though we have set the fd
+        # to non-blocking in get_readable_stream. I am not sure why, but
+        # since we fall into a select call after read is done anyway, this is
+        # not really a problem for now.
+        try:
+            chunk = os.read(self.fd, length)
+
+        except BlockingIOError:
+            pass
+
+        except OSError as error:
+            if error.errno == 11:  # Resource temporarily unavailable
+                pass
+
+            raise
+
+        return chunk
 
     def write(self, data):
         return os.write(self.fd, data)
