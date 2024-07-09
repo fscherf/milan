@@ -33,6 +33,81 @@ const sleep = (ms) => {
 }
 
 
+// highlight ------------------------------------------------------------------
+class Highlight {
+    constructor({
+        element=required('element'),
+        iframe=undefined,
+        borderWidth=2,
+        borderStyle='solid',
+        borderColor='#FF0000',
+        padding=5,
+        track=true,
+    }={}) {
+
+        this.element = element;
+        this.iframe = iframe;
+        this.borderWidth = borderWidth;
+        this.borderStyle = borderStyle;
+        this.borderColor = borderColor;
+        this.padding = padding;
+        this.track = track;
+
+        // setup highlight element
+        this.highlightElement = document.createElement('div');
+
+        this.highlightElement.classList.add('milan-highlight');
+
+        this.highlightElement.style.position = 'fixed';
+        this.highlightElement.style.border = `${this.borderWidth}px ${this.borderStyle} ${this.borderColor}`;
+
+        this.getDocument().body.appendChild(this.highlightElement);
+
+        // setup tracking
+        const animationFrameCallback = () => {
+            this.placeHighlightElement();
+
+            if (
+                !this.track ||
+                !this.element.isConnected ||
+                this.getDocument() != element.ownerDocument
+            ) {
+
+                this.destroy();
+
+                return;
+            }
+
+            requestAnimationFrame(animationFrameCallback);
+        };
+
+        requestAnimationFrame(animationFrameCallback);
+    }
+
+    getDocument = () => {
+        if (typeof(this.iframe) !== undefined) {
+            return this.iframe.contentDocument;
+        }
+
+        return document;
+    }
+
+    placeHighlightElement = () => {
+        const clientRect = this.element.getBoundingClientRect();
+
+        this.highlightElement.style.left = `${clientRect.left - this.padding - this.borderWidth}px`;
+        this.highlightElement.style.top = `${clientRect.top - this.padding - this.borderWidth}px`;
+        this.highlightElement.style.width = `${clientRect.width + (this.padding * 2)}px`;
+        this.highlightElement.style.height = `${clientRect.height + (this.padding * 2)}px`;
+    }
+
+    destroy = () => {
+        this.track = false;
+        this.highlightElement.remove();
+    }
+}
+
+
 // browser window -------------------------------------------------------------
 class BrowserWindow {
     constructor({
@@ -40,6 +115,7 @@ class BrowserWindow {
     }={}) {
 
         this._load_promises = new Array();
+        this.highlights = new Array();
         this.cursor = window['milan']['cursor'];
 
         // setup HTML
@@ -341,6 +417,93 @@ class BrowserWindow {
         }
 
         return returnValue;
+    }
+
+    // highlights -------------------------------------------------------------
+    highlightElements = async ({
+        selectors=required('selectors'),
+        text=undefined,
+        index=undefined,
+        count=undefined,
+        timeout=undefined,
+        timeoutMax=undefined,
+        borderWidth=undefined,
+        borderStyle=undefined,
+        borderColor=undefined,
+        padding=undefined,
+        track=undefined,
+        duration=undefined,
+    }={}) => {
+
+        const elements = await this.awaitElements({
+            selectors: selectors,
+            text: text,
+            count: count,
+            index: index,
+            iframe: this.iframeElement,
+            timeout: timeout,
+            timeoutMax: timeoutMax,
+        });
+
+        const highlights = [];
+
+        let highlight;
+
+        // scroll element into view if needed
+        // FIXME: move cursor onto iframe if needed
+        const firstElementIsVisible = this.cursor.elementIsVisible({
+            element: elements[0],
+            iframe: this.iframeElement,
+        });
+
+        if (!firstElementIsVisible) {
+            elements[0].scrollIntoView({
+                behavior: 'smooth',
+                inline: 'nearest',
+
+                // the element has to be centered because the highlight
+                // element has some padding around the element
+                block: 'center',
+            });
+
+            await sleep(750);
+        }
+
+        // highlight elements
+        for (const element of elements) {
+            highlight = new Highlight({
+                iframe: this.iframeElement,
+                element: element,
+                borderWidth: borderWidth,
+                borderStyle: borderStyle,
+                borderColor: borderColor,
+                padding: padding,
+                track: track,
+            });
+
+            if(duration) {
+                highlights.push(highlight);
+            } else {
+                this.highlights.push(highlight);
+            }
+        }
+
+        if (duration) {
+            await sleep(duration);
+
+            for(const highlight of highlights) {
+                highlight.destroy();
+            }
+        }
+
+        // return count of elements that are/were highlighted
+        return elements.length;
+    }
+
+    removeHighlights = async () => {
+        for(const highlight of this.highlights) {
+            highlight.destroy();
+        }
     }
 
     // cursor shortcuts -------------------------------------------------------

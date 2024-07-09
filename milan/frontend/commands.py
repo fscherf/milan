@@ -763,3 +763,52 @@ def gen_window_select_command(
             'timeoutMax': timeout_max * 1000,
         },
     )
+
+
+# window: highlights
+def gen_window_highlight_elements_command(
+        window_index,
+        selectors,
+        index,
+        count,
+        timeout,
+        timeout_max,
+        border_width,
+        border_style,
+        border_color,
+        padding,
+        track,
+        duration,
+):
+
+    if duration:
+        duration = duration * 1000
+
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='highlightElements',
+        ),
+        args={
+            'selectors': selectors,
+            'index': index,
+            'count': count,
+            'timeout': timeout * 1000,
+            'timeoutMax': timeout_max * 1000,
+            'borderWidth': border_width,
+            'borderStyle': border_style,
+            'borderColor': border_color,
+            'padding': padding,
+            'track': track,
+            'duration': duration,
+        },
+    )
+
+
+def gen_window_remove_highlights_command(window_index):
+    return _gen_frontend_run_command(
+        func=_gen_window_function_name(
+            window_index=window_index,
+            name='removeHighlights',
+        ),
+    )

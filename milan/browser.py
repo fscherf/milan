@@ -1297,6 +1297,56 @@ class Browser:
 
         self._browser_navigate(url=self._frontend_server.get_frontend_url())
 
+    @browser_function
+    @frontend_function
+    def highlight_elements(
+        self,
+        selectors,
+        index=None,
+        count=None,
+        timeout=None,
+        timeout_max=None,
+        border_width=2,
+        border_style='solid',
+        border_color='#FF0000',
+        padding=10,
+        track=True,
+        duration=None,
+        window=0,
+    ):
+
+        timeout = self._get_selector_timeout(timeout)
+        timeout_max = self._get_selector_timeout_max(timeout_max)
+
+        if not isinstance(selectors, (list, tuple)):
+            selectors = [selectors]
+
+        return self._browser_evaluate(
+            expression=commands.gen_window_highlight_elements_command(
+                window_index=window,
+                selectors=selectors,
+                index=index,
+                count=count,
+                timeout=timeout,
+                timeout_max=timeout_max,
+                border_width=border_width,
+                border_style=border_style,
+                border_color=border_color,
+                padding=padding,
+                track=track,
+                duration=duration,
+            ),
+        )
+
+    @browser_function
+    @frontend_function
+    def remove_highlights(self, window=0):
+        return self._browser_evaluate(
+            expression=commands.gen_window_remove_highlights_command(
+                window_index=window,
+            ),
+        )
+
     # hooks ###################################################################
     @browser_function
     def _browser_navigate(self, url):
