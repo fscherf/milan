@@ -36,7 +36,7 @@ dev = [
 ]
 
 test = [
-  "coverage==7.5.4",
+  "coverage==7.6.0",
   "pytest==8.2.2",
   "pytest-timeout==2.3.1",
   "pytest-asyncio==0.23.7",
