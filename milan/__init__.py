@@ -1,14 +1,13 @@
 import logging
 
 from milan.frontend.commands import FrontendError  # NOQA
-from milan._version import version_tuple, version
 from milan.chromium import Chromium  # NOQA
 from milan.firefox import Firefox  # NOQA
 from milan.webkit import Webkit  # NOQA
 from milan.errors import *  # NOQA
 
-VERSION = version_tuple
-VERSION_STRING = version
+VERSION = (0, 0, 0)
+VERSION_STRING = '.'.join(str(i) for i in VERSION)
 
 BROWSER = {
     'chromium': Chromium,
