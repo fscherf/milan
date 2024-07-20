@@ -1,5 +1,4 @@
-name: ci
-
+name: CI
 
 on:
   push:
@@ -8,41 +7,38 @@ on:
   pull_request:
   workflow_dispatch:
 
-
 jobs:
   test:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ["py38", "py39", "py310", "py311", "py312"]
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-    - name: Install dependencies
+    - name: Build Docker image
+      run: docker build -t app .
+
+    - name: Run pytest inside Docker container
       run: |
-        sudo apt-get install -y
-        pip install --upgrade setuptools tox
-        pip install .[test]
-        python -m playwright install-deps
-        python -m playwright install
-
-    - name: Run Tox
-      env:
-        MILAN_CI_TEST: 1
-      run: tox -e py
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
+        docker run \
+          -v ./:/app \
+          -w /app \
+          -u root \
+          -e MILAN_CI_TEST=1 \
+          app:latest \
+          tox -e ${{ matrix.python-version }}
 
     - name: Upload artifacts to GitHub
       uses: actions/upload-artifact@v4
       with:
-        name: python-${{ matrix.python-version }}-artifacts
+        name: ${{ matrix.python-version }}-artifacts
         path: artifacts
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
