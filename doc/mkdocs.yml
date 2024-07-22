@@ -40,6 +40,7 @@ theme:
 plugins:
   - search
   - mkdocstrings
+  - autorefs
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -50,8 +51,8 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - admonition
 
 nav:
   - Home: index.md
-  - Reference:
-      - Browser: reference/browser.md
+  - Usage: usage.md

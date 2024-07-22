@@ -183,6 +183,17 @@ class Browser:
     # events ##################################################################
     @browser_function
     def await_browser_load(self, timeout=None, await_future=True):
+        """
+        Waits for the next JavaScript window load event (`window.onload`).
+
+        `timeout` can be a positive number in seconds or `None`. If the is
+        `None`, the default timeout is used.
+
+        If `await_future` is true, the method blocks until the next event gets
+        fired. If not, a `concurrent.futures.Future` object is returned that
+        can be awaited outside the method.
+        """
+
         return self._event_router.await_event(
             name='browser_load',
             timeout=timeout,
@@ -196,6 +207,19 @@ class Browser:
             timeout=None,
             await_future=True,
     ):
+
+        """
+        Waits for the next navigation event of the browser.
+
+        If `url` is set, the browser waits until the given URL is present.
+
+        `timeout` can be a positive number in seconds or `None`. If the is
+        `None`, the default timeout is used.
+
+        If `await_future` is true, the method blocks until the next event gets
+        fired. If not, a `concurrent.futures.Future` object is returned that
+        can be awaited outside the method.
+        """
 
         if url:
             return self._event_router.await_state(
@@ -215,6 +239,13 @@ class Browser:
     @browser_function
     @frontend_function
     def evaluate(self, expression, window=0):
+        """
+        Evaluates the given JavaScript expression in the given window and
+        returns the result.
+
+        If `window` is set to `None`, the expression gets evaluated in the
+        Milan frontend.
+        """
 
         # evaluate in the real browser
         if window is None:
@@ -235,6 +266,9 @@ class Browser:
     @browser_function
     @frontend_function
     def add_style_sheet(self, text, window=0):
+        """
+        Adds a CSS stylesheet as text to the given window.
+        """
 
         # add to browser
         if window is None:
@@ -256,12 +290,25 @@ class Browser:
     @frontend_function
     @browser_function
     def get_size(self):
+        """
+        Returns the size of browser as dict.
+
+        Example return value: `{'height': 720, 'width': 1_280}`
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_window_manager_get_size_command(),
         )
 
     @browser_function
     def set_size(self, width=0, height=0, even_values=True):
+        """
+        Resizes the browser to the given width and height.
+
+        If `even_values` is set to true, odd values get rounded to even
+        numbers. This is necessary for some FFmpeg filters.
+        """
+
         if even_values:
             width = width + (width % 2)
             height = height + (height % 2)
@@ -274,6 +321,10 @@ class Browser:
     @frontend_function
     @browser_function
     def get_window_count(self):
+        """
+        Returns the count of visible browser windows as integer.
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_window_manager_get_window_count_command(),
         )
@@ -281,6 +332,12 @@ class Browser:
     @frontend_function
     @browser_function
     def split(self):
+        """
+        Split the frontend clockwise into multiple windows.
+
+        Max splits are three. So you can have four windows tops.
+        """
+
         self.logger.info('splitting window')
 
         return self._browser_evaluate(
@@ -290,6 +347,12 @@ class Browser:
     @frontend_function
     @browser_function
     def set_background_url(self, url):
+        """
+        Sets the URL of the frontends background IFrame.
+
+        Default is `/_milan/frontend/background/index.html`
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_window_manager_set_background_url_command(
                 url=url,
@@ -299,6 +362,12 @@ class Browser:
     @frontend_function
     @browser_function
     def set_watermark(self, text):
+        """
+        Sets the watermark of the frontends background.
+
+        Default is `f'Milan v{milan.VERSION_STRING}'`
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_window_manager_set_watermark_command(
                 text=text,
@@ -308,6 +377,15 @@ class Browser:
     @frontend_function
     @browser_function
     def set_background(self, background):
+        """
+        Sets the background as CSS property.
+
+        Example values:
+          - `red`
+          - `#FF0000`
+          - `linear-gradient(0deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%)`
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_window_manager_set_background_command(
                 background=background,
@@ -325,6 +403,12 @@ class Browser:
     @frontend_function
     @browser_function
     def show_cursor(self):
+        """
+        Shows cursor.
+
+        Has no effect if cursor is already visible.
+        """
+
         self.logger.info('showing cursor')
 
         return self._browser_evaluate(
@@ -334,6 +418,12 @@ class Browser:
     @frontend_function
     @browser_function
     def hide_cursor(self):
+        """
+        Hides cursor.
+
+        Has no effect if cursor is already visible.
+        """
+
         self.logger.info('hiding cursor')
 
         return self._browser_evaluate(
@@ -343,6 +433,10 @@ class Browser:
     @frontend_function
     @browser_function
     def cursor_is_visible(self):
+        """
+        Returns whether the cursor is visible as bool.
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_cursor_is_visible_command(),
         )
@@ -355,6 +449,14 @@ class Browser:
             y=0,
             animation=None,
     ):
+
+        """
+        Moves cursor to given X and Y coordinates.
+
+        If `animation` is set to true, the cursor is animated. If animation is
+        set to `None` the `Browser.animation` property is used to determine if
+        an animation should be played.
+        """
 
         self.logger.info('moving cursor to x=%s y=%s', x, y)
 
@@ -369,6 +471,14 @@ class Browser:
     @frontend_function
     @browser_function
     def move_cursor_to_home(self, animation=None):
+        """
+        Moves cursor to the middle of the screen.
+
+        If `animation` is set to true, the cursor is animated. If animation is
+        set to `None` the `Browser.animation` property is used to determine if
+        an animation should be played.
+        """
+
         self.logger.info('moving cursor to home')
 
         return self._browser_evaluate(
@@ -380,6 +490,12 @@ class Browser:
     @frontend_function
     @browser_function
     def get_cursor_position(self):
+        """
+        Returns the cursor position as dict.
+
+        Example return value: `{'x': 640, 'y': 360}`
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_cursor_get_position_command(),
         )
@@ -388,6 +504,16 @@ class Browser:
     @frontend_function
     @browser_function
     def reload(self, window=0, animation=None):
+        """
+        Reloads the given window.
+
+        If `animation` is set to true, an animation is played that uses the
+        cursor to click on the reload button of the given window.
+
+        If `animation` is set to `None` the `Browser.animation` property is
+        used to determine if an animation should be played.
+        """
+
         self.logger.info('reloading window %s', window)
 
         return self._browser_evaluate(
@@ -401,6 +527,16 @@ class Browser:
     @frontend_function
     @browser_function
     def navigate_back(self, window=0, animation=None):
+        """
+        Moves back in the history of the given window.
+
+        If `animation` is set to true, an animation is played that uses the
+        cursor to click on the back button of the given window.
+
+        If `animation` is set to `None` the `Browser.animation` property is
+        used to determine if an animation should be played.
+        """
+
         self.logger.info('navigating window %s back', window)
 
         return self._browser_evaluate(
@@ -413,6 +549,16 @@ class Browser:
     @frontend_function
     @browser_function
     def navigate_forward(self, window=0, animation=None):
+        """
+        Moves forward in the history of the given window.
+
+        If `animation` is set to true, an animation is played that uses the
+        cursor to click on the forward button of the given window.
+
+        If `animation` is set to `None` the `Browser.animation` property is
+        used to determine if an animation should be played.
+        """
+
         self.logger.info('navigating window %s forward', window)
 
         return self._browser_evaluate(
@@ -425,6 +571,10 @@ class Browser:
     @frontend_function
     @browser_function
     def get_fullscreen(self, window=0):
+        """
+        Returns whether fullscreen is enabled for the given window as bool.        
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_window_get_fullscreen_command(
                 window_index=window,
@@ -434,6 +584,13 @@ class Browser:
     @frontend_function
     @browser_function
     def set_fullscreen(self, window=0, fullscreen=True, decorations=True):
+        """
+        Enables or disables fullscreen mode for the given window.
+
+        If decorations is set to `False`, the window decorations are not shown
+        and the page is in "true" fullscreen mode.
+        """
+
         self.logger.info(
             '%s fullscreen for window %s %s decorations',
             'enabling' if fullscreen else 'disabling',
@@ -459,6 +616,10 @@ class Browser:
         )
 
     def get_url(self, window=0):
+        """
+        Returns the URL of the given window as a `milan.utils.url.URL` object.
+        """
+
         raw_url = self._get_url(window=window)
 
         return URL(raw_url)
@@ -467,6 +628,12 @@ class Browser:
     @frontend_function
     @browser_function
     def get_window_size(self, window=0):
+        """
+        Returns the size of the given window.
+
+        Example return value: `{'height': 720, 'width': 1_280}`
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_window_get_size_command(
                 window_index=window,
@@ -474,6 +641,13 @@ class Browser:
         )
 
     def set_window_size(self, width, height, window=0, even_values=True):
+        """
+        Sets the size of the given window.
+
+        If `even_values` is set to true, odd values get rounded to even
+        numbers. This is necessary for some FFmpeg filters.
+        """
+
         current_browser_size = self.get_size()
         current_window_size = self.get_window_size()
 
@@ -505,6 +679,21 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Checks whether at least one element matching the given selector is
+        present in the given window. The selector is reevaluated in the given
+        retry interval until the timeout is reached.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited.
+
+        If `retry_interval` is set to `None` the
+        `Browser.short_selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.short_selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_short_selector_retry_interval(
             retry_interval,
@@ -551,6 +740,28 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector to be
+        present in the given window. The selector is reevaluated in the given
+        retry interval until the timeout is reached.
+        If the timeout is reached, a `milan.FrontendError` is raised.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+
+        !!! warning
+
+            This method is deprecated and will be removed.
+
+            Use `Browser.await_elements` instead.
+        """
+
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
 
@@ -586,6 +797,35 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for one or more selectors to match one or more elements in the
+        given window and returns the matching selectors. All selectors are
+        reevaluated in the given retry interval until the timeout is reached.
+        If the timeout is reached, a `milan.FrontendError` is raised.
+
+        If `text` is set to a string, all matching elements must have the
+        given text.
+
+        If `present` is set to `False`, the method waits until no matching
+        element is present.
+
+        If `match_all` is set to `False` only one of the given selectors
+        has to match.
+
+        If `count` is set to a number, the method will wait until the amount
+        of matching elements is the given number.
+
+        If `element_index` is set to a number, the method will wait until a
+        matching element with that index is present, regardless the overall
+        count.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -630,6 +870,28 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and text to
+        be present in the given window. The selector is reevaluated in the
+        given retry interval until the timeout is reached.
+        If the timeout is reached, a `milan.FrontendError` is raised.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+
+        !!! warning
+
+            This method is deprecated and will be removed.
+
+            Use `Browser.await_elements` instead.
+        """
+
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
 
@@ -661,6 +923,11 @@ class Browser:
             window=0,
     ):
 
+        """
+        Returns the amount of elements matching the given selector in the
+        given window as integer.
+        """
+
         self.logger.info(
             "counting elements with selector '%s' in window %s",
             selector,
@@ -686,6 +953,20 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and returns
+        its HTML as string.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its value is returned.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -720,6 +1001,20 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and sets
+        its HTML to the given string.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its HTML is set.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
+
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
 
@@ -753,6 +1048,20 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and returns
+        its text as string.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its value is returned.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
+
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
 
@@ -784,6 +1093,20 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and sets
+        its text to the given string.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its text is set.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
+
         return self.set_html(
             selector=selector,
             html=text,
@@ -804,6 +1127,20 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and returns
+        the attribute with the given name.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -839,6 +1176,20 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and returns
+        all of its attributes as a dict.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are returned.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
+
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
 
@@ -871,6 +1222,20 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and sets
+        the given attributes provided as a dict.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are set.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -905,6 +1270,20 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and sets
+        the given attribute name to the given value.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
+
         return self.set_attributes(
             selector=selector,
             element_index=element_index,
@@ -925,6 +1304,20 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and removes
+        the given attribute names.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -959,6 +1352,20 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and removes
+        the given attribute name.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
+
         return self.remove_attributes(
             selector=selector,
             names=[name],
@@ -976,6 +1383,20 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and returns
+        its CSS class list as a list of strings.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         class_list = self.get_attribute(
             selector=selector,
@@ -998,6 +1419,20 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and sets
+        its CSS class list to the given list of strings.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
+
         return self.set_attribute(
             selector=selector,
             name='class',
@@ -1016,6 +1451,20 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and clears
+        its CSS class list.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         return self.set_attribute(
             selector=selector,
@@ -1038,6 +1487,20 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and adds
+        the given class to its CSS class list.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -1076,6 +1539,20 @@ class Browser:
             timeout=None,
             window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and removes
+        the given class from its CSS class list.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -1116,6 +1593,24 @@ class Browser:
             window=0,
     ):
 
+        """
+        Waits for at least one element matching the given selector and fires
+        a click event onto it.
+
+        If `animation` is set to true, an animation using the cursor is played.
+        If animation is set to `None` the `Browser.animation` property is used
+        to determine if an animation should be played.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
+
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
 
@@ -1150,6 +1645,24 @@ class Browser:
             animation=None,
             window=0,
     ):
+
+        """
+        Waits for at least one input matching the given selector and fills the
+        given value into it.
+
+        If `animation` is set to true, an animation using the cursor is played.
+        If animation is set to `None` the `Browser.animation` property is used
+        to determine if an animation should be played.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -1187,6 +1700,24 @@ class Browser:
             animation=None,
             window=0,
     ):
+
+        """
+        Waits for at least one checkbox matching the given selector and checks
+        or unchecks it, depending on the given value.
+
+        If `animation` is set to true, an animation using the cursor is played.
+        If animation is set to `None` the `Browser.animation` property is used
+        to determine if an animation should be played.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -1226,6 +1757,24 @@ class Browser:
             window=0,
             animation=None,
     ):
+
+        """
+        Waits for at least one select element matching the given selector and
+        selects an option specified by `value`, `index`, or `label`.
+
+        If `animation` is set to true, an animation using the cursor is played.
+        If animation is set to `None` the `Browser.animation` property is used
+        to determine if an animation should be played.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -1268,6 +1817,16 @@ class Browser:
     @browser_function
     @frontend_function
     def navigate(self, url, window=0, animation=None):
+        """
+        Navigates the given window to the given URL.
+
+        If `animation` is set to true, an animation is played that uses the
+        cursor to click and fill the address bar of the window.
+
+        If `animation` is set to `None` the `Browser.animation` property is
+        used to determine if an animation should be played.
+        """
+
         # TODO: add support for external sites besides 'localhost'
         # TODO: add support for cursor bootstrapping
 
@@ -1289,6 +1848,10 @@ class Browser:
         )
 
     def navigate_to_test_application(self, *args, **kwargs):
+        """
+        Navigates the given window to the Milan test application.
+        """
+
         return self.navigate(
             url=self._frontend_server.get_test_application_url(),
             *args,
@@ -1297,6 +1860,10 @@ class Browser:
 
     @browser_function
     def reload_frontend(self):
+        """
+        Reloads the Milan frontend.
+        """
+
         self.logger.info('loading frontend')
 
         self._browser_navigate(url=self._frontend_server.get_frontend_url())
@@ -1318,6 +1885,26 @@ class Browser:
         duration=None,
         window=0,
     ):
+
+        """
+        Waits for at least one element matching the given selector and
+        selects and draws a marker around it.
+
+        If `duration` is set to a number, the method will block for the given
+        duration and the highlights will be removed afterwards.
+
+        If `track` is set to true, the marker will track possible movements
+        of the highlighted element.
+
+        If `element_index` is set, a matching element with the given index
+        is awaited and its attributes are used.
+
+        If `retry_interval` is set to `None` the
+        `Browser.selector_retry_interval` property is used instead.
+
+        If `timeout` is set to `None` the
+        `Browser.selector_timeout` property is used instead.
+        """
 
         retry_interval = self._get_selector_retry_interval(retry_interval)
         timeout = self._get_selector_timeout(timeout)
@@ -1345,6 +1932,10 @@ class Browser:
     @browser_function
     @frontend_function
     def remove_highlights(self, window=0):
+        """
+        Removes all highlight markers in the given window.
+        """
+
         return self._browser_evaluate(
             expression=commands.gen_window_remove_highlights_command(
                 window_index=window,
@@ -1365,13 +1956,32 @@ class Browser:
         raise NotImplementedError()
 
     def stop(self):
+        """
+        Stops the browser.
+
+        When video capturing is still running, `Browser.stop_video_capturing`
+        is called automatically.
+        """
+
         raise NotImplementedError()
 
     def set_color_scheme(self, color_scheme):
+        """
+        Sets the color scheme of the browser.
+
+        Possible values:
+          - light
+          - dark
+        """
+
         raise NotImplementedError()
 
     @browser_function
     def screenshot(self, path):
+        """
+        Writes a screenshot of the current page to the given path.
+        """
+
         raise NotImplementedError()
 
     @browser_function
@@ -1380,6 +1990,18 @@ class Browser:
             path,
             delay=DEFAULT_VIDEO_CAPTURING_START_DELAY,
     ):
+
+        """
+        Starts video capturing into the given path.
+
+        The video format is determined by the file extension of the given
+        path.
+
+        Possible video formats:
+          - webm
+          - mp4
+          - gif
+        """
 
         raise NotImplementedError()
 
