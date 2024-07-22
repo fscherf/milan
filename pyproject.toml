@@ -22,7 +22,6 @@ dependencies = [
 
 [project.optional-dependencies]
 docker = [
-  "playwright>=1.44,<1.46",
   "tox==4.16.0"
 ]
 
