@@ -25,6 +25,26 @@ dependencies = [
   "rlpython",
 ]
 
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Web Environment",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Unix",
+  "Programming Language :: JavaScript",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Documentation",
+  "Topic :: Internet",
+  "Topic :: Internet :: WWW/HTTP",
+  "Topic :: Internet :: WWW/HTTP :: Browsers",
+  "Topic :: Multimedia :: Video",
+  "Topic :: Multimedia :: Video :: Capture",
+  "Topic :: Software Development",
+  "Topic :: Software Development :: Documentation",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Software Development :: User Interfaces",
+]
+
 
 [project.optional-dependencies]
 docker = [
