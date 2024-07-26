@@ -58,7 +58,7 @@ dev = [
   "simple-logging-setup",
   "debugpy",
   "mkdocs==1.6.0",
-  "mkdocstrings[python]==0.25.1",
+  "mkdocstrings[python]==0.25.2",
   "mkdocs-material==9.5.30",
 ]
 
