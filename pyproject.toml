@@ -18,7 +18,7 @@ license = { file="LICENSE.txt" }
 requires-python = ">=3.8"
 
 dependencies = [
-  "playwright>=1.44,<1.47",
+  "playwright>=1.44,<1.48",
   "aiohttp>=3.9,<3.11",
   "urllib3",
   "simple-logging-setup",
