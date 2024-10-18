@@ -48,7 +48,7 @@ classifiers = [
 
 [project.optional-dependencies]
 docker = [
-  "tox==4.21.2"
+  "tox==4.23.0"
 ]
 
 dev = [
