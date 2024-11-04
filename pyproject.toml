@@ -68,7 +68,7 @@ test = [
   "pytest-timeout==2.3.1",
   "pytest-asyncio==0.24.0",
   "lona==1.16.2",
-  "lona-picocss==0.4.3",
+  "lona-picocss==0.4.4",
 ]
 
 
